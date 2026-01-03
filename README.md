@@ -1,5 +1,9 @@
 <p align="center">
-  <img src="./src/assets/logo.svg" alt="Quant Logo Banner" width="600"/>
+  <picture>
+    <source srcset="./src/assets/logo-white.svg" media="(prefers-color-scheme: dark)" />
+    <source srcset="./src/assets/logo.svg" media="(prefers-color-scheme: light)" />
+    <img src="./src/assets/logo.svg" alt="Quant Logo Banner" height="64"/>
+  </picture>
 </p>
 
 [![Cyberpath](https://img.shields.io/badge/Cyberpath-HQ-blue)](https://cyberpath-hq.com) [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE.md) [![Made with Astro](https://img.shields.io/badge/Made%20with-Astro-FF5D01?logo=astro&logoColor=white)](https://astro.build)
