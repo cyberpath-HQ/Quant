@@ -6,7 +6,7 @@
   </picture>
 </p>
 
-[![Cyberpath](https://img.shields.io/badge/Cyberpath-HQ-blue)](https://cyberpath-hq.com) [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE.md) [![Made with Astro](https://img.shields.io/badge/Made%20with-Astro-FF5D01?logo=astro&logoColor=white)](https://astro.build)
+[![Cyberpath](https://img.shields.io/badge/Cyberpath-project-blue)](https://cyberpath-hq.com) [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE.md) [![Made with Astro](https://img.shields.io/badge/Made%20with-Astro-FF5D01?logo=astro&logoColor=white)](https://astro.build)
 
 ## What is Quant?
 
