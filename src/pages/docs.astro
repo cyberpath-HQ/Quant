@@ -1,0 +1,560 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+// Use native details/summary for server-rendered documentation to avoid client-only Radix Accordion
+
+const seoProps = {
+  title: "Documentation - Quant CVSS Calculator",
+  canonical: "https://quant.cyberpath-hq.com/docs",
+  description:
+    "Learn how to use Quant CVSS Calculator for vulnerability scoring. Complete guide to CVSS metrics and severity assessment.",
+  openGraph: {
+    url: "https://quant.cyberpath-hq.com/docs",
+    title: "Documentation - Quant CVSS Calculator",
+    description: "Learn how to use Quant CVSS Calculator for vulnerability scoring.",
+    site_name: "Quant",
+  },
+};
+---
+
+<Layout seo={seoProps}>
+  <Header client:load />
+  <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-12 max-w-4xl">
+    <div class="space-y-12">
+      <!-- Header -->
+      <div class="space-y-3">
+        <h1 class="text-4xl md:text-5xl font-bold tracking-tight">Documentation</h1>
+        <p class="text-lg text-muted-foreground">
+          Learn how to use Quant to calculate CVSS vulnerability scores accurately and efficiently.
+        </p>
+      </div>
+
+      <!-- Getting Started -->
+      <section class="space-y-4">
+        <h2 class="text-3xl font-bold tracking-tight border-b pb-2">Getting Started</h2>
+        <div class="prose prose-zinc dark:prose-invert max-w-none">
+          <h3 class="text-xl font-semibold mt-6">How to Use Quant</h3>
+          <ol class="space-y-2">
+            <li>
+              <strong>Select a CVSS Version:</strong> Choose from v4.0, v3.1, v3.0, or v2.0 using the tabs
+            </li>
+            <li>
+              <strong>Configure Metrics:</strong> Switch between Base, Threat, Environmental, and Supplemental metric groups
+              using tabs
+            </li>
+            <li>
+              <strong>Watch Score Update:</strong> The score updates in real-time as you select values, displayed in the sticky
+              card on the right
+            </li>
+            <li>
+              <strong>Export Results:</strong> Copy the vector string, share a link, or download a PDF report
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- CVSS Versions -->
+      <section class="space-y-4">
+        <h2 class="text-3xl font-bold tracking-tight border-b pb-2">CVSS Versions</h2>
+        <div class="space-y-6">
+          <details class="group">
+            <summary
+              class="py-3 cursor-pointer font-semibold text-lg hover:text-sky-600 dark:hover:text-sky-400 transition-colors"
+            >
+              ▸ CVSS v4.0 (Latest)
+            </summary>
+            <div class="prose prose-zinc dark:prose-invert max-w-none pl-4 pt-2 pb-4">
+              <p>CVSS v4.0 is the latest version, released in November 2023:</p>
+              <ul class="space-y-1">
+                <li><strong>MacroVector-Based Scoring:</strong> More nuanced scoring using equivalence classes</li>
+                <li><strong>Subsequent System Impact:</strong> Separate metrics for impact on downstream systems</li>
+                <li>
+                  <strong>Enhanced Supplemental Metrics:</strong> Additional context like Safety, Automatable, and Recovery
+                </li>
+                <li><strong>Provider Urgency:</strong> New metric for vendor-assigned urgency</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="group">
+            <summary
+              class="py-3 cursor-pointer font-semibold text-lg hover:text-sky-600 dark:hover:text-sky-400 transition-colors"
+            >
+              ▸ CVSS v3.1 / v3.0
+            </summary>
+            <div class="prose prose-zinc dark:prose-invert max-w-none pl-4 pt-2 pb-4">
+              <p>CVSS v3.x introduced significant improvements over v2.0:</p>
+              <ul class="space-y-1">
+                <li><strong>Privileges Required:</strong> Replaces v2.0's Authentication metric</li>
+                <li>
+                  <strong>Scope:</strong> New concept for vulnerabilities that affect resources beyond their security context
+                </li>
+                <li><strong>User Interaction:</strong> More granular than v2.0's Access Complexity</li>
+                <li><strong>0-10 Scale:</strong> Maintains the familiar scoring range but with improved calculation</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="group">
+            <summary
+              class="py-3 cursor-pointer font-semibold text-lg hover:text-sky-600 dark:hover:text-sky-400 transition-colors"
+            >
+              ▸ CVSS v2.0 (Legacy)
+            </summary>
+            <div class="prose prose-zinc dark:prose-invert max-w-none pl-4 pt-2 pb-4">
+              <p>CVSS v2.0 is the legacy version, still used for older vulnerabilities:</p>
+              <ul class="space-y-1">
+                <li><strong>Simpler Model:</strong> Fewer metrics than v3.x/v4.0</li>
+                <li><strong>Access Vector/Complexity:</strong> Basic exploitability metrics</li>
+                <li><strong>Authentication:</strong> Whether authentication is required</li>
+                <li><strong>CIA Impact:</strong> Impact on Confidentiality, Integrity, and Availability</li>
+              </ul>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section class="space-y-4">
+        <h2 class="text-3xl font-bold tracking-tight border-b pb-2">Frequently Asked Questions</h2>
+        <div class="space-y-6">
+          <details class="group">
+            <summary
+              class="py-3 cursor-pointer font-semibold text-lg hover:text-sky-600 dark:hover:text-sky-400 transition-colors"
+            >
+              ▸ Which CVSS version should I use?
+            </summary>
+            <div class="prose prose-zinc dark:prose-invert max-w-none pl-4 pt-2 pb-4">
+              <p>
+                Use <strong>CVSS v4.0</strong> for new vulnerabilities. Use v3.1/v3.0 or v2.0 only when required for compatibility
+                with existing assessments or databases.
+              </p>
+            </div>
+          </details>
+
+          <details class="group">
+            <summary
+              class="py-3 cursor-pointer font-semibold text-lg hover:text-sky-600 dark:hover:text-sky-400 transition-colors"
+            >
+              ▸ What's the difference between Base, Temporal, and Environmental metrics?
+            </summary>
+            <div class="prose prose-zinc dark:prose-invert max-w-none pl-4 pt-2 pb-4">
+              <ul class="space-y-2">
+                <li><strong>Base:</strong> Intrinsic characteristics that don't change over time (Required)</li>
+                <li>
+                  <strong>Temporal/Threat:</strong> Characteristics that change over time, like exploit availability
+                </li>
+                <li><strong>Environmental:</strong> Characteristics unique to your environment and requirements</li>
+                <li><strong>Supplemental:</strong> Additional context that doesn't affect the score (v4.0 only)</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="group">
+            <summary
+              class="py-3 cursor-pointer font-semibold text-lg hover:text-sky-600 dark:hover:text-sky-400 transition-colors"
+            >
+              ▸ How do I share my assessment?
+            </summary>
+            <div class="prose prose-zinc dark:prose-invert max-w-none pl-4 pt-2 pb-4">
+              <p>
+                Click <strong>Share Link</strong> to copy a URL with your vector string. Anyone can open this link to see
+                your exact assessment. You can also use <strong>Copy Vector</strong> to get just the vector string, or <strong
+                  >Export PDF</strong
+                > for a formatted report.
+              </p>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <!-- Severity Ratings -->
+      <section class="space-y-4">
+        <h2 class="text-3xl font-bold tracking-tight border-b pb-2">Severity Ratings</h2>
+        <div class="prose prose-zinc dark:prose-invert max-w-none">
+          <p>CVSS scores map to severity ratings:</p>
+          <table class="min-w-full mt-4">
+            <thead>
+              <tr>
+                <th class="text-left py-2">Score Range</th>
+                <th class="text-left py-2">Severity</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="py-2">0.0</td>
+                <td class="py-2"><span class="px-3 py-1 rounded bg-muted text-sm font-medium">None</span></td>
+              </tr>
+              <tr>
+                <td class="py-2">0.1 - 3.9</td>
+                <td class="py-2"
+                  ><span
+                    class="px-3 py-1 rounded bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-sm font-medium"
+                    >Low</span
+                  ></td
+                >
+              </tr>
+              <tr>
+                <td class="py-2">4.0 - 6.9</td>
+                <td class="py-2"
+                  ><span
+                    class="px-3 py-1 rounded bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 text-sm font-medium"
+                    >Medium</span
+                  ></td
+                >
+              </tr>
+              <tr>
+                <td class="py-2">7.0 - 8.9</td>
+                <td class="py-2"
+                  ><span
+                    class="px-3 py-1 rounded bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200 text-sm font-medium"
+                    >High</span
+                  ></td
+                >
+              </tr>
+              <tr>
+                <td class="py-2">9.0 - 10.0</td>
+                <td class="py-2"
+                  ><span
+                    class="px-3 py-1 rounded bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 text-sm font-medium"
+                    >Critical</span
+                  ></td
+                >
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+  <Footer />
+</Layout>
+
+<details class="group border-b">
+  <summary class="px-6 py-4 cursor-pointer font-medium">CVSS v3.1 / v3.0</summary>
+  <div class="prose prose-zinc dark:prose-invert max-w-none px-6 pb-4">
+    <p>CVSS v3.1 (2019) and v3.0 (2015) use formula-based scoring and are widely adopted:</p>
+    <ul>
+      <li>
+        <strong>Scope Metric:</strong> Captures whether a vulnerability affects resources beyond its security scope
+      </li>
+      <li><strong>Simplified Metrics:</strong> More intuitive metric definitions compared to v2.0</li>
+      <li><strong>Industry Standard:</strong> Currently the most widely used version</li>
+    </ul>
+    <p><em>v3.1 includes minor clarifications and fixes to v3.0 but uses the same scoring formula.</em></p>
+  </div>
+</details>
+
+<details class="group">
+  <summary class="px-6 py-4 cursor-pointer font-medium">CVSS v2.0 (Legacy)</summary>
+  <div class="prose prose-zinc dark:prose-invert max-w-none px-6 pb-4">
+    <p>CVSS v2.0 (2007) is the legacy version still used for historical vulnerabilities:</p>
+    <ul>
+      <li><strong>Simpler Scoring:</strong> Three severity ratings: Low, Medium, High (no Critical)</li>
+      <li><strong>Collateral Damage:</strong> Environmental metric for physical impact</li>
+      <li><strong>Target Distribution:</strong> Measures the proportion of vulnerable systems</li>
+    </ul>
+    <p><em>Use v2.0 only for legacy systems or when comparing with older vulnerability data.</em></p>
+  </div>
+</details>
+
+<!-- Severity Ratings -->
+<Card client:idle>
+  <CardHeader>
+    <CardTitle>Severity Ratings</CardTitle>
+    <CardDescription>How scores map to severity levels</CardDescription>
+  </CardHeader>
+  <CardContent>
+    <div class="space-y-4">
+      <div>
+        <h4 class="font-semibold mb-2">CVSS v4.0, v3.1, v3.0</h4>
+        <table class="w-full border-collapse">
+          <thead>
+            <tr class="border-b">
+              <th class="text-left p-2">Score Range</th>
+              <th class="text-left p-2">Severity</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b"
+              ><td class="p-2">0.0</td><td class="p-2"
+                ><span class="px-2 py-1 rounded bg-green-100 text-green-700">None</span></td
+              ></tr
+            >
+            <tr class="border-b"
+              ><td class="p-2">0.1 - 3.9</td><td class="p-2"
+                ><span class="px-2 py-1 rounded bg-yellow-100 text-yellow-700">Low</span></td
+              ></tr
+            >
+            <tr class="border-b"
+              ><td class="p-2">4.0 - 6.9</td><td class="p-2"
+                ><span class="px-2 py-1 rounded bg-orange-100 text-orange-700">Medium</span></td
+              ></tr
+            >
+            <tr class="border-b"
+              ><td class="p-2">7.0 - 8.9</td><td class="p-2"
+                ><span class="px-2 py-1 rounded bg-red-100 text-red-700">High</span></td
+              ></tr
+            >
+            <tr
+              ><td class="p-2">9.0 - 10.0</td><td class="p-2"
+                ><span class="px-2 py-1 rounded bg-purple-100 text-purple-700">Critical</span></td
+              ></tr
+            >
+          </tbody>
+        </table>
+      </div>
+
+      <div>
+        <h4 class="font-semibold mb-2">CVSS v2.0</h4>
+        <table class="w-full border-collapse">
+          <thead>
+            <tr class="border-b">
+              <th class="text-left p-2">Score Range</th>
+              <th class="text-left p-2">Severity</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b"
+              ><td class="p-2">0.0 - 3.9</td><td class="p-2"
+                ><span class="px-2 py-1 rounded bg-yellow-100 text-yellow-700">Low</span></td
+              ></tr
+            >
+            <tr class="border-b"
+              ><td class="p-2">4.0 - 6.9</td><td class="p-2"
+                ><span class="px-2 py-1 rounded bg-orange-100 text-orange-700">Medium</span></td
+              ></tr
+            >
+            <tr
+              ><td class="p-2">7.0 - 10.0</td><td class="p-2"
+                ><span class="px-2 py-1 rounded bg-red-100 text-red-700">High</span></td
+              ></tr
+            >
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </CardContent>
+</Card>
+
+<!-- FAQ -->
+<Card client:idle>
+  <CardHeader>
+    <CardTitle>Frequently Asked Questions</CardTitle>
+    <CardDescription>Common questions about CVSS and Quant</CardDescription>
+  </CardHeader>
+  <CardContent>
+    <div class="space-y-2">
+      <details class="group border-b">
+        <summary class="px-6 py-4 cursor-pointer font-medium">Which CVSS version should I use?</summary>
+        <div class="px-6 pb-4">
+          <p>
+            For new vulnerabilities, use <strong>CVSS v4.0</strong> (the latest standard) or <strong>v3.1</strong> (widely
+            adopted). Use v3.0 if required by your organization's policy. Only use v2.0 for legacy systems or historical comparisons.
+          </p>
+        </div>
+      </details>
+
+      <details class="group border-b">
+        <summary class="px-6 py-4 cursor-pointer font-medium">Is my data stored or sent to a server?</summary>
+        <div class="px-6 pb-4">
+          <p>
+            <strong>No.</strong> All calculations happen locally in your browser. Quant is completely client-side, meaning
+            your vulnerability assessments remain private and are never sent to any server.
+          </p>
+        </div>
+      </details>
+
+      <details class="group border-b">
+        <summary class="px-6 py-4 cursor-pointer font-medium">How accurate are the calculations?</summary>
+        <div class="px-6 pb-4">
+          <p>
+            Quant implements the official CVSS specifications exactly as published by FIRST.org. The scoring algorithms
+            are tested against reference implementations to ensure accuracy. All formulas, lookup tables, and
+            calculations match the official standards.
+          </p>
+        </div>
+      </details>
+
+      <details class="group border-b">
+        <summary class="px-6 py-4 cursor-pointer font-medium">Can I share my assessment with others?</summary>
+        <div class="px-6 pb-4">
+          <p>Yes! You can share your CVSS assessment in multiple ways:</p>
+          <ul>
+            <li><strong>Vector String:</strong> Copy the compact vector string to share in documentation</li>
+            <li><strong>Share URL:</strong> Generate a link that pre-fills all metrics when opened</li>
+            <li><strong>PDF Report:</strong> Download a formatted report to attach to tickets or emails</li>
+            <li><strong>JSON Export:</strong> Export structured data for integration with other tools</li>
+          </ul>
+        </div>
+      </details>
+
+      <details class="group">
+        <summary class="px-6 py-4 cursor-pointer font-medium">What do the different metric groups mean?</summary>
+        <div class="px-6 pb-4">
+          <ul>
+            <li>
+              <strong>Base Metrics:</strong> Required - describe the intrinsic characteristics of the vulnerability
+            </li>
+            <li>
+              <strong>Temporal Metrics:</strong> Optional - reflect characteristics that change over time (exploit availability,
+              fixes)
+            </li>
+            <li>
+              <strong>Environmental Metrics:</strong> Optional - represent characteristics unique to your environment
+            </li>
+            <li>
+              <strong>Supplemental Metrics (v4.0):</strong> Optional - provide additional context without affecting the score
+            </li>
+          </ul>
+        </div>
+      </details>
+    </div>
+  </CardContent>
+</Card>
+
+<!-- Advanced Features -->
+<Card client:idle>
+  <CardHeader>
+    <CardTitle>Advanced Features</CardTitle>
+    <CardDescription>Power user features for efficient workflow</CardDescription>
+  </CardHeader>
+  <CardContent>
+    <div class="space-y-2">
+      <details class="group border-b">
+        <summary class="px-6 py-4 cursor-pointer font-medium">URL Vector Loading</summary>
+        <div class="prose prose-zinc dark:prose-invert max-w-none px-6 pb-4">
+          <p>
+            You can share CVSS assessments by adding a vector string to the URL. When someone opens the link, the
+            calculator automatically loads with all metrics pre-configured.
+          </p>
+          <p><strong>Example:</strong></p>
+          <code class="block p-2 bg-muted rounded text-sm"
+            >https://quant.cyberpath-hq.com/?vector=CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N</code
+          >
+          <p>Simply click the "Share" button on any calculator to generate a shareable URL.</p>
+        </div>
+      </details>
+
+      <details class="group border-b">
+        <summary class="px-6 py-4 cursor-pointer font-medium">Score History Tracking</summary>
+        <div class="prose prose-zinc dark:prose-invert max-w-none px-6 pb-4">
+          <p>
+            Quant automatically saves your calculated scores in your browser's local storage. You can view, restore, and
+            export your score history at any time.
+          </p>
+          <ul>
+            <li><strong>Automatic Saving:</strong> Every calculated score is saved automatically</li>
+            <li><strong>Restore Scores:</strong> Click the restore button to reload a previous assessment</li>
+            <li><strong>Export History:</strong> Download your entire history as JSON</li>
+            <li><strong>Privacy:</strong> All history is stored locally - nothing sent to servers</li>
+          </ul>
+          <p>The score history section appears below the calculator on the main page.</p>
+        </div>
+      </details>
+
+      <details class="group border-b">
+        <summary class="px-6 py-4 cursor-pointer font-medium">Export Options</summary>
+        <div class="prose prose-zinc dark:prose-invert max-w-none px-6 pb-4">
+          <p>Export your assessments in multiple formats:</p>
+          <ul>
+            <li>
+              <strong>Copy Vector:</strong> Copy the compact CVSS vector string to clipboard for documentation
+            </li>
+            <li>
+              <strong>Share URL:</strong> Generate a link that includes the complete assessment that can be opened by anyone
+            </li>
+            <li>
+              <strong>Download PDF:</strong> Create a professionally formatted PDF report with score, severity, vector string,
+              and all metric values
+            </li>
+            <li>
+              <strong>Export JSON:</strong> Download structured data including all metrics, scores, and timestamps for integration
+              with other tools
+            </li>
+          </ul>
+        </div>
+      </details>
+
+      <details class="group">
+        <summary class="px-6 py-4 cursor-pointer font-medium">Keyboard Navigation</summary>
+        <div class="prose prose-zinc dark:prose-invert max-w-none px-6 pb-4">
+          <p>Quant supports full keyboard navigation for accessibility and efficiency:</p>
+          <ul>
+            <li><strong>Tab:</strong> Navigate between metric selects</li>
+            <li><strong>Arrow Keys:</strong> Change metric values when a select is focused</li>
+            <li><strong>Enter/Space:</strong> Open dropdown menus</li>
+            <li><strong>Escape:</strong> Close dropdown menus</li>
+          </ul>
+          <p>All interactive elements are keyboard accessible and follow WCAG 2.1 guidelines.</p>
+        </div>
+      </details>
+    </div>
+  </CardContent>
+</Card>
+
+<!-- Resources -->
+<Card client:idle>
+  <CardHeader>
+    <CardTitle>Official Resources</CardTitle>
+    <CardDescription>Learn more about CVSS from FIRST.org</CardDescription>
+  </CardHeader>
+  <CardContent>
+    <ul class="space-y-2">
+      <li>
+        <a
+          href="https://www.first.org/cvss/v4-0/specification-document"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-primary hover:underline"
+        >
+          CVSS v4.0 Specification Document
+        </a>
+      </li>
+      <li>
+        <a
+          href="https://www.first.org/cvss/v3-1/specification-document"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-primary hover:underline"
+        >
+          CVSS v3.1 Specification Document
+        </a>
+      </li>
+      <li>
+        <a
+          href="https://www.first.org/cvss/v3-0/specification-document"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-primary hover:underline"
+        >
+          CVSS v3.0 Specification Document
+        </a>
+      </li>
+      <li>
+        <a
+          href="https://www.first.org/cvss/v2/guide"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-primary hover:underline"
+        >
+          CVSS v2.0 Complete Guide
+        </a>
+      </li>
+      <li>
+        <a
+          href="https://www.first.org/cvss/examples"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-primary hover:underline"
+        >
+          CVSS Scoring Examples
+        </a>
+      </li>
+    </ul>
+  </CardContent>
+</Card>
+
+<Footer />

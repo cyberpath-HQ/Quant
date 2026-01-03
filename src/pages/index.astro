@@ -1,5 +1,9 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
+import { CVSSCalculator } from "@/components/CVSSCalculator";
+import { ScoreHistory } from "@/components/ScoreHistory";
 import { makeJsonLd } from "@/lib/make-json-ld";
 import type { WebPage } from "schema-dts";
 
@@ -7,23 +11,23 @@ const date = new Date();
 const json_ld = makeJsonLd<WebPage>({
   "@type": "WebPage",
   "@context": "https://schema.org",
-  "@id": "https://cyberpath-hq.com/",
-  url: "https://cyberpath-hq.com/",
-  name: "CyberPath - Cybersecurity Tools & Resources",
+  "@id": "https://quant.cyberpath-hq.com/",
+  url: "https://quant.cyberpath-hq.com/",
+  name: "Quant - Modern CVSS Score Calculator",
   description:
-    "Discover CyberPath's suite of free, open-source cybersecurity tools. Explore our certification database, AI-powered security assistant, and contribute to the community.",
+    "An intuitive, modern CVSS score calculator that makes vulnerability severity assessment fast, accurate, and accessible. Supports CVSS v4.0, v3.1, v3.0, and v2.0.",
   inLanguage: "en-US",
   author: "CyberPath <support@cyberpath-hq.com>",
   image: {
     "@type": "ImageObject",
-    url: "https://cyberpath-hq.com/CyberPath-og.webp",
+    url: "https://quant.cyberpath-hq.com/CyberPath-og.webp",
     width: "1920",
     height: "933",
-    description: "CyberPath - Cybersecurity Tools & Resources",
+    description: "Quant - Modern CVSS Score Calculator",
   },
   mainEntityOfPage: {
     "@type": "WebPage",
-    "@id": "https://cyberpath-hq.com/",
+    "@id": "https://quant.cyberpath-hq.com/",
   },
   datePublished: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
   dateModified: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
@@ -38,29 +42,30 @@ const json_ld = makeJsonLd<WebPage>({
 <Layout
   JSON_LD={json_ld}
   seo={{
-    title: "CyberPath - Cybersecurity Tools & Resources",
-    canonical: "https://cyberpath-hq.com/",
+    title: "Quant - Modern CVSS Score Calculator",
+    canonical: "https://quant.cyberpath-hq.com/",
     description:
-      "Discover CyberPath's suite of free, open-source cybersecurity tools. Explore our certification database, AI-powered security assistant, and contribute to the community.",
+      "An intuitive, modern CVSS score calculator that makes vulnerability severity assessment fast, accurate, and accessible. Supports CVSS v4.0, v3.1, v3.0, and v2.0.",
     openGraph: {
-      url: "https://cyberpath-hq.com/",
-      title: "CyberPath - Cybersecurity Tools & Resources",
+      url: "https://quant.cyberpath-hq.com/",
+      title: "Quant - Modern CVSS Score Calculator",
       description:
-        "Discover CyberPath's suite of free, open-source cybersecurity tools. Explore our certification database, AI-powered security assistant, and contribute to the community.",
-      site_name: "CyberPath",
+        "An intuitive, modern CVSS score calculator that makes vulnerability severity assessment fast, accurate, and accessible. Supports CVSS v4.0, v3.1, v3.0, and v2.0.",
+      site_name: "Quant",
       images: [
         {
-          url: "https://cyberpath-hq.com/CyberPath-og.webp",
+          url: "https://quant.cyberpath-hq.com/CyberPath-og.webp",
           width: 1920,
           height: 933,
-          alt: "CyberPath - Cybersecurity Tools & Resources",
+          alt: "Quant - Modern CVSS Score Calculator",
         },
       ],
     },
     additionalMetaTags: [
       {
         name: "keywords",
-        content: "cybersecurity, open source, certifications, AI assistant, security tools, CertDb, Orbis",
+        content:
+          "CVSS, vulnerability scoring, security assessment, CVSS v4.0, CVSS v3.1, CVSS calculator, cybersecurity",
       },
     ],
     twitter: {
@@ -70,5 +75,12 @@ const json_ld = makeJsonLd<WebPage>({
     },
   }}
 >
-  TODO: Home Page Content
+  <Header client:load />
+  <main class="min-h-screen bg-background">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
+      <CVSSCalculator client:load />
+      <ScoreHistory client:load />
+    </div>
+  </main>
+  <Footer />
 </Layout>
