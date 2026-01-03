@@ -169,8 +169,10 @@ Join the Cyberpath community and stay connected:
 ## Learn More
 
 - [Astro Documentation](https://docs.astro.build)
-- [CVSS v4.0 Specification](https://www.first.org/cvss/v4.0/)
-- [CVSS v3.1 Specification](https://www.first.org/cvss/v3.1/)
+- [CVSS v4.0 Specification](https://www.first.org/cvss/v4-0/specification-document)
+- [CVSS v3.1 Specification](https://www.first.org/cvss/v3-1/specification-document)
+- [CVSS v3.0 Specification](https://www.first.org/cvss/v3-0/specification-document)
+- [CVSS v2.0 Specification](https://www.first.org/cvss/v2/guide)
 - [Cyberpath Resources](https://cyberpath-hq.com)
 
 ## Acknowledgments
