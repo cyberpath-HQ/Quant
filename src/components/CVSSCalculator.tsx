@@ -4,75 +4,103 @@
  * Tabbed interface for all CVSS version calculators
  */
 
-import { useEffect, useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+    useEffect, useState
+} from "react";
+import {
+    Tabs, TabsContent, TabsList, TabsTrigger
+} from "@/components/ui/tabs";
 import { CVSS40Calculator } from "./CVSS40Calculator";
 import { CVSS3Calculator } from "./CVSS3Calculator";
 import { CVSS2Calculator } from "./CVSS2Calculator";
 import { vectorParser } from "@/lib/cvss";
 
 export function CVSSCalculator() {
-  const [activeTab, setActiveTab] = useState("v4.0");
-  const [parsedVector, setParsedVector] = useState<ReturnType<typeof vectorParser.getVectorFromURL> | null>(null);
+    const [
+        activeTab,
+        setActiveTab,
+    ] = useState(`v4.0`);
+    const [
+        parsedVector,
+        setParsedVector,
+    ] = useState<ReturnType<typeof vectorParser.getVectorFromURL> | null>(null);
 
-  // Check for vector in URL on mount
-  useEffect(() => {
-    const parsed = vectorParser.getVectorFromURL();
-    if (parsed) {
-      setParsedVector(parsed);
-      // Switch to the appropriate tab
-      setActiveTab(`v${parsed.version}`);
-    }
-  }, []);
+    const [
+        should_use_alternative_description,
+        setShouldUseAlternativeDescription,
+    ] = useState(false);
 
-  return (
-    <div className="w-full max-w-7xl mx-auto">
-      <div className="mb-10 space-y-3">
-        <h1 className="text-5xl font-extrabold tracking-tight">CVSS Calculator</h1>
-        <p className="text-lg text-muted-foreground max-w-3xl">
-          Calculate vulnerability severity scores using the Common Vulnerability Scoring System. Select a version below
-          to begin your assessment.
-        </p>
-      </div>
+    // Check for vector in URL on mount
+    useEffect(() => {
+        const parsed = vectorParser.getVectorFromURL();
+        if (parsed) {
+            setParsedVector(parsed);
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full max-w-lg grid-cols-4 h-12">
-          <TabsTrigger value="v4.0" className="text-base font-semibold">
-            v4.0
-          </TabsTrigger>
-          <TabsTrigger value="v3.1" className="text-base font-semibold">
-            v3.1
-          </TabsTrigger>
-          <TabsTrigger value="v3.0" className="text-base font-semibold">
-            v3.0
-          </TabsTrigger>
-          <TabsTrigger value="v2.0" className="text-base font-semibold">
-            v2.0
-          </TabsTrigger>
-        </TabsList>
+            // Switch to the appropriate tab
+            setActiveTab(`v${ parsed.version }`);
+        }
+    }, []);
 
-        <TabsContent value="v4.0" className="mt-8">
-          <CVSS40Calculator initialMetrics={parsedVector?.version === "4.0" ? parsedVector.metrics : undefined} />
-        </TabsContent>
+    return (
+        <div className="w-full max-w-7xl mx-auto">
+            <div className="mb-10 space-y-3">
+                <h1 className="text-5xl font-extrabold tracking-tight">CVSS Calculator</h1>
+                <p className="text-lg text-muted-foreground max-w-3xl">
+                    Calculate vulnerability severity scores using the Common Vulnerability Scoring System. Select a version below
+                    to begin your assessment.
+                </p>
+            </div>
 
-        <TabsContent value="v3.1" className="mt-6">
-          <CVSS3Calculator
-            version="3.1"
-            initialMetrics={parsedVector?.version === "3.1" ? parsedVector.metrics : undefined}
-          />
-        </TabsContent>
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid w-full max-w-lg grid-cols-4 h-12">
+                    <TabsTrigger value="v4.0" className="text-base font-semibold">
+                        v4.0
+                    </TabsTrigger>
+                    <TabsTrigger value="v3.1" className="text-base font-semibold">
+                        v3.1
+                    </TabsTrigger>
+                    <TabsTrigger value="v3.0" className="text-base font-semibold">
+                        v3.0
+                    </TabsTrigger>
+                    <TabsTrigger value="v2.0" className="text-base font-semibold">
+                        v2.0
+                    </TabsTrigger>
+                </TabsList>
 
-        <TabsContent value="v3.0" className="mt-6">
-          <CVSS3Calculator
-            version="3.0"
-            initialMetrics={parsedVector?.version === "3.0" ? parsedVector.metrics : undefined}
-          />
-        </TabsContent>
+                <TabsContent value="v4.0" className="mt-8">
+                    <CVSS40Calculator
+                        initialMetrics={parsedVector?.version === `4.0` ? parsedVector.metrics : undefined}
+                        shouldUseAlternativeDescription={should_use_alternative_description}
+                        setShouldUseAlternativeDescription={setShouldUseAlternativeDescription}
+                    />
+                </TabsContent>
 
-        <TabsContent value="v2.0" className="mt-6">
-          <CVSS2Calculator initialMetrics={parsedVector?.version === "2.0" ? parsedVector.metrics : undefined} />
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
+                <TabsContent value="v3.1" className="mt-6">
+                    <CVSS3Calculator
+                        version="3.1"
+                        initialMetrics={parsedVector?.version === `3.1` ? parsedVector.metrics : undefined}
+                        shouldUseAlternativeDescription={should_use_alternative_description}
+                        setShouldUseAlternativeDescription={setShouldUseAlternativeDescription}
+                    />
+                </TabsContent>
+
+                <TabsContent value="v3.0" className="mt-6">
+                    <CVSS3Calculator
+                        version="3.0"
+                        initialMetrics={parsedVector?.version === `3.0` ? parsedVector.metrics : undefined}
+                        shouldUseAlternativeDescription={should_use_alternative_description}
+                        setShouldUseAlternativeDescription={setShouldUseAlternativeDescription}
+                    />
+                </TabsContent>
+
+                <TabsContent value="v2.0" className="mt-6">
+                    <CVSS2Calculator
+                        initialMetrics={parsedVector?.version === `2.0` ? parsedVector.metrics : undefined}
+                        shouldUseAlternativeDescription={should_use_alternative_description}
+                        setShouldUseAlternativeDescription={setShouldUseAlternativeDescription}
+                    />
+                </TabsContent>
+            </Tabs>
+        </div>
+    );
 }
