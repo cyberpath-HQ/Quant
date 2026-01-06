@@ -20,7 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import {
     CodeXml,
-    Copy, Download, EllipsisVertical, MoreHorizontalIcon, Settings, Share2
+    Copy, Download, EllipsisVertical, History, MoreHorizontalIcon, Settings, Share2
 } from "lucide-react";
 import {
     toast, Toaster
@@ -45,8 +45,13 @@ import { Switch } from "./ui/switch";
 import logoWhite from "@/assets/logo-white.svg";
 import logoBlack from "@/assets/logo.svg";
 import {
+    Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle
+} from "./ui/dialog";
+import {
     DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger
 } from "./ui/dropdown-menu";
+import { Input } from "./ui/input";
+import { addToHistory } from "./ScoreHistory";
 
 interface CVSS40CalculatorProps {
     initialMetrics?:                    Partial<CVSSv4Metrics>
@@ -124,6 +129,15 @@ export function CVSS40Calculator({
         setActiveGroup,
     ] = useState(`base-metrics`);
 
+    const [
+        isSaveDialogOpen,
+        setIsSaveDialogOpen,
+    ] = useState(false);
+    const [
+        historyName,
+        setHistoryName,
+    ] = useState(``);
+
     const updateMetric = useCallback((key: keyof CVSSv4Metrics, value: string) => {
         setMetrics((prev) => ({
             ...prev,
@@ -147,6 +161,26 @@ export function CVSS40Calculator({
         navigator.clipboard.writeText(embeddableCode);
         toast.success(`Embeddable code copied`);
     }, [ vectorString ]);
+
+    const handleSaveToHistory = useCallback(() => {
+        if (historyName.trim()) {
+            const currentSeverity = getSeverityRating(score, `4.0`);
+            addToHistory({
+                version:      `4.0`,
+                score,
+                severity:     currentSeverity.label,
+                vectorString,
+                name:         historyName.trim(),
+            });
+            toast.success(`Score saved to history`);
+            setIsSaveDialogOpen(false);
+            setHistoryName(``);
+        }
+    }, [
+        historyName,
+        score,
+        vectorString,
+    ]);
 
     const severity = useMemo(() => getSeverityRating(score, `4.0`), [ score ]);
 
@@ -177,7 +211,7 @@ export function CVSS40Calculator({
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent className="max-w-96">
                                     <DropdownMenuItem
-                                        className="cursor-pointer"
+                                        className="cursor-pointer p-3"
                                         onClick={() => document.getElementById(`alternative-descriptions`)?.click()}>
                                         <Field orientation="horizontal">
                                             <Switch
@@ -195,7 +229,7 @@ export function CVSS40Calculator({
                                         </Field>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
-                                        className="cursor-pointer"
+                                        className="cursor-pointer p-3"
                                         onClick={() => document.getElementById(`show-contributions`)?.click()}>
                                         <Field orientation="horizontal">
                                             <Switch
@@ -342,7 +376,7 @@ export function CVSS40Calculator({
                 </div>
 
                 {/* Right: Sticky Score */}
-                <div className="lg:sticky lg:top-6 h-fit">
+                <div className="lg:sticky lg:top-20 h-fit">
                     <Card className="border-2 border-sky-500/30 shadow-lg">
                         <CardContent className="px-6 space-y-6">
                             <div className="space-y-3">
@@ -371,6 +405,14 @@ export function CVSS40Calculator({
                                             <DropdownMenuItem onClick={shareEmbeddableCode}>
                                                 <CodeXml className="size-3.5 mr-2" />
                                                 Embeddable code
+                                            </DropdownMenuItem>
+                                            <DropdownMenuLabel className="text-xs">
+                                                Persistence
+                                            </DropdownMenuLabel>
+                                            <DropdownMenuSeparator />
+                                            <DropdownMenuItem onClick={() => setIsSaveDialogOpen(true)}>
+                                                <History className="size-3.5 mr-2" />
+                                                Save to History
                                             </DropdownMenuItem>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
@@ -417,6 +459,48 @@ export function CVSS40Calculator({
                     </Card>
                 </div>
             </div>
+
+            <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Save Score to History</DialogTitle>
+                        <DialogDescription>
+                            Enter a name for this CVSS score to save it in your history.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <Field orientation="horizontal">
+                            <FieldContent>
+                                <FieldLabel htmlFor="show-contributions">
+                                    History Name
+                                </FieldLabel>
+                                <Input
+                                    id="name"
+                                    value={historyName}
+                                    onChange={(e) => setHistoryName(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === `Enter`) {
+                                            handleSaveToHistory();
+                                        }
+                                    }}
+                                    placeholder="Enter a name for this score"
+                                />
+                                <FieldDescription>
+                                    A descriptive name to help you identify this score in your history.
+                                </FieldDescription>
+                            </FieldContent>
+                        </Field>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsSaveDialogOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button id="save-to-history" onClick={handleSaveToHistory}>
+                            Save
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </>
     );
 }
