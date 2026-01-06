@@ -20,12 +20,15 @@ import {
 import { Button } from "@/components/ui/button";
 import {
     CodeXml,
-    Copy, Download, MoreHorizontalIcon, Share2
+    Copy, Download, EllipsisVertical, MoreHorizontalIcon, Settings, Share2
 } from "lucide-react";
 import {
     toast, Toaster
 } from "sonner";
-import { calculateCVSSv4Score } from "@/lib/cvss/v4";
+import {
+    calculateCVSSv4Score,
+    calculateOptionImpact
+} from "@/lib/cvss/v4";
 import {
     cvss40Metrics, getSeverityRating
 } from "@/lib/cvss/metrics-data";
@@ -49,6 +52,8 @@ interface CVSS40CalculatorProps {
     initialMetrics?:                    Partial<CVSSv4Metrics>
     shouldUseAlternativeDescription:    boolean
     setShouldUseAlternativeDescription: (value: boolean) => void
+    shouldShowContributions:            boolean
+    setShouldShowContributions:         (value: boolean) => void
 }
 
 const DEFAULT_METRICS: CVSSv4Metrics = {
@@ -90,6 +95,8 @@ export function CVSS40Calculator({
     initialMetrics,
     shouldUseAlternativeDescription,
     setShouldUseAlternativeDescription,
+    shouldShowContributions,
+    setShouldShowContributions,
 }: CVSS40CalculatorProps) {
     const [
         metrics,
@@ -155,27 +162,60 @@ export function CVSS40Calculator({
             <div className="grid lg:grid-cols-[1fr_380px] gap-8">
                 {/* Left: Metrics */}
                 <div className="space-y-6">
-                    <div>
-                        <h2 className="text-2xl font-bold text-foreground">Configure Metrics</h2>
-                        <p className="text-sm text-muted-foreground mt-1">Score updates in real-time</p>
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h2 className="text-2xl font-bold text-foreground">Configure Metrics</h2>
+                            <p className="text-sm text-muted-foreground mt-1">Score updates in real-time</p>
+                        </div>
+                        <div className="space-y-3">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant={`outline`} size={`sm`}>
+                                        <Settings className="size-3.5"/>
+                                        Settings
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent className="max-w-96">
+                                    <DropdownMenuItem
+                                        className="cursor-pointer"
+                                        onClick={() => document.getElementById(`alternative-descriptions`)?.click()}>
+                                        <Field orientation="horizontal">
+                                            <Switch
+                                                onCheckedChange={setShouldUseAlternativeDescription}
+                                                checked={shouldUseAlternativeDescription}
+                                                id="alternative-descriptions" />
+                                            <FieldContent>
+                                                <FieldLabel htmlFor="alternative-descriptions">
+                                                    Use Alternative Descriptions
+                                                </FieldLabel>
+                                                <FieldDescription>
+                                                    Toggle to switch between official not-so-clear and alternative, more explanatory metric descriptions.
+                                                </FieldDescription>
+                                            </FieldContent>
+                                        </Field>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        className="cursor-pointer"
+                                        onClick={() => document.getElementById(`show-contributions`)?.click()}>
+                                        <Field orientation="horizontal">
+                                            <Switch
+                                                onCheckedChange={setShouldShowContributions}
+                                                checked={shouldShowContributions}
+                                                id="show-contributions" />
+                                            <FieldContent>
+                                                <FieldLabel htmlFor="show-contributions">
+                                                    Show Score Contributions
+                                                </FieldLabel>
+                                                <FieldDescription>
+                                                    Display how much each metric option contributes to the overall vulnerability score.
+                                                </FieldDescription>
+                                            </FieldContent>
+                                        </Field>
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
                     </div>
-
-                    <Field orientation="horizontal">
-                        <Switch
-                            onCheckedChange={setShouldUseAlternativeDescription}
-                            checked={shouldUseAlternativeDescription}
-                            id="alternative-descriptions" />
-                        <FieldContent
-                            onClick={() => document.getElementById(`alternative-descriptions`)?.click()}
-                            className="cursor-pointer">
-                            <FieldLabel htmlFor="2fa">
-                                Use Alternative Descriptions
-                            </FieldLabel>
-                            <FieldDescription>
-                                Toggle to switch between official not-so-clear and alternative, more explanatory metric descriptions.
-                            </FieldDescription>
-                        </FieldContent>
-                    </Field>
 
                     <Tabs value={activeGroup} onValueChange={setActiveGroup}>
                         <TabsList className="w-full grid grid-cols-4 h-10">
@@ -204,34 +244,92 @@ export function CVSS40Calculator({
                                                 </FieldDescription>
                                                 <RadioGroup
                                                     value={metrics[metric.key as keyof CVSSv4Metrics] as string}
-                                                    onValueChange={(value) => updateMetric(metric.key as keyof CVSSv4Metrics, value)}
+                                                    onValueChange={(value) => {
+                                                        updateMetric(metric.key as keyof CVSSv4Metrics, value);
+                                                    }}
                                                 >
                                                     {
-                                                        metric.options.map((option) => (
-                                                            <Field
-                                                                key={option.value}
-                                                                orientation="horizontal"
-                                                                className="items-start border rounded-md p-4 cursor-pointer
-                                                                [:has([role='radio'][data-state='checked'])]:border-sky-500
-                                                                [:has([role='radio'][data-state='checked'])]:bg-sky-500/10"
-                                                                onClick={() => document.getElementById(`${ metric.key }-${ option.value }`)?.click()}
-                                                            >
-                                                                <RadioGroupItem
-                                                                    value={option.value}
-                                                                    id={`${ metric.key }-${ option.value }`}
-                                                                    className="mt-1 [[data-state='checked']]:border-sky-500"/>
-                                                                <div className="flex flex-col">
-                                                                    <FieldLabel
-                                                                        htmlFor={`${ metric.key }-${ option.value }`}
-                                                                        className="font-medium">
-                                                                        {option.label}
-                                                                    </FieldLabel>
-                                                                    <FieldDescription>
-                                                                        {shouldUseAlternativeDescription ? option.in_other_words : option.description}
-                                                                    </FieldDescription>
-                                                                </div>
-                                                            </Field>
-                                                        ))
+                                                        metric.options.map((option) => {
+                                                            const metricKey = metric.key as keyof CVSSv4Metrics;
+                                                            const isCurrentlySelected = metrics[metricKey] === option.value;
+
+                                                            // Calculate what the score impact would be if this option is selected
+                                                            const impact = shouldShowContributions && !isCurrentlySelected
+                                                                ? calculateOptionImpact(metrics, metricKey, option.value)
+                                                                : 0;
+
+                                                            const hasImpact = shouldShowContributions && !isCurrentlySelected;
+
+                                                            let impactColor = `text-gray-500 dark:text-gray-400`;
+                                                            if (hasImpact) {
+                                                                if (impact > 0) {
+                                                                    impactColor = `text-red-600 dark:text-red-400 border-red-300 dark:border-red-700`;
+                                                                }
+                                                                else if (impact < 0) {
+                                                                    impactColor = `text-green-600 dark:text-green-400 border-green-300 dark:border-green-700`;
+                                                                }
+                                                            }
+
+                                                            return (
+                                                                <Field
+                                                                    key={option.value}
+                                                                    orientation="horizontal"
+                                                                    className="items-start border rounded-md p-4 cursor-pointer
+                                                                    [:has([role='radio'][data-state='checked'])]:border-sky-500
+                                                                    [:has([role='radio'][data-state='checked'])]:bg-sky-500/10"
+                                                                    onClick={() => {
+                                                                        const element = document.getElementById(
+                                                                            `${ metricKey }-${ option.value }`
+                                                                        );
+                                                                        element?.click();
+                                                                    }}
+                                                                >
+                                                                    <RadioGroupItem
+                                                                        value={option.value}
+                                                                        id={`${ metricKey }-${ option.value }`}
+                                                                        className="mt-1 [[data-state='checked']]:border-sky-500"
+                                                                    />
+                                                                    <div className="flex flex-col flex-1">
+                                                                        <div className="flex items-center justify-between gap-2">
+                                                                            <FieldLabel
+                                                                                htmlFor={`${ metricKey }-${ option.value }`}
+                                                                                className="font-medium"
+                                                                            >
+                                                                                {option.label}
+                                                                            </FieldLabel>
+                                                                            {shouldShowContributions && (
+                                                                                <Badge
+                                                                                    variant="outline"
+                                                                                    className={cn(
+                                                                                        `text-xs font-mono tabular-nums`,
+                                                                                        isCurrentlySelected
+                                                                                            ? `text-blue-600 dark:text-blue-400 border-blue-300 dark:border-blue-700`
+                                                                                            : impactColor
+                                                                                    )}
+                                                                                >
+                                                                                    {isCurrentlySelected
+? (
+                                                                                        `Current`
+                                                                                    )
+: (
+                                                                                        <>
+                                                                                            {impact > 0 ? `+` : ``}
+                                                                                            {impact.toFixed(1)}
+                                                                                        </>
+                                                                                    )}
+                                                                                </Badge>
+                                                                            )}
+                                                                        </div>
+                                                                        <FieldDescription>
+                                                                            {shouldUseAlternativeDescription
+                                                                                ? option.in_other_words
+                                                                                : option.description
+                                                                            }
+                                                                        </FieldDescription>
+                                                                    </div>
+                                                                </Field>
+                                                            );
+                                                        })
                                                     }
                                                 </RadioGroup>
                                             </FieldSet>
@@ -252,23 +350,26 @@ export function CVSS40Calculator({
                                     <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">CVSS v4.0</p>
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
-                                            <Button variant={`outline`} size={`icon-sm`}>
-                                                <MoreHorizontalIcon />
+                                            <Button variant={`outline`} size={`sm`}>
+                                                <EllipsisVertical className="size-3.5" />
+                                                Export
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent>
-                                            <DropdownMenuLabel className="text-xs">Options</DropdownMenuLabel>
+                                            <DropdownMenuLabel className="text-xs">
+                                                Export options
+                                            </DropdownMenuLabel>
                                             <DropdownMenuSeparator />
                                             <DropdownMenuItem onClick={copyVector}>
                                                 <Copy className="size-3.5 mr-2" />
                                                 Copy Vector
                                             </DropdownMenuItem>
                                             <DropdownMenuItem onClick={shareScore}>
-                                                <Share2 className="h-3.5 w-3.5 mr-2" />
+                                                <Share2 className="size-3.5 mr-2" />
                                                 Share Link
                                             </DropdownMenuItem>
                                             <DropdownMenuItem onClick={shareEmbeddableCode}>
-                                                <CodeXml className="h-3.5 w-3.5 mr-2" />
+                                                <CodeXml className="size-3.5 mr-2" />
                                                 Embeddable code
                                             </DropdownMenuItem>
                                         </DropdownMenuContent>

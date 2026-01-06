@@ -5,6 +5,7 @@
  */
 
 import {
+    use,
     useEffect, useState
 } from "react";
 import {
@@ -30,6 +31,11 @@ export function CVSSCalculator() {
         setShouldUseAlternativeDescription,
     ] = useState(false);
 
+    const [
+        should_show_contributions,
+        setShouldShowContributions,
+    ] = useState(false);
+
     // Check for vector in URL on mount
     useEffect(() => {
         const parsed = vectorParser.getVectorFromURL();
@@ -38,6 +44,29 @@ export function CVSSCalculator() {
 
             // Switch to the appropriate tab
             setActiveTab(`v${ parsed.version }`);
+        }
+    }, []);
+
+    // Handle side effects when settings change
+    useEffect(() => {
+        // Save settings to local storage
+        localStorage.setItem(`cvss_calculator_settings`, JSON.stringify({
+            should_use_alternative_description,
+            should_show_contributions,
+        }));
+    }, [
+        should_use_alternative_description,
+        should_show_contributions,
+    ]);
+
+    // Load settings from local storage on mount
+    useEffect(() => {
+        // Load settings from local storage
+        const savedSettings = localStorage.getItem(`cvss_calculator_settings`);
+        if (savedSettings) {
+            const settings = JSON.parse(savedSettings);
+            setShouldUseAlternativeDescription(settings.should_use_alternative_description);
+            setShouldShowContributions(settings.should_show_contributions);
         }
     }, []);
 
@@ -72,6 +101,8 @@ export function CVSSCalculator() {
                         initialMetrics={parsedVector?.version === `4.0` ? parsedVector.metrics : undefined}
                         shouldUseAlternativeDescription={should_use_alternative_description}
                         setShouldUseAlternativeDescription={setShouldUseAlternativeDescription}
+                        shouldShowContributions={should_show_contributions}
+                        setShouldShowContributions={setShouldShowContributions}
                     />
                 </TabsContent>
 
