@@ -29,12 +29,36 @@ export function CVSSCalculator() {
     const [
         should_use_alternative_description,
         setShouldUseAlternativeDescription,
-    ] = useState(false);
+    ] = useState(() => {
+        if (typeof window === `undefined`) {
+            return false;
+        }
+
+        // Load from local storage
+        const savedSettings = localStorage.getItem(`cvss_calculator_settings`);
+        if (savedSettings) {
+            const settings = JSON.parse(savedSettings);
+            return settings.should_use_alternative_description ?? false;
+        }
+        return false;
+    });
 
     const [
         should_show_contributions,
         setShouldShowContributions,
-    ] = useState(false);
+    ] = useState(() => {
+        if (typeof window === `undefined`) {
+            return false;
+        }
+
+        // Load from local storage
+        const savedSettings = localStorage.getItem(`cvss_calculator_settings`);
+        if (savedSettings) {
+            const settings = JSON.parse(savedSettings);
+            return settings.should_show_contributions ?? false;
+        }
+        return false;
+    });
 
     // Check for vector in URL on mount
     useEffect(() => {
