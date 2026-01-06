@@ -32,7 +32,6 @@ import { calculateCVSSv3Score } from "@/lib/cvss/v3";
 import {
     cvss3Metrics, getSeverityRating
 } from "@/lib/cvss/metrics-data";
-import { exportToPDF } from "@/lib/pdf-export";
 import { addToHistory } from "./ScoreHistory";
 import type { CVSSv3Metrics } from "@/lib/cvss/types";
 
@@ -149,16 +148,6 @@ export function CVSS3Calculator({
         const url = `${ window.location.origin }?vector=${ encodeURIComponent(vectorString) }`;
         navigator.clipboard.writeText(url);
         toast.success(`Shareable link copied`);
-    };
-
-    const exportPDF = () => {
-        exportToPDF({
-            version,
-            score,
-            severity: getSeverityRating(score, version).label,
-            vectorString,
-            metrics:  metrics as unknown as Record<string, string>,
-        });
     };
 
     const severity = getSeverityRating(score, version);

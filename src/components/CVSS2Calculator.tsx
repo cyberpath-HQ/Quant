@@ -16,7 +16,6 @@ import { Copy, Download, Share2, Info } from "lucide-react";
 import { toast, Toaster } from "sonner";
 import { calculateCVSSv2Score } from "@/lib/cvss/v2";
 import { cvss2Metrics, getSeverityRating } from "@/lib/cvss/metrics-data";
-import { exportToPDF } from "@/lib/pdf-export";
 import { addToHistory } from "./ScoreHistory";
 import type { CVSSv2Metrics } from "@/lib/cvss/types";
 
@@ -93,16 +92,6 @@ export function CVSS2Calculator({ initialMetrics }: CVSS2CalculatorProps = {}) {
     const url = `${window.location.origin}?vector=${encodeURIComponent(vectorString)}`;
     navigator.clipboard.writeText(url);
     toast.success("Shareable link copied");
-  };
-
-  const exportPDF = () => {
-    exportToPDF({
-      version: "2.0",
-      score,
-      severity: getSeverityRating(score, "2.0").label,
-      vectorString,
-      metrics: metrics as unknown as Record<string, string>,
-    });
   };
 
   const severity = getSeverityRating(score, "2.0");
