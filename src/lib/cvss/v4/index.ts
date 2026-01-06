@@ -10,6 +10,9 @@ export {
     generateVector,
     parseVector,
     createDefaultMetrics,
+    calculateMetricContribution,
+    calculateAllMetricContributions,
+    calculateOptionImpact,
 } from "./scoring";
 
 export {

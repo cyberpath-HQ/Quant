@@ -20,28 +20,30 @@ import type {
     CVSSv4Nomenclature,
     SeverityRating
 } from "../types";
-import { CVSS_V4_LOOKUP, MAX_COMPOSED, MAX_SEVERITY, METRIC_LEVELS } from "./lookup";
+import {
+    CVSS_V4_LOOKUP, MAX_COMPOSED, MAX_SEVERITY, METRIC_LEVELS
+} from "./lookup";
 
 /** Named constants to avoid magic numbers */
 enum Constants {
     MAX_SCORE = 10,
     MIN_SCORE = 0,
     ROUND_MULTIPLIER = 10,
-    NOT_FOUND = -1,
+    NOT_FOUND = -1
 }
 
 /** Score thresholds for severity ratings */
 enum SeverityThreshold {
     LOW = 4.0,
     MEDIUM = 7.0,
-    HIGH = 9.0,
+    HIGH = 9.0
 }
 
 /** Equivalence class level values */
 enum EQLevel {
     HIGHEST = 0,
     MIDDLE = 1,
-    LOWEST = 2,
+    LOWEST = 2
 }
 
 /** MacroVector index positions */
@@ -51,7 +53,7 @@ enum MacroVectorIndex {
     EQ3 = 2,
     EQ4 = 3,
     EQ5 = 4,
-    EQ6 = 5,
+    EQ6 = 5
 }
 
 /** EQ number identifiers */
@@ -60,7 +62,7 @@ enum EQNumber {
     TWO = 2,
     THREE = 3,
     FOUR = 4,
-    FIVE = 5,
+    FIVE = 5
 }
 
 /** Score interpolation step */
@@ -216,28 +218,28 @@ export function calculateMacroVector(metrics: CVSSv4Metrics): CVSSv4MacroVector 
     const eq5 = calculateEQ5(m);
     const eq6 = calculateEQ6(m);
 
-    return `${eq1}${eq2}${eq3}${eq4}${eq5}${eq6}`;
+    return `${ eq1 }${ eq2 }${ eq3 }${ eq4 }${ eq5 }${ eq6 }`;
 }
 
 /**
  * Get the maximum severity vectors for a given MacroVector level
  */
-function getEQMaxes(eq: EQNumber, level: number, eq6Level?: number): string[] {
+function getEQMaxes(eq: EQNumber, level: number, eq6Level?: number): Array<string> {
     if (eq === EQNumber.THREE) {
-        const eq3Data = MAX_COMPOSED.eq3[level] as Record<number, string[]>;
+        const eq3Data = MAX_COMPOSED.eq3[level] as Record<number, Array<string>>;
         return eq3Data[eq6Level!] ?? [];
     }
-    const eqKey = `eq${eq}` as keyof typeof MAX_COMPOSED;
-    const eqData = MAX_COMPOSED[eqKey] as Record<number, string[]>;
+    const eqKey = `eq${ eq }` as keyof typeof MAX_COMPOSED;
+    const eqData = MAX_COMPOSED[eqKey] as Record<number, Array<string>>;
     return eqData[level] ?? [];
 }
 
 /** Severity distances from max vector */
 interface SeverityDistances {
-    eq1:    number;
-    eq2:    number;
-    eq3eq6: number;
-    eq4:    number;
+    eq1:    number
+    eq2:    number
+    eq3eq6: number
+    eq4:    number
 }
 
 /**
@@ -245,10 +247,15 @@ interface SeverityDistances {
  */
 function calculateSeverityDistances(
     metrics: CVSSv4Metrics,
-    maxVectors: string[]
+    maxVectors: Array<string>
 ): SeverityDistances {
     const m = (metric: string): string => getMetricValue(metrics, metric);
-    const result: SeverityDistances = { eq1: 0, eq2: 0, eq3eq6: 0, eq4: 0 };
+    const result: SeverityDistances = {
+        eq1:    0,
+        eq2:    0,
+        eq3eq6: 0,
+        eq4:    0,
+    };
 
     for (const maxVector of maxVectors) {
         const distAV = getMetricLevel(`AV`, m(`AV`)) - getMetricLevel(`AV`, extractMetricFromVector(`AV`, maxVector));
@@ -267,9 +274,20 @@ function calculateSeverityDistances(
         const distAR = getMetricLevel(`AR`, m(`AR`)) - getMetricLevel(`AR`, extractMetricFromVector(`AR`, maxVector));
 
         const allDistances = [
-            distAV, distPR, distUI, distAC, distAT,
-            distVC, distVI, distVA, distSC, distSI, distSA,
-            distCR, distIR, distAR,
+            distAV,
+            distPR,
+            distUI,
+            distAC,
+            distAT,
+            distVC,
+            distVI,
+            distVA,
+            distSC,
+            distSI,
+            distSA,
+            distCR,
+            distIR,
+            distAR,
         ];
 
         if (allDistances.some((d) => d < Constants.MIN_SCORE)) {
@@ -290,13 +308,13 @@ function calculateSeverityDistances(
  * Compose all possible max vectors from EQ components
  */
 function composeMaxVectors(
-    eq1Maxes: string[],
-    eq2Maxes: string[],
-    eq3eq6Maxes: string[],
-    eq4Maxes: string[],
-    eq5Maxes: string[]
-): string[] {
-    const maxVectors: string[] = [];
+    eq1Maxes: Array<string>,
+    eq2Maxes: Array<string>,
+    eq3eq6Maxes: Array<string>,
+    eq4Maxes: Array<string>,
+    eq5Maxes: Array<string>
+): Array<string> {
+    const maxVectors: Array<string> = [];
     for (const eq1Max of eq1Maxes) {
         for (const eq2Max of eq2Maxes) {
             for (const eq3eq6Max of eq3eq6Maxes) {
@@ -358,80 +376,90 @@ function determineNomenclature(metrics: CVSSv4Metrics): CVSSv4Nomenclature {
  * Generate CVSS v4.0 vector string from metrics
  */
 export function generateVector(metrics: CVSSv4Metrics): string {
-    const parts: string[] = [`CVSS:4.0`];
+    const parts: Array<string> = [ `CVSS:4.0` ];
 
-    const baseMetrics: (keyof CVSSv4Metrics)[] = [
-        `AV`, `AC`, `AT`, `PR`, `UI`, `VC`, `VI`, `VA`, `SC`, `SI`, `SA`,
+    const baseMetrics: Array<keyof CVSSv4Metrics> = [
+        `AV`,
+        `AC`,
+        `AT`,
+        `PR`,
+        `UI`,
+        `VC`,
+        `VI`,
+        `VA`,
+        `SC`,
+        `SI`,
+        `SA`,
     ];
     for (const metric of baseMetrics) {
-        parts.push(`${metric}:${metrics[metric]}`);
+        parts.push(`${ metric }:${ metrics[metric] }`);
     }
 
     if (metrics.E !== `X`) {
-        parts.push(`E:${metrics.E}`);
+        parts.push(`E:${ metrics.E }`);
     }
 
     if (metrics.CR !== `X`) {
-        parts.push(`CR:${metrics.CR}`);
+        parts.push(`CR:${ metrics.CR }`);
     }
     if (metrics.IR !== `X`) {
-        parts.push(`IR:${metrics.IR}`);
+        parts.push(`IR:${ metrics.IR }`);
     }
     if (metrics.AR !== `X`) {
-        parts.push(`AR:${metrics.AR}`);
+        parts.push(`AR:${ metrics.AR }`);
     }
 
     if (metrics.MAV !== `X`) {
-        parts.push(`MAV:${metrics.MAV}`);
+        parts.push(`MAV:${ metrics.MAV }`);
     }
     if (metrics.MAC !== `X`) {
-        parts.push(`MAC:${metrics.MAC}`);
+        parts.push(`MAC:${ metrics.MAC }`);
     }
     if (metrics.MAT !== `X`) {
-        parts.push(`MAT:${metrics.MAT}`);
+        parts.push(`MAT:${ metrics.MAT }`);
     }
     if (metrics.MPR !== `X`) {
-        parts.push(`MPR:${metrics.MPR}`);
+        parts.push(`MPR:${ metrics.MPR }`);
     }
     if (metrics.MUI !== `X`) {
-        parts.push(`MUI:${metrics.MUI}`);
+        parts.push(`MUI:${ metrics.MUI }`);
     }
     if (metrics.MVC !== `X`) {
-        parts.push(`MVC:${metrics.MVC}`);
+        parts.push(`MVC:${ metrics.MVC }`);
     }
     if (metrics.MVI !== `X`) {
-        parts.push(`MVI:${metrics.MVI}`);
+        parts.push(`MVI:${ metrics.MVI }`);
     }
     if (metrics.MVA !== `X`) {
-        parts.push(`MVA:${metrics.MVA}`);
+        parts.push(`MVA:${ metrics.MVA }`);
     }
     if (metrics.MSC !== `X`) {
-        parts.push(`MSC:${metrics.MSC}`);
+        parts.push(`MSC:${ metrics.MSC }`);
     }
     if (metrics.MSI !== `X`) {
-        parts.push(`MSI:${metrics.MSI}`);
+        parts.push(`MSI:${ metrics.MSI }`);
     }
     if (metrics.MSA !== `X`) {
-        parts.push(`MSA:${metrics.MSA}`);
+        parts.push(`MSA:${ metrics.MSA }`);
     }
 
     if (metrics.S !== `X`) {
-        parts.push(`S:${metrics.S}`);
+        parts.push(`S:${ metrics.S }`);
     }
     if (metrics.AU !== `X`) {
-        parts.push(`AU:${metrics.AU}`);
+        parts.push(`AU:${ metrics.AU }`);
     }
     if (metrics.R !== `X`) {
-        parts.push(`R:${metrics.R}`);
+        parts.push(`R:${ metrics.R }`);
     }
     if (metrics.V !== `X`) {
-        parts.push(`V:${metrics.V}`);
+        parts.push(`V:${ metrics.V }`);
     }
     if (metrics.RE !== `X`) {
-        parts.push(`RE:${metrics.RE}`);
+        parts.push(`RE:${ metrics.RE }`);
     }
     if (metrics.U !== `X`) {
-        parts.push(`U:${metrics.U}`);
+        parts.push(`U:${ metrics.U }`);
     }
 
     return parts.join(`/`);
@@ -482,7 +510,10 @@ export function parseVector(vector: string): CVSSv4Metrics {
     }
 
     for (let i = EQNumber.ONE; i < parts.length; i++) {
-        const [key, value] = parts[i].split(`:`);
+        const [
+            key,
+            value,
+        ] = parts[i].split(`:`);
         if (key && value && key in metrics) {
             (metrics as unknown as Record<string, string>)[key] = value;
         }
@@ -501,12 +532,12 @@ export function createDefaultMetrics(): CVSSv4Metrics {
         AT:  `N`,
         PR:  `N`,
         UI:  `N`,
-        VC:  `H`,
-        VI:  `H`,
-        VA:  `H`,
-        SC:  `H`,
-        SI:  `H`,
-        SA:  `H`,
+        VC:  `N`,
+        VI:  `N`,
+        VA:  `N`,
+        SC:  `N`,
+        SI:  `N`,
+        SA:  `N`,
         E:   `X`,
         MAV: `X`,
         MAC: `X`,
@@ -533,13 +564,13 @@ export function createDefaultMetrics(): CVSSv4Metrics {
 
 /** Next lower MacroVectors for interpolation */
 interface NextLowerMacroVectors {
-    eq1:          string;
-    eq2:          string;
-    eq3eq6:       string;
-    eq3eq6Left?:  string;
-    eq3eq6Right?: string;
-    eq4:          string;
-    eq5:          string;
+    eq1:          string
+    eq2:          string
+    eq3eq6:       string
+    eq3eq6Left?:  string
+    eq3eq6Right?: string
+    eq4:          string
+    eq5:          string
 }
 
 /**
@@ -554,24 +585,28 @@ function getNextLowerMacroVectors(
     eq6: number
 ): NextLowerMacroVectors {
     const result: NextLowerMacroVectors = {
-        eq1:    `${eq1 + EQNumber.ONE}${eq2}${eq3}${eq4}${eq5}${eq6}`,
-        eq2:    `${eq1}${eq2 + EQNumber.ONE}${eq3}${eq4}${eq5}${eq6}`,
+        eq1:    `${ eq1 + EQNumber.ONE }${ eq2 }${ eq3 }${ eq4 }${ eq5 }${ eq6 }`,
+        eq2:    `${ eq1 }${ eq2 + EQNumber.ONE }${ eq3 }${ eq4 }${ eq5 }${ eq6 }`,
         eq3eq6: ``,
-        eq4:    `${eq1}${eq2}${eq3}${eq4 + EQNumber.ONE}${eq5}${eq6}`,
-        eq5:    `${eq1}${eq2}${eq3}${eq4}${eq5 + EQNumber.ONE}${eq6}`,
+        eq4:    `${ eq1 }${ eq2 }${ eq3 }${ eq4 + EQNumber.ONE }${ eq5 }${ eq6 }`,
+        eq5:    `${ eq1 }${ eq2 }${ eq3 }${ eq4 }${ eq5 + EQNumber.ONE }${ eq6 }`,
     };
 
     if (eq3 === EQLevel.MIDDLE && eq6 === EQLevel.MIDDLE) {
-        result.eq3eq6 = `${eq1}${eq2}${eq3 + EQNumber.ONE}${eq4}${eq5}${eq6}`;
-    } else if (eq3 === EQLevel.HIGHEST && eq6 === EQLevel.MIDDLE) {
-        result.eq3eq6 = `${eq1}${eq2}${eq3 + EQNumber.ONE}${eq4}${eq5}${eq6}`;
-    } else if (eq3 === EQLevel.MIDDLE && eq6 === EQLevel.HIGHEST) {
-        result.eq3eq6 = `${eq1}${eq2}${eq3}${eq4}${eq5}${eq6 + EQNumber.ONE}`;
-    } else if (eq3 === EQLevel.HIGHEST && eq6 === EQLevel.HIGHEST) {
-        result.eq3eq6Left = `${eq1}${eq2}${eq3}${eq4}${eq5}${eq6 + EQNumber.ONE}`;
-        result.eq3eq6Right = `${eq1}${eq2}${eq3 + EQNumber.ONE}${eq4}${eq5}${eq6}`;
-    } else {
-        result.eq3eq6 = `${eq1}${eq2}${eq3 + EQNumber.ONE}${eq4}${eq5}${eq6 + EQNumber.ONE}`;
+        result.eq3eq6 = `${ eq1 }${ eq2 }${ eq3 + EQNumber.ONE }${ eq4 }${ eq5 }${ eq6 }`;
+    }
+    else if (eq3 === EQLevel.HIGHEST && eq6 === EQLevel.MIDDLE) {
+        result.eq3eq6 = `${ eq1 }${ eq2 }${ eq3 + EQNumber.ONE }${ eq4 }${ eq5 }${ eq6 }`;
+    }
+    else if (eq3 === EQLevel.MIDDLE && eq6 === EQLevel.HIGHEST) {
+        result.eq3eq6 = `${ eq1 }${ eq2 }${ eq3 }${ eq4 }${ eq5 }${ eq6 + EQNumber.ONE }`;
+    }
+    else if (eq3 === EQLevel.HIGHEST && eq6 === EQLevel.HIGHEST) {
+        result.eq3eq6Left = `${ eq1 }${ eq2 }${ eq3 }${ eq4 }${ eq5 }${ eq6 + EQNumber.ONE }`;
+        result.eq3eq6Right = `${ eq1 }${ eq2 }${ eq3 + EQNumber.ONE }${ eq4 }${ eq5 }${ eq6 }`;
+    }
+    else {
+        result.eq3eq6 = `${ eq1 }${ eq2 }${ eq3 + EQNumber.ONE }${ eq4 }${ eq5 }${ eq6 + EQNumber.ONE }`;
     }
 
     return result;
@@ -579,17 +614,17 @@ function getNextLowerMacroVectors(
 
 /** Interpolation result */
 interface InterpolationResult {
-    adjustment: number;
-    count:      number;
+    adjustment: number
+    count:      number
 }
 
 /** EQ levels for interpolation calculation */
 interface EQLevels {
-    eq1: number;
-    eq2: number;
-    eq3: number;
-    eq4: number;
-    eq6: number;
+    eq1: number
+    eq2: number
+    eq3: number
+    eq4: number
+    eq6: number
 }
 
 /**
@@ -611,7 +646,8 @@ function calculateInterpolation(
         const leftScore = CVSS_V4_LOOKUP[nextLower.eq3eq6Left!];
         const rightScore = CVSS_V4_LOOKUP[nextLower.eq3eq6Right!];
         scoreEq3eq6NextLower = Math.max(leftScore ?? Constants.MIN_SCORE, rightScore ?? Constants.MIN_SCORE);
-    } else {
+    }
+    else {
         scoreEq3eq6NextLower = CVSS_V4_LOOKUP[nextLower.eq3eq6];
     }
 
@@ -656,7 +692,155 @@ function calculateInterpolation(
         count++;
     }
 
-    return { adjustment: totalNormalized, count };
+    return {
+        adjustment: totalNormalized,
+        count,
+    };
+}
+
+/**
+ * Calculate the score impact of selecting a specific metric value
+ *
+ * @param metrics Current metrics configuration
+ * @param metricKey The metric to analyze
+ * @param optionValue The specific option value to test
+ * @returns The score delta if this option is selected (positive = increases score, negative = decreases)
+ */
+export function calculateOptionImpact(
+    metrics: CVSSv4Metrics,
+    metricKey: keyof CVSSv4Metrics,
+    optionValue: string
+): number {
+    const currentScore = calculateCVSSv4Score(metrics).score;
+    
+    // Create a copy with this specific option selected
+    const testMetrics = {
+        ...metrics,
+        [metricKey]: optionValue,
+    };
+    
+    const testScore = calculateCVSSv4Score(testMetrics).score;
+    
+    // Return the delta: positive means selecting this option increases score
+    return testScore - currentScore;
+}
+
+/**
+ * Calculate the contribution of a specific metric to the overall score
+ *
+ * @param metrics Current metrics configuration
+ * @param metricKey The metric to analyze
+ * @returns The contribution value (positive means increases score, negative means decreases)
+ */
+export function calculateMetricContribution(
+    metrics: CVSSv4Metrics,
+    metricKey: keyof CVSSv4Metrics
+): number {
+    const currentScore = calculateCVSSv4Score(metrics).score;
+
+    // Create a copy with the metric set to its neutral/lowest severity value
+    const neutralMetrics = {
+        ...metrics,
+    };
+
+    // Define neutral values for each metric (least impactful)
+    const neutralValues: Partial<Record<keyof CVSSv4Metrics, string>> = {
+        AV:  `P`,   // Physical
+        AC:  `H`,   // High
+        AT:  `P`,   // Present
+        PR:  `H`,   // High
+        UI:  `A`,   // Active
+        VC:  `N`,   // None
+        VI:  `N`,   // None
+        VA:  `N`,   // None
+        SC:  `N`,   // None
+        SI:  `N`,   // None
+        SA:  `N`,   // None
+        E:   `X`,    // Not Defined
+        CR:  `X`,   // Not Defined
+        IR:  `X`,   // Not Defined
+        AR:  `X`,   // Not Defined
+        MAV: `X`,  // Not Defined
+        MAC: `X`,  // Not Defined
+        MAT: `X`,  // Not Defined
+        MPR: `X`,  // Not Defined
+        MUI: `X`,  // Not Defined
+        MVC: `X`,  // Not Defined
+        MVI: `X`,  // Not Defined
+        MVA: `X`,  // Not Defined
+        MSC: `X`,  // Not Defined
+        MSI: `X`,  // Not Defined
+        MSA: `X`,  // Not Defined
+        S:   `X`,    // Not Defined
+        AU:  `X`,   // Not Defined
+        R:   `X`,    // Not Defined
+        V:   `X`,    // Not Defined
+        RE:  `X`,   // Not Defined
+        U:   `X`,    // Not Defined
+    };
+
+    const neutralValue = neutralValues[metricKey];
+    if (neutralValue) {
+        (neutralMetrics as Record<keyof CVSSv4Metrics, string>)[metricKey] = neutralValue;
+    }
+
+    const neutralScore = calculateCVSSv4Score(neutralMetrics).score;
+
+    // Positive contribution means the metric increases the score
+    return currentScore - neutralScore;
+}
+
+/**
+ * Calculate contributions for all metrics
+ *
+ * @param metrics Current metrics configuration
+ * @returns Record of all metric contributions
+ */
+export function calculateAllMetricContributions(
+    metrics: CVSSv4Metrics
+): Record<keyof CVSSv4Metrics, number> {
+    const contributions = {} as Record<keyof CVSSv4Metrics, number>;
+
+    const allMetrics: Array<keyof CVSSv4Metrics> = [
+        `AV`,
+        `AC`,
+        `AT`,
+        `PR`,
+        `UI`,
+        `VC`,
+        `VI`,
+        `VA`,
+        `SC`,
+        `SI`,
+        `SA`,
+        `E`,
+        `CR`,
+        `IR`,
+        `AR`,
+        `MAV`,
+        `MAC`,
+        `MAT`,
+        `MPR`,
+        `MUI`,
+        `MVC`,
+        `MVI`,
+        `MVA`,
+        `MSC`,
+        `MSI`,
+        `MSA`,
+        `S`,
+        `AU`,
+        `R`,
+        `V`,
+        `RE`,
+        `U`,
+    ];
+
+    for (const metric of allMetrics) {
+        contributions[metric] = calculateMetricContribution(metrics, metric);
+    }
+
+    return contributions;
 }
 
 /**
@@ -671,7 +855,14 @@ function calculateInterpolation(
 export function calculateCVSSv4Score(metrics: CVSSv4Metrics): CVSSv4Score {
     const m = (metric: string): string => getMetricValue(metrics, metric);
 
-    const impactMetrics = [`VC`, `VI`, `VA`, `SC`, `SI`, `SA`];
+    const impactMetrics = [
+        `VC`,
+        `VI`,
+        `VA`,
+        `SC`,
+        `SI`,
+        `SA`,
+    ];
     if (impactMetrics.every((metric) => m(metric) === `N`)) {
         return {
             score:        Constants.MIN_SCORE,
@@ -688,7 +879,7 @@ export function calculateCVSSv4Score(metrics: CVSSv4Metrics): CVSSv4Score {
     const baseValue = CVSS_V4_LOOKUP[macroVector];
 
     if (baseValue === undefined) {
-        throw new Error(`Invalid MacroVector: ${macroVector}`);
+        throw new Error(`Invalid MacroVector: ${ macroVector }`);
     }
 
     const eq1 = parseInt(macroVector[MacroVectorIndex.EQ1]);
@@ -711,7 +902,13 @@ export function calculateCVSSv4Score(metrics: CVSSv4Metrics): CVSSv4Score {
         baseValue,
         nextLower,
         distances,
-        { eq1, eq2, eq3, eq4, eq6 }
+        {
+            eq1,
+            eq2,
+            eq3,
+            eq4,
+            eq6,
+        }
     );
 
     let meanDistance = Constants.MIN_SCORE;
