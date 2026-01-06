@@ -6,7 +6,8 @@
  */
 
 import {
-    useState, useEffect
+    useState, useEffect,
+    useCallback
 } from "react";
 import {
     Card, CardContent, CardDescription, CardHeader, CardTitle
@@ -17,24 +18,15 @@ import {
     History, Trash2, RotateCcw, Download
 } from "lucide-react";
 import { toast } from "sonner";
-
-export interface ScoreHistoryEntry {
-    id:           string
-    version:      string
-    score:        number
-    severity:     string
-    vectorString: string
-    timestamp:    string
-    name:         string
-}
+import {
+    STORAGE_KEY, HISTORY_UPDATE_EVENT,
+    type ScoreHistoryEntry
+} from "@/lib/add-to-history";
+import dayjs from "dayjs";
 
 interface ScoreHistoryProps {
     onRestore?: (entry: ScoreHistoryEntry) => void
 }
-
-const STORAGE_KEY = `cvss-score-history`;
-const MAX_HISTORY = 50;
-const HISTORY_UPDATE_EVENT = `cvss-history-update`;
 
 export function ScoreHistory({
     onRestore,
@@ -51,9 +43,9 @@ export function ScoreHistory({
                 const stored = localStorage.getItem(STORAGE_KEY);
                 if (stored) {
                     const parsed = JSON.parse(stored) as Array<Partial<ScoreHistoryEntry>>;
-                    const withNames = parsed.map(entry => ({
+                    const withNames = parsed.map((entry) => ({
                         ...entry,
-                        name: entry.name || `Unnamed Score`
+                        name: entry.name || `Unnamed Score`,
                     })) as Array<ScoreHistoryEntry>;
                     setHistory(withNames);
                 }
@@ -77,29 +69,29 @@ export function ScoreHistory({
         };
     }, []);
 
-    const deleteEntry = (id: string) => {
+    const deleteEntry = useCallback((id: string) => {
         const updated = history.filter((entry) => entry.id !== id);
         setHistory(updated);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
         window.dispatchEvent(new CustomEvent(HISTORY_UPDATE_EVENT));
         toast.success(`Entry deleted from history`);
-    };
+    }, [ history ]);
 
-    const clearHistory = () => {
+    const clearHistory = useCallback(() => {
         setHistory([]);
         localStorage.removeItem(STORAGE_KEY);
         window.dispatchEvent(new CustomEvent(HISTORY_UPDATE_EVENT));
         toast.success(`History cleared`);
-    };
+    }, []);
 
-    const restoreEntry = (entry: ScoreHistoryEntry) => {
+    const restoreEntry = useCallback((entry: ScoreHistoryEntry) => {
         if (onRestore) {
             onRestore(entry);
             toast.success(`Score restored - check the URL or reload`);
         }
-    };
+    }, [ onRestore ]);
 
-    const exportHistory = () => {
+    const exportHistory = useCallback(() => {
         const data = JSON.stringify(history, null, 2);
         const blob = new Blob([ data ], {
             type: `application/json`,
@@ -111,16 +103,16 @@ export function ScoreHistory({
         a.click();
         URL.revokeObjectURL(url);
         toast.success(`History exported`);
-    };
+    }, [ history ]);
 
-    const getSeverityColor = (severity: string): string => {
+    const getSeverityColor = useCallback((severity: string): string => {
         switch (severity.toLowerCase()) {
             case `none`:
-                return `bg-green-500/10 text-green-700 dark:text-green-400`;
+                return `bg-sky-500/10 text-sky-700 dark:text-sky-400`;
             case `low`:
-                return `bg-yellow-500/10 text-yellow-700 dark:text-yellow-400`;
+                return `bg-green-500/10 text-green-700 dark:text-green-400`;
             case `medium`:
-                return `bg-orange-500/10 text-orange-700 dark:text-orange-400`;
+                return `bg-yellow-500/10 text-yellow-700 dark:text-yellow-400`;
             case `high`:
                 return `bg-red-500/10 text-red-700 dark:text-red-400`;
             case `critical`:
@@ -128,7 +120,7 @@ export function ScoreHistory({
             default:
                 return `bg-gray-500/10 text-gray-700 dark:text-gray-400`;
         }
-    };
+    }, []);
 
     if (history.length === 0) {
         return (
@@ -173,28 +165,39 @@ export function ScoreHistory({
                 </div>
             </CardHeader>
             <CardContent>
-                <div className="space-y-2 max-h-96 overflow-y-auto">
+                <div className="space-y-2 max-h-96 overflow-y-auto p-4">
                     {history.map((entry) => (
                         <div
                             key={entry.id}
-                            className="flex items-center justify-between rounded-lg border bg-card p-3 shadow-sm transition-colors hover:bg-accent"
+                            className="flex items-center justify-between rounded-lg border bg-card p-3 transition-shadow hover:shadow-sm"
                         >
                             <div className="flex-1 space-y-1">
-                                <div className="flex items-center gap-2">
-                                    <Badge variant="secondary">v{entry.version}</Badge>
-                                    <span className="font-bold text-lg">{entry.score.toFixed(1)}</span>
+                                <h4 className="text-lg font-semibold">{entry.name}</h4>
+                                <div className="flex items-center gap-2 text-sm">
+                                    <span className="font-medium">Score: {entry.score.toFixed(1)}</span>
                                     <Badge className={getSeverityColor(entry.severity)}>{entry.severity}</Badge>
                                 </div>
-                                <p className="text-sm font-medium">{entry.name}</p>
-                                <p className="text-xs text-muted-foreground font-mono truncate max-w-md">{entry.vectorString}</p>
-                                <p className="text-xs text-muted-foreground">{new Date(entry.timestamp).toLocaleString()}</p>
+                                <p className="text-xs text-muted-foreground font-mono truncate max-w-md">
+                                    {entry.vectorString}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                    {dayjs(entry.timestamp).format(`ddd DD MMM, YYYY hh:mm`)}
+                                </p>
                             </div>
 
                             <div className="flex gap-2 ml-4">
-                                <Button variant="ghost" size="icon" onClick={() => restoreEntry(entry)} title="Restore this score">
+                                <Button
+                                    variant={`secondary`}
+                                    size="icon"
+                                    onClick={() => restoreEntry(entry)}
+                                    title="Restore this score">
                                     <RotateCcw className="h-4 w-4" />
                                 </Button>
-                                <Button variant="ghost" size="icon" onClick={() => deleteEntry(entry.id)} title="Delete this entry">
+                                <Button
+                                    variant={`destructive`}
+                                    size="icon"
+                                    onClick={() => deleteEntry(entry.id)}
+                                    title="Delete this entry">
                                     <Trash2 className="h-4 w-4" />
                                 </Button>
                             </div>
@@ -204,34 +207,4 @@ export function ScoreHistory({
             </CardContent>
         </Card>
     );
-}
-
-/**
- * Add a score to history
- */
-export function addToHistory(entry: Omit<ScoreHistoryEntry, `id` | `timestamp`>): void {
-    try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        const history: Array<ScoreHistoryEntry> = stored ? JSON.parse(stored) : [];
-
-        const newEntry: ScoreHistoryEntry = {
-            ...entry,
-            id:        `${ Date.now() }-${ Math.random().toString(36)
-                .substr(2, 9) }`,
-            timestamp: new Date().toISOString(),
-        };
-
-        // Add to beginning and limit to MAX_HISTORY
-        const updated = [
-            newEntry,
-            ...history,
-        ].slice(0, MAX_HISTORY);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-
-        // Notify other components that history has been updated
-        window.dispatchEvent(new CustomEvent(HISTORY_UPDATE_EVENT));
-    }
-    catch (error) {
-        console.error(`Failed to save to history:`, error);
-    }
 }
