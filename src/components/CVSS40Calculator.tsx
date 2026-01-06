@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import {
+    CodeXml,
     Copy, Download, MoreHorizontalIcon, Share2
 } from "lucide-react";
 import {
@@ -267,7 +268,7 @@ export function CVSS40Calculator({
                                                 Share Link
                                             </DropdownMenuItem>
                                             <DropdownMenuItem onClick={shareEmbeddableCode}>
-                                                <Download className="h-3.5 w-3.5 mr-2" />
+                                                <CodeXml className="h-3.5 w-3.5 mr-2" />
                                                 Embeddable code
                                             </DropdownMenuItem>
                                         </DropdownMenuContent>
