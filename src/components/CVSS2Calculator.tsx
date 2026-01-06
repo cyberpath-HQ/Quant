@@ -16,7 +16,7 @@ import { Copy, Download, Share2, Info } from "lucide-react";
 import { toast, Toaster } from "sonner";
 import { calculateCVSSv2Score } from "@/lib/cvss/v2";
 import { cvss2Metrics, getSeverityRating } from "@/lib/cvss/metrics-data";
-import { addToHistory } from "./ScoreHistory";
+import { addToHistory } from "../lib/add-to-history";
 import type { CVSSv2Metrics } from "@/lib/cvss/types";
 
 interface CVSS2CalculatorProps {

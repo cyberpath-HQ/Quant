@@ -32,7 +32,7 @@ import { calculateCVSSv3Score } from "@/lib/cvss/v3";
 import {
     cvss3Metrics, getSeverityRating
 } from "@/lib/cvss/metrics-data";
-import { addToHistory } from "./ScoreHistory";
+import { addToHistory } from "../lib/add-to-history";
 import type { CVSSv3Metrics } from "@/lib/cvss/types";
 
 interface CVSS3CalculatorProps {

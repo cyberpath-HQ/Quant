@@ -51,7 +51,7 @@ import {
     DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger
 } from "./ui/dropdown-menu";
 import { Input } from "./ui/input";
-import { addToHistory } from "./ScoreHistory";
+import { addToHistory } from "../lib/add-to-history";
 
 interface CVSS40CalculatorProps {
     initialMetrics?:                    Partial<CVSSv4Metrics>
