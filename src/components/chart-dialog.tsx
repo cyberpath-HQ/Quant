@@ -16,7 +16,7 @@ import {
     CodeXml, Download, EllipsisVertical, Minus, Plus
 } from "lucide-react";
 import {
-    Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis
+    Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis
 } from "recharts";
 import logoBlack from "@/assets/logo.svg";
 import {
@@ -37,6 +37,9 @@ import {
 import {
     ColorPicker, ColorPickerAlphaSlider, ColorPickerArea, ColorPickerContent, ColorPickerEyeDropper, ColorPickerFormatSelect, ColorPickerHueSlider, ColorPickerInput, ColorPickerSwatch, ColorPickerTrigger
 } from "./ui/color-picker";
+import {
+    Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue
+} from "./ui/select";
 
 interface ChartDialogProps {
     open:            boolean
@@ -107,6 +110,22 @@ export function ChartDialog({
         showFloatingLabels,
         setShowFloatingLabels,
     ] = useState(true);
+    const [
+        tooltipContentType,
+        setTooltipContentType,
+    ] = useState<`count` | `percentage`>(`count`);
+    const [
+        floatingLabelType,
+        setFloatingLabelType,
+    ] = useState<`count` | `percentage`>(`percentage`);
+    const [
+        showXAxisTickLabels,
+        setShowXAxisTickLabels,
+    ] = useState(true);
+    const [
+        legendPosition,
+        setLegendPosition,
+    ] = useState<`below-title` | `below-chart`>(`below-chart`);
     const chartRef = useRef<HTMLDivElement>(null);
 
     const allSeverities = [
@@ -129,6 +148,8 @@ export function ChartDialog({
             severityCounts[sev]++;
         }
     });
+
+    const total = selectedEntries.length;
 
     const filteredSeverities = allSeverities.filter((sev) => severityCounts[sev] > 0);
 
@@ -172,8 +193,21 @@ export function ChartDialog({
         (_, i) => i
     );
 
+    const getFloatingLabel = ({
+        name, value, percent,
+    }: { name:    string
+        value:    number
+        percent?: number }) => {
+        const label = severityLabels[name] ?? titleCase(name);
+        if (floatingLabelType === `count`) {
+            return `${ label } ${ value }`;
+        }
+        return `${ label } ${ ((percent ?? 0) * 100).toFixed(2) }%`;
+
+    };
+
     const customLegend = () => (
-        <ul className={cn(`flex flex-wrap gap-4 justify-center`, chartType === `bar` && `mt-4`)}>
+        <ul className={cn(`flex flex-wrap gap-4 justify-center`, chartType === `bar` && `mt-4`, legendPosition === `below-title` && `mt-2 mb-4`)}>
             {filteredSeverities.map((sev) => (
                 <li key={sev} className="flex items-center gap-1">
                     <div
@@ -220,20 +254,24 @@ export function ChartDialog({
 
     const shareEmbeddableCode = useCallback(() => {
         const embeddableCode = `<iframe src="${ window.location.origin }/embed/chart?${ new URLSearchParams({
-            chart_type:           chartType,
+            chart_type:              chartType,
             title,
-            show_legend:          JSON.stringify(showLegend),
-            show_x_axis_label:    JSON.stringify(showXAxisLabel),
-            show_y_axis_label:    JSON.stringify(showYAxisLabel),
-            inner_radius:         JSON.stringify(innerRadius),
-            custom_colors:        JSON.stringify(customColors),
-            transparency:         JSON.stringify(transparency),
-            x_axis_label:         xAxisLabel,
-            y_axis_label:         yAxisLabel,
-            tooltip_label:        tooltipLabel,
-            bar_radius:           JSON.stringify(barRadius),
-            severity_labels:      JSON.stringify(severityLabels),
-            show_floating_labels: JSON.stringify(showFloatingLabels),
+            show_legend:             JSON.stringify(showLegend),
+            show_x_axis_label:       JSON.stringify(showXAxisLabel),
+            show_y_axis_label:       JSON.stringify(showYAxisLabel),
+            inner_radius:            JSON.stringify(innerRadius),
+            custom_colors:           JSON.stringify(customColors),
+            transparency:            JSON.stringify(transparency),
+            x_axis_label:            xAxisLabel,
+            y_axis_label:            yAxisLabel,
+            tooltip_label:           tooltipLabel,
+            bar_radius:              JSON.stringify(barRadius),
+            severity_labels:         JSON.stringify(severityLabels),
+            show_floating_labels:    JSON.stringify(showFloatingLabels),
+            tooltip_content_type:    tooltipContentType,
+            floating_label_type:     floatingLabelType,
+            show_x_axis_tick_labels: JSON.stringify(showXAxisTickLabels),
+            legend_position:         legendPosition,
         }).toString() }" width="400" height="600" style="border:none;"></iframe>`;
         navigator.clipboard.writeText(embeddableCode);
         toast.success(`Embeddable code copied`);
@@ -252,6 +290,10 @@ export function ChartDialog({
         barRadius,
         severityLabels,
         showFloatingLabels,
+        tooltipContentType,
+        floatingLabelType,
+        showXAxisTickLabels,
+        legendPosition,
     ]);
 
     return (
@@ -287,6 +329,7 @@ export function ChartDialog({
                     <div ref={chartRef} className="relative">
                         <div className="text-center">
                             <h3 className="text-lg font-semibold">{title}</h3>
+                            {showLegend && legendPosition === `below-title` && customLegend()}
                         </div>
                         <div className="h-96">
                             <ResponsiveContainer width="100%" height="100%">
@@ -296,12 +339,13 @@ export function ChartDialog({
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis
                           dataKey="name"
+                          tickFormatter={showXAxisTickLabels ? undefined : () => ``}
                           label={
                         showXAxisLabel
                           ? {
                               value:    xAxisLabel,
                               position: `insideBottom`,
-                              offset:   -5,
+                              offset:   -10,
                           }
                           : undefined
                           }
@@ -325,10 +369,9 @@ export function ChartDialog({
                           }
                       />
                       <Tooltip formatter={(value) => [
-                          value,
+                          tooltipContentType === `count` ? value : `${ ((value as number) / total * 100).toFixed(2) }%`,
                           tooltipLabel,
                       ]} />
-                      {showLegend && <Legend content={customLegend} verticalAlign="bottom" height={36} />}
                       <Bar dataKey="count" fill="#8884d8" radius={[
                           barRadius,
                           barRadius,
@@ -351,9 +394,7 @@ export function ChartDialog({
                           labelLine={false}
                           label={
                         showFloatingLabels
-                          ? ({
-                              name, percent,
-                          }) => `${ severityLabels[name!] ?? titleCase(name!) } ${ ((percent ?? 0) * 100).toFixed(2) }%`
+                          ? getFloatingLabel
                           : false
                           }
                           outerRadius={120}
@@ -364,12 +405,15 @@ export function ChartDialog({
                               <Cell key={`cell-${ index }`} fill={entry.color} />
                           ))}
                       </Pie>
-                      <Tooltip />
-                      {showLegend && <Legend content={customLegend} verticalAlign="bottom" height={36} />}
+                      <Tooltip formatter={(value, name) => [
+                          tooltipContentType === `count` ? value : `${ ((value as number) / total * 100).toFixed(2) }%`,
+                          name,
+                      ]} />
                   </PieChart>
                 )}
                             </ResponsiveContainer>
                         </div>
+                        {showLegend && legendPosition === `below-chart` && customLegend()}
                         <img
                             src={logoBlack.src}
                             alt="CyberPath Quant Logo"
@@ -395,28 +439,51 @@ export function ChartDialog({
                                         <div className="grid grid-cols-2 gap-4">
                                             <Field>
                                                 <FieldLabel>Chart Type</FieldLabel>
-                                                <RadioGroup
-                                                    name={`chart-type`}
-                                                    onValueChange={(value: `bar` | `donut`) => setChartType(value)}
+                                                <Select
                                                     value={chartType}
+                                                    onValueChange={(value: `bar` | `donut`) => setChartType(value)}
                                                 >
-                                                    <div className="flex items-center gap-2">
-                                                        <RadioGroupItem
-                                                            value="bar"
-                                                            id="chart-type-bar"
-                                                        />
-                                                        <FieldLabel htmlFor="chart-type-bar">Bar Chart</FieldLabel>
-                                                    </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <RadioGroupItem
-                                                            value="donut"
-                                                            id="chart-type-donut"
-                                                        />
-                                                        <FieldLabel htmlFor="chart-type-donut">Donut Chart</FieldLabel>
-                                                    </div>
-                                                </RadioGroup>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select chart type" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectGroup>
+                                                            <SelectLabel>
+                                                                Chart Type
+                                                            </SelectLabel>
+                                                            <SelectItem value="bar">Bar Chart</SelectItem>
+                                                            <SelectItem value="donut">Donut Chart</SelectItem>
+                                                        </SelectGroup>
+                                                    </SelectContent>
+                                                </Select>
+                                                <FieldDescription className="text-xs">
+                                                    Choose between a bar chart or a donut chart to visualize the data.
+                                                </FieldDescription>
                                             </Field>
-                                            <Field orientation={`horizontal`}>
+                                            <Field>
+                                                <FieldLabel>Tooltip Content</FieldLabel>
+                                                <Select
+                                                    value={tooltipContentType}
+                                                    onValueChange={(value: `count` | `percentage`) => setTooltipContentType(value)}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select tooltip content" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectGroup>
+                                                            <SelectLabel>
+                                                                Tooltip Content
+                                                            </SelectLabel>
+                                                            <SelectItem value="count">Count</SelectItem>
+                                                            <SelectItem value="percentage">Percentage</SelectItem>
+                                                        </SelectGroup>
+                                                    </SelectContent>
+                                                </Select>
+                                                <FieldDescription className="text-xs">
+                                                    Choose whether the tooltip displays count or percentage values.
+                                                </FieldDescription>
+                                            </Field>
+                                            <Field orientation={`horizontal`} className="self-center">
                                                 <Switch checked={showLegend} onCheckedChange={setShowLegend} />
                                                 <FieldContent>
                                                     <FieldLabel className="flex items-center gap-2">
@@ -427,8 +494,29 @@ export function ChartDialog({
                                                     </FieldDescription>
                                                 </FieldContent>
                                             </Field>
+                                            <Field>
+                                                <FieldLabel>Legend Position</FieldLabel>
+                                                <Select
+                                                    value={legendPosition}
+                                                    onValueChange={(value: `below-title` | `below-chart`) => setLegendPosition(value)}>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select a legend position" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectGroup>
+                                                            <SelectLabel>
+                                                                Legend Position
+                                                            </SelectLabel>
+                                                            <SelectItem value="below-title">Below Title</SelectItem>
+                                                            <SelectItem value="below-chart">Below Chart</SelectItem>
+                                                        </SelectGroup>
+                                                    </SelectContent>
+                                                </Select>
+                                                <FieldDescription className="text-xs">
+                                                    Select the position of the legend in relation to the chart.
+                                                </FieldDescription>
+                                            </Field>
                                         </div>
-
                                     </FieldGroup>
                                     <Field>
                                         <FieldLabel>Transparency</FieldLabel>
@@ -492,30 +580,43 @@ export function ChartDialog({
                                 {chartType === `bar` && (
                                     <FieldSet>
                                         <FieldDescription>Customize the appearance of the bar chart.</FieldDescription>
-                                        <FieldGroup className="grid grid-cols-2 gap-4">
-                                            <Field orientation={`horizontal`}>
-                                                <Switch checked={showXAxisLabel} onCheckedChange={setShowXAxisLabel} />
-                                                <FieldContent>
-                                                    <FieldLabel className="flex items-center gap-2">
-                                                        Show X-Axis Label
-                                                    </FieldLabel>
-                                                    <FieldDescription className="text-xs">
-                                                        Toggle the display of the X-Axis label.
-                                                    </FieldDescription>
-                                                </FieldContent>
-                                            </Field>
-                                            <Field orientation={`horizontal`}>
-                                                <Switch checked={showYAxisLabel} onCheckedChange={setShowYAxisLabel} />
-                                                <FieldContent>
-                                                    <FieldLabel className="flex items-center gap-2">
-                                                        Show Y-Axis Label
-                                                    </FieldLabel>
-                                                    <FieldDescription className="text-xs">
-                                                        Toggle the display of the Y-Axis label.
-                                                    </FieldDescription>
-                                                </FieldContent>
-                                            </Field>
-                                            <Field>
+                                        <Field orientation={`horizontal`}>
+                                            <Switch checked={showXAxisLabel} onCheckedChange={setShowXAxisLabel} />
+                                            <FieldContent>
+                                                <FieldLabel className="flex items-center gap-2">
+                                                    Show X-Axis Label
+                                                </FieldLabel>
+                                                <FieldDescription className="text-xs">
+                                                    Toggle the display of the X-Axis label.
+                                                </FieldDescription>
+                                            </FieldContent>
+                                        </Field>
+                                        <Field orientation={`horizontal`}>
+                                            <Switch checked={showYAxisLabel} onCheckedChange={setShowYAxisLabel} />
+                                            <FieldContent>
+                                                <FieldLabel className="flex items-center gap-2">
+                                                    Show Y-Axis Label
+                                                </FieldLabel>
+                                                <FieldDescription className="text-xs">
+                                                    Toggle the display of the Y-Axis label.
+                                                </FieldDescription>
+                                            </FieldContent>
+                                        </Field>
+
+                                        <Field orientation={`horizontal`}>
+                                            <Switch checked={showXAxisTickLabels} onCheckedChange={setShowXAxisTickLabels} />
+                                            <FieldContent>
+                                                <FieldLabel className="flex items-center gap-2">
+                                                    Show X-Axis Tick Labels
+                                                </FieldLabel>
+                                                <FieldDescription className="text-xs">
+                                                    Toggle the display of tick labels on the X-axis.
+                                                </FieldDescription>
+                                            </FieldContent>
+                                        </Field>
+
+                                        <Field>
+                                            <FieldContent>
                                                 <FieldLabel>X-Axis Label</FieldLabel>
                                                 <Input
                                                     value={xAxisLabel}
@@ -523,8 +624,10 @@ export function ChartDialog({
                                                 <FieldDescription className="text-xs">
                                                     Label for the X-Axis representing severity levels.
                                                 </FieldDescription>
-                                            </Field>
-                                            <Field>
+                                            </FieldContent>
+                                        </Field>
+                                        <Field>
+                                            <FieldContent>
                                                 <FieldLabel>Y-Axis Label</FieldLabel>
                                                 <Input
                                                     value={yAxisLabel}
@@ -532,8 +635,8 @@ export function ChartDialog({
                                                 <FieldDescription className="text-xs">
                                                     Label for the Y-Axis representing frequency.
                                                 </FieldDescription>
-                                            </Field>
-                                        </FieldGroup>
+                                            </FieldContent>
+                                        </Field>
 
                                         <Field>
                                             <FieldContent>
@@ -651,17 +754,42 @@ export function ChartDialog({
                                                 Set the inner radius of the donut chart to {innerRadius}% of the outer radius.
                                             </FieldDescription>
                                         </Field>
-                                        <Field orientation={`horizontal`}>
-                                            <Switch checked={showFloatingLabels} onCheckedChange={setShowFloatingLabels} />
-                                            <FieldContent>
-                                                <FieldLabel className="flex items-center gap-2">
-                                                    Show Floating Labels
-                                                </FieldLabel>
+                                        <div className="grid grid-cols-2">
+                                            <Field orientation={`horizontal`} className="self-center">
+                                                <Switch checked={showFloatingLabels} onCheckedChange={setShowFloatingLabels} />
+                                                <FieldContent>
+                                                    <FieldLabel className="flex items-center gap-2">
+                                                        Show Floating Labels
+                                                    </FieldLabel>
+                                                    <FieldDescription className="text-xs">
+                                                        Toggle the display of floating labels on the donut segments.
+                                                    </FieldDescription>
+                                                </FieldContent>
+                                            </Field>
+                                            <Field>
+                                                <FieldLabel>Floating Label Content</FieldLabel>
+                                                <Select
+                                                    value={floatingLabelType}
+                                                    onValueChange={(value: `count` | `percentage`) => setFloatingLabelType(value)}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select floating label content" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectGroup>
+                                                            <SelectLabel>
+                                                                Floating Label Content
+                                                            </SelectLabel>
+                                                            <SelectItem value="count">Count</SelectItem>
+                                                            <SelectItem value="percentage">Percentage</SelectItem>
+                                                        </SelectGroup>
+                                                    </SelectContent>
+                                                </Select>
                                                 <FieldDescription className="text-xs">
-                                                    Toggle the display of floating labels on the donut segments.
+                                                    Choose whether floating labels display count or percentage values.
                                                 </FieldDescription>
-                                            </FieldContent>
-                                        </Field>
+                                            </Field>
+                                        </div>
                                     </FieldSet>
                                 )}
                             </AccordionContent>
