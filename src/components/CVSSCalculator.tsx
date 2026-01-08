@@ -5,7 +5,6 @@
  */
 
 import {
-    use,
     useEffect, useState
 } from "react";
 import {
@@ -14,7 +13,9 @@ import {
 import { CVSS40Calculator } from "./CVSS40Calculator";
 import { CVSS3Calculator } from "./CVSS3Calculator";
 import { CVSS2Calculator } from "./CVSS2Calculator";
-import { vectorParser } from "@/lib/cvss";
+import {
+    vectorParser, type CVSSv4Metrics
+} from "@/lib/cvss";
 
 export function CVSSCalculator() {
     const [
@@ -25,6 +26,10 @@ export function CVSSCalculator() {
         parsedVector,
         setParsedVector,
     ] = useState<ReturnType<typeof vectorParser.getVectorFromURL> | null>(null);
+    const [
+        restoreVectorString,
+        setRestoreVectorString,
+    ] = useState<string | null>(null);
 
     const [
         should_use_alternative_description,
@@ -65,19 +70,46 @@ export function CVSSCalculator() {
         const parsed = vectorParser.getVectorFromURL();
         if (parsed) {
             setParsedVector(parsed);
+            setRestoreVectorString(null);
 
             // Switch to the appropriate tab
             setActiveTab(`v${ parsed.version }`);
         }
     }, []);
 
+    // Listen for restore events from ScoreHistory component
+    useEffect(() => {
+        const handleRestore = (event: CustomEvent) => {
+            const {
+                vectorString,
+            } = event.detail;
+
+            // Parse the vector string to get the correct format
+            const parsed = vectorParser.parseVector(vectorString);
+            if (parsed) {
+                setParsedVector(parsed);
+                setRestoreVectorString(vectorString);
+                setActiveTab(`v${ parsed.version }`);
+            }
+        };
+
+        window.addEventListener(`cvss-restore-vector`, handleRestore as EventListener);
+
+        return (): void => {
+            window.removeEventListener(`cvss-restore-vector`, handleRestore as EventListener);
+        };
+    }, []);
+
     // Handle side effects when settings change
     useEffect(() => {
-        // Save settings to local storage
-        localStorage.setItem(`cvss_calculator_settings`, JSON.stringify({
-            should_use_alternative_description,
-            should_show_contributions,
-        }));
+    // Save settings to local storage
+        localStorage.setItem(
+            `cvss_calculator_settings`,
+            JSON.stringify({
+                should_use_alternative_description,
+                should_show_contributions,
+            })
+        );
     }, [
         should_use_alternative_description,
         should_show_contributions,
@@ -85,7 +117,7 @@ export function CVSSCalculator() {
 
     // Load settings from local storage on mount
     useEffect(() => {
-        // Load settings from local storage
+    // Load settings from local storage
         const savedSettings = localStorage.getItem(`cvss_calculator_settings`);
         if (savedSettings) {
             const settings = JSON.parse(savedSettings);
@@ -122,7 +154,10 @@ export function CVSSCalculator() {
 
                 <TabsContent value="v4.0" className="mt-8">
                     <CVSS40Calculator
-                        initialMetrics={parsedVector?.version === `4.0` ? parsedVector.metrics : undefined}
+                        key={restoreVectorString ?? `v4.0`}
+                        initialMetrics={
+              parsedVector?.version === `4.0` ? (parsedVector.metrics as Partial<CVSSv4Metrics>) : undefined
+                        }
                         shouldUseAlternativeDescription={should_use_alternative_description}
                         setShouldUseAlternativeDescription={setShouldUseAlternativeDescription}
                         shouldShowContributions={should_show_contributions}
@@ -132,27 +167,24 @@ export function CVSSCalculator() {
 
                 <TabsContent value="v3.1" className="mt-6">
                     <CVSS3Calculator
+                        key={restoreVectorString ?? `v3.1`}
                         version="3.1"
-                        initialMetrics={parsedVector?.version === `3.1` ? parsedVector.metrics : undefined}
-                        shouldUseAlternativeDescription={should_use_alternative_description}
-                        setShouldUseAlternativeDescription={setShouldUseAlternativeDescription}
+                        initialMetrics={parsedVector?.version === `3.1` ? (parsedVector.metrics as any) : undefined}
                     />
                 </TabsContent>
 
                 <TabsContent value="v3.0" className="mt-6">
                     <CVSS3Calculator
+                        key={restoreVectorString ?? `v3.0`}
                         version="3.0"
-                        initialMetrics={parsedVector?.version === `3.0` ? parsedVector.metrics : undefined}
-                        shouldUseAlternativeDescription={should_use_alternative_description}
-                        setShouldUseAlternativeDescription={setShouldUseAlternativeDescription}
+                        initialMetrics={parsedVector?.version === `3.0` ? (parsedVector.metrics as any) : undefined}
                     />
                 </TabsContent>
 
                 <TabsContent value="v2.0" className="mt-6">
                     <CVSS2Calculator
-                        initialMetrics={parsedVector?.version === `2.0` ? parsedVector.metrics : undefined}
-                        shouldUseAlternativeDescription={should_use_alternative_description}
-                        setShouldUseAlternativeDescription={setShouldUseAlternativeDescription}
+                        key={restoreVectorString ?? `v2.0`}
+                        initialMetrics={parsedVector?.version === `2.0` ? (parsedVector.metrics as any) : undefined}
                     />
                 </TabsContent>
             </Tabs>
