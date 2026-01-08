@@ -6,24 +6,28 @@
  */
 
 import {
-    useState, useEffect,
-    useCallback,
-    useRef
+    useState, useEffect, useCallback, useRef
 } from "react";
 import {
     Card, CardContent, CardDescription, CardHeader, CardTitle
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
-    History, Trash2, RotateCcw, Download, Upload
+    Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle
+} from "@/components/ui/dialog";
+import {
+    History, Trash2, RotateCcw, Download, Upload, GitCompare, X
 } from "lucide-react";
 import { toast } from "sonner";
 import {
-    STORAGE_KEY, HISTORY_UPDATE_EVENT,
-    type ScoreHistoryEntry
+    STORAGE_KEY, HISTORY_UPDATE_EVENT, type ScoreHistoryEntry
 } from "@/lib/add-to-history";
 import { vectorParser } from "@/lib/cvss";
+import {
+    cvss40Metrics, cvss3Metrics, cvss2Metrics
+} from "@/lib/cvss/metrics-data";
 import dayjs from "dayjs";
 
 export function ScoreHistory() {
@@ -31,6 +35,14 @@ export function ScoreHistory() {
         history,
         setHistory,
     ] = useState<Array<ScoreHistoryEntry>>([]);
+    const [
+        selectedIds,
+        setSelectedIds,
+    ] = useState<Set<string>>(new Set());
+    const [
+        isCompareDialogOpen,
+        setIsCompareDialogOpen,
+    ] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Load history from localStorage
@@ -66,13 +78,16 @@ export function ScoreHistory() {
         };
     }, []);
 
-    const deleteEntry = useCallback((id: string) => {
-        const updated = history.filter((entry) => entry.id !== id);
-        setHistory(updated);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-        window.dispatchEvent(new CustomEvent(HISTORY_UPDATE_EVENT));
-        toast.success(`Entry deleted from history`);
-    }, [ history ]);
+    const deleteEntry = useCallback(
+        (id: string) => {
+            const updated = history.filter((entry) => entry.id !== id);
+            setHistory(updated);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+            window.dispatchEvent(new CustomEvent(HISTORY_UPDATE_EVENT));
+            toast.success(`Entry deleted from history`);
+        },
+        [ history ]
+    );
 
     const clearHistory = useCallback(() => {
         setHistory([]);
@@ -82,7 +97,7 @@ export function ScoreHistory() {
     }, []);
 
     const restoreEntry = useCallback((entry: ScoreHistoryEntry) => {
-        // Parse the vector string to get version and metrics
+    // Parse the vector string to get version and metrics
         const parsed = vectorParser.parseVector(entry.vectorString);
         if (!parsed) {
             toast.error(`Failed to parse vector string`);
@@ -116,67 +131,95 @@ export function ScoreHistory() {
         toast.success(`History exported`);
     }, [ history ]);
 
-    const importHistory = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (!file) {
-            return;
-        }
+    const importHistory = useCallback(
+        (event: React.ChangeEvent<HTMLInputElement>) => {
+            const file = event.target.files?.[0];
+            if (!file) {
+                return;
+            }
 
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const content = e.target?.result as string;
-                const imported = JSON.parse(content) as Array<Partial<ScoreHistoryEntry>>;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const content = e.target?.result as string;
+                    const imported = JSON.parse(content) as Array<Partial<ScoreHistoryEntry>>;
 
-                // Validate imported data
-                if (!Array.isArray(imported)) {
-                    throw new Error(`Invalid format: expected an array`);
-                }
-
-                // Merge with existing history, avoiding duplicates by vectorString
-                const existingVectors = new Set(history.map((entry) => entry.vectorString));
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-                const newEntries = imported.filter((entry) => {
-                    // Validate required fields
-                    if (!entry.vectorString || !entry.version || typeof entry.score !== `number`) {
-                        return false;
+                    // Validate imported data
+                    if (!Array.isArray(imported)) {
+                        throw new Error(`Invalid format: expected an array`);
                     }
-                    return !existingVectors.has(entry.vectorString);
-                }).map((entry) => ({
-                    id:           `${ Date.now() }-${ Math.random().toString(36)
-                        .substring(2, 9) }`,
-                    version:      entry.version,
-                    score:        entry.score,
-                    severity:     entry.severity ?? `Unknown`,
-                    vectorString: entry.vectorString,
-                    timestamp:    entry.timestamp ?? new Date().toISOString(),
-                    name:         entry.name ?? `Imported Score`,
-                })) as Array<ScoreHistoryEntry>;
 
-                if (newEntries.length === 0) {
-                    toast.info(`No new entries to import`);
-                    return;
+                    // Merge with existing history, avoiding duplicates by vectorString
+                    const existingVectors = new Set(history.map((entry) => entry.vectorString));
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+                    const newEntries = imported
+                        .filter((entry) => {
+                            // Validate required fields
+                            if (!entry.vectorString || !entry.version || typeof entry.score !== `number`) {
+                                return false;
+                            }
+                            return !existingVectors.has(entry.vectorString);
+                        })
+                        .map((entry) => ({
+                            id:           `${ Date.now() }-${ Math.random().toString(36)
+                                .substring(2, 9) }`,
+                            version:      entry.version,
+                            score:        entry.score,
+                            severity:     entry.severity ?? `Unknown`,
+                            vectorString: entry.vectorString,
+                            timestamp:    entry.timestamp ?? new Date().toISOString(),
+                            name:         entry.name ?? `Imported Score`,
+                        })) as Array<ScoreHistoryEntry>;
+
+                    if (newEntries.length === 0) {
+                        toast.info(`No new entries to import`);
+                        return;
+                    }
+
+                    const updated = [
+                        ...newEntries,
+                        ...history,
+                    ];
+                    setHistory(updated);
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+                    window.dispatchEvent(new CustomEvent(HISTORY_UPDATE_EVENT));
+                    toast.success(`Imported ${ newEntries.length } new entr${ newEntries.length === 1 ? `y` : `ies` }`);
                 }
+                catch (error) {
+                    console.error(`Failed to import history:`, error);
+                    toast.error(`Failed to import: Invalid file format`);
+                }
+            };
+            reader.readAsText(file);
 
-                const updated = [
-                    ...newEntries,
-                    ...history,
-                ];
-                setHistory(updated);
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-                window.dispatchEvent(new CustomEvent(HISTORY_UPDATE_EVENT));
-                toast.success(`Imported ${ newEntries.length } new entr${ newEntries.length === 1 ? `y` : `ies` }`);
-            }
-            catch (error) {
-                console.error(`Failed to import history:`, error);
-                toast.error(`Failed to import: Invalid file format`);
-            }
-        };
-        reader.readAsText(file);
+            // Reset file input
+            event.target.value = ``;
+        },
+        [ history ]
+    );
 
-        // Reset file input
-        event.target.value = ``;
-    }, [ history ]);
+    const toggleSelection = useCallback((id: string) => {
+        setSelectedIds((prev) => {
+            const newSet = new Set(prev);
+            if (newSet.has(id)) {
+                newSet.delete(id);
+            }
+            else {
+                newSet.add(id);
+            }
+            return newSet;
+        });
+    }, []);
+
+    const clearSelection = useCallback(() => {
+        setSelectedIds(new Set());
+    }, []);
+
+    const openCompareDialog = useCallback(() => {
+        if (selectedIds.size >= 2) {
+            setIsCompareDialogOpen(true);
+        }
+    }, [ selectedIds ]);
 
     const getSeverityColor = useCallback((severity: string): string => {
         switch (severity.toLowerCase()) {
@@ -208,11 +251,7 @@ export function ScoreHistory() {
                             <CardDescription>Your previously calculated scores will appear here</CardDescription>
                         </div>
                         <div className="flex gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => fileInputRef.current?.click()}
-                            >
+                            <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
                                 <Upload className="h-4 w-4 mr-1" />
                                 Import
                             </Button>
@@ -247,22 +286,35 @@ export function ScoreHistory() {
                         <CardDescription>{history.length} score(s) saved locally</CardDescription>
                     </div>
                     <div className="flex gap-2">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => fileInputRef.current?.click()}
-                        >
-                            <Upload className="h-4 w-4 mr-1" />
-                            Import
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={exportHistory}>
-                            <Download className="h-4 w-4 mr-1" />
-                            Export
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={clearHistory}>
-                            <Trash2 className="h-4 w-4 mr-1" />
-                            Clear All
-                        </Button>
+                        {selectedIds.size > 0
+? (
+              <>
+                  <Button variant="outline" size="sm" onClick={clearSelection}>
+                      <X className="h-4 w-4 mr-1" />
+                      Clear ({selectedIds.size})
+                  </Button>
+                  <Button variant="default" size="sm" onClick={openCompareDialog} disabled={selectedIds.size < 2}>
+                      <GitCompare className="h-4 w-4 mr-1" />
+                      Compare ({selectedIds.size})
+                  </Button>
+              </>
+            )
+: (
+              <>
+                  <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                      <Upload className="h-4 w-4 mr-1" />
+                      Import
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={exportHistory}>
+                      <Download className="h-4 w-4 mr-1" />
+                      Export
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={clearHistory}>
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Clear All
+                  </Button>
+              </>
+            )}
                     </div>
                     <input
                         ref={fileInputRef}
@@ -275,45 +327,245 @@ export function ScoreHistory() {
             </CardHeader>
             <CardContent>
                 <div className="space-y-2 max-h-96 overflow-y-auto p-4">
-                    {history.map((entry) => (
-                        <div
-                            key={entry.id}
-                            className="flex items-center justify-between rounded-lg border bg-card p-3 transition-shadow hover:shadow-sm"
-                        >
-                            <div className="flex-1 space-y-1">
-                                <h4 className="text-lg font-semibold">{entry.name}</h4>
-                                <div className="flex items-center gap-2 text-sm">
-                                    <span className="font-medium">Score: {entry.score.toFixed(1)}</span>
-                                    <Badge className={getSeverityColor(entry.severity)}>{entry.severity}</Badge>
+                    {history.map((entry) => {
+                        const isSelected = selectedIds.has(entry.id);
+                        return (
+                            <div
+                                key={entry.id}
+                                className={`flex items-center gap-3 rounded-lg border p-3 transition-all ${
+                  isSelected ? `border-sky-500 bg-sky-500/5` : `bg-card hover:shadow-sm`
+                                }`}
+                            >
+                                <Checkbox checked={isSelected} onCheckedChange={() => toggleSelection(entry.id)} className="mt-1" />
+                                <div className="flex-1 space-y-1">
+                                    <h4 className="text-lg font-semibold">{entry.name}</h4>
+                                    <div className="flex items-center gap-2 text-sm">
+                                        <span className="font-medium">Score: {entry.score.toFixed(1)}</span>
+                                        <Badge className={getSeverityColor(entry.severity)}>{entry.severity}</Badge>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground font-mono truncate max-w-md">{entry.vectorString}</p>
+                                    <p className="text-xs text-muted-foreground">
+                                        {dayjs(entry.timestamp).format(`ddd DD MMM, YYYY hh:mm`)}
+                                    </p>
                                 </div>
-                                <p className="text-xs text-muted-foreground font-mono truncate max-w-md">
-                                    {entry.vectorString}
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                    {dayjs(entry.timestamp).format(`ddd DD MMM, YYYY hh:mm`)}
-                                </p>
-                            </div>
 
-                            <div className="flex gap-2 ml-4">
-                                <Button
-                                    variant={`secondary`}
-                                    size="icon"
-                                    onClick={() => restoreEntry(entry)}
-                                    title="Restore this score">
-                                    <RotateCcw className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                    variant={`destructive`}
-                                    size="icon"
-                                    onClick={() => deleteEntry(entry.id)}
-                                    title="Delete this entry">
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>
+                                <div className="flex gap-2 ml-4">
+                                    <Button
+                                        variant={`secondary`}
+                                        size="icon"
+                                        onClick={() => restoreEntry(entry)}
+                                        title="Restore this score"
+                                    >
+                                        <RotateCcw className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        variant={`destructive`}
+                                        size="icon"
+                                        onClick={() => deleteEntry(entry.id)}
+                                        title="Delete this entry"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </CardContent>
+
+            <ComparisonDialog
+                open={isCompareDialogOpen}
+                onOpenChange={setIsCompareDialogOpen}
+                selectedEntries={history.filter((entry) => selectedIds.has(entry.id))}
+                getSeverityColor={getSeverityColor}
+            />
         </Card>
+    );
+}
+
+interface ComparisonDialogProps {
+    open:             boolean
+    onOpenChange:     (open: boolean) => void
+    selectedEntries:  Array<ScoreHistoryEntry>
+    getSeverityColor: (severity: string) => string
+}
+
+function ComparisonDialog({
+    open, onOpenChange, selectedEntries, getSeverityColor,
+}: ComparisonDialogProps) {
+    if (selectedEntries.length < 2) {
+        return null;
+    }
+
+    const parseMetrics = (entry: ScoreHistoryEntry) => {
+        const parsed = vectorParser.parseVector(entry.vectorString);
+        return parsed?.metrics;
+    };
+
+    const getMetricLabel = (key: string, version: string): string => {
+        let metricsData;
+        switch (version) {
+            case `4.0`:
+                metricsData = cvss40Metrics;
+                break;
+            case `3.1`:
+            case `3.0`:
+                metricsData = cvss3Metrics;
+                break;
+            case `2.0`:
+                metricsData = cvss2Metrics;
+                break;
+            default:
+                return key;
+        }
+
+        for (const group of metricsData) {
+            for (const metric of group.metrics) {
+                if (metric.key === key) {
+                    return metric.label;
+                }
+            }
+        }
+        return key;
+    };
+
+    const getMetricDifferences = () => {
+        if (selectedEntries.length !== 2) {
+            return null;
+        }
+
+        const [
+            first,
+            second,
+        ] = selectedEntries;
+        if (first.version !== second.version) {
+            return null;
+        }
+
+        const firstMetrics = parseMetrics(first);
+        const secondMetrics = parseMetrics(second);
+
+        if (!firstMetrics || !secondMetrics) {
+            return null;
+        }
+
+        const differences: Array<{ key: string
+            first:                      string
+            second:                     string }> = [];
+        const allKeys = new Set([
+            ...Object.keys(firstMetrics),
+            ...Object.keys(secondMetrics),
+        ]);
+
+        for (const key of allKeys) {
+            const firstValue = (firstMetrics as unknown as Record<string, string>)[key];
+            const secondValue = (secondMetrics as unknown as Record<string, string>)[key];
+            if (firstValue !== secondValue) {
+                differences.push({
+                    key,
+                    first:  firstValue,
+                    second: secondValue,
+                });
+            }
+        }
+
+        return differences;
+    };
+
+    const metricDifferences = getMetricDifferences();
+
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent className="lg:max-w-3xl w-full max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                        <GitCompare className="h-5 w-5" />
+                        Score Comparison ({selectedEntries.length} scores)
+                    </DialogTitle>
+                    <DialogDescription>Compare CVSS scores side by side to identify differences</DialogDescription>
+                </DialogHeader>
+
+                <div className="space-y-6 mt-4">
+                    <div className="grid gap-4 grid-cols-2">
+                        {selectedEntries.map((entry, index) => (
+                            <Card key={entry.id} className="border-2">
+                                <CardContent className="p-4 space-y-3">
+                                    <div className="space-y-1">
+                                        <h4 className="font-semibold text-sm text-muted-foreground">Score {index + 1}</h4>
+                                        <h5 className="font-bold text-lg">{entry.name}</h5>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-sm text-muted-foreground">Version</span>
+                                            <Badge variant="outline">{entry.version}</Badge>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-sm text-muted-foreground">Score</span>
+                                            <span className="text-2xl font-bold">{entry.score.toFixed(1)}</span>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-sm text-muted-foreground">Severity</span>
+                                            <Badge className={getSeverityColor(entry.severity)}>{entry.severity}</Badge>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <span className="text-sm text-muted-foreground">Vector</span>
+                                            <p className="text-xs font-mono bg-muted p-2 rounded break-all">{entry.vectorString}</p>
+                                        </div>
+                                        <div className="text-xs text-muted-foreground">
+                                            {dayjs(entry.timestamp).format(`MMM DD, YYYY HH:mm`)}
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+
+                    {metricDifferences && metricDifferences.length > 0 && (
+                        <div className="space-y-3">
+                            <div className="flex items-center gap-2">
+                                <h4 className="font-semibold">Metric Differences</h4>
+                                <Badge variant="outline">{metricDifferences.length} changed</Badge>
+                            </div>
+                            <div className="rounded-lg border">
+                                <div className="grid grid-cols-3 gap-2 p-3 bg-muted/50 font-semibold text-sm">
+                                    <div>Metric</div>
+                                    <div>Score 1</div>
+                                    <div>Score 2</div>
+                                </div>
+                                {metricDifferences.map((diff) => (
+                                    <div key={diff.key} className="grid grid-cols-3 gap-2 p-3 border-t">
+                                        <div className="font-semibold text-sm">{getMetricLabel(diff.key, selectedEntries[0].version)}</div>
+                                        <div className="font-mono text-sm bg-red-100 dark:bg-red-950 px-2 py-1 rounded">{diff.first}</div>
+                                        <div className="font-mono text-sm bg-green-100 dark:bg-green-950 px-2 py-1 rounded">
+                                            {diff.second}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {selectedEntries.length === 2 && selectedEntries[0].version !== selectedEntries[1].version && (
+                        <div className="rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 p-4">
+                            <p className="text-sm text-amber-800 dark:text-amber-200">
+                                <strong>Note:</strong> These scores use different CVSS versions ({selectedEntries[0].version} vs{` `}
+                                {selectedEntries[1].version}). Metric-level comparison is only available for scores using the same
+                                version.
+                            </p>
+                        </div>
+                    )}
+
+                    {selectedEntries.length > 2 && (
+                        <div className="rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 p-4">
+                            <p className="text-sm text-blue-800 dark:text-blue-200">
+                                <strong>Tip:</strong> Metric-level comparison is available when comparing exactly 2 scores of the same
+                                CVSS version.
+                            </p>
+                        </div>
+                    )}
+                </div>
+            </DialogContent>
+        </Dialog>
     );
 }
