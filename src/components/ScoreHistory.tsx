@@ -1,8 +1,9 @@
 /**
- * Score History Component
+ * CVSS Score Manager Component
  *
- * Tracks and displays previously calculated CVSS scores using localStorage.
- * Allows users to view, compare, and restore previous assessments.
+ * Comprehensive management of saved CVSS scores stored in localStorage.
+ * Provides advanced features for listing, sorting, comparing, editing, deleting, and restoring scores.
+ * Supports diff-like comparisons, aggregate charts with advanced settings, and import/export functionality.
  */
 
 import {
@@ -22,10 +23,8 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import {
-    Field, FieldContent, FieldDescription, FieldGroup, FieldLabel, FieldLegend, FieldSeparator, FieldSet
+    Field, FieldContent, FieldDescription, FieldLabel
 } from "@/components/ui/field";
-import { Switch } from "@/components/ui/switch";
-import { Slider } from "@/components/ui/slider";
 import {
     History,
     Trash2,
@@ -38,11 +37,7 @@ import {
     ChevronUp,
     ChevronDown,
     ArrowUpDown,
-    BarChart3,
-    Minus,
-    Plus,
-    EllipsisVertical,
-    CodeXml
+    BarChart3
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -51,39 +46,9 @@ import {
 import { vectorParser } from "@/lib/cvss";
 import dayjs from "dayjs";
 import { ComparisonDialog } from "./comparison-dialog";
-import {
-    BarChart,
-    Bar,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    Legend,
-    ResponsiveContainer,
-    PieChart,
-    Pie,
-    Cell,
-    Label
-} from "recharts";
-import { cn } from "@/lib/utils";
-import { title as titleCase } from "radash";
-import logoBlack from "@/assets/logo.svg";
-import {
-    RadioGroup, RadioGroupItem
-} from "./ui/radio-group";
-import {
-    InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput
-} from "./ui/input-group";
-import {
-    ColorPicker, ColorPickerAlphaSlider, ColorPickerArea, ColorPickerContent, ColorPickerEyeDropper, ColorPickerFormatSelect, ColorPickerHueSlider, ColorPickerInput, ColorPickerSwatch, ColorPickerTrigger
-} from "./ui/color-picker";
-import {
-    AccordionContent, AccordionTrigger, Accordion, AccordionItem
-} from "./ui/accordion";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { ChartDialog } from "./chart-dialog";
 
-export function ScoreHistory() {
+export function CVSSScoreManager() {
     const [
         history,
         setHistory,
@@ -440,9 +405,9 @@ export function ScoreHistory() {
                         <div>
                             <CardTitle className="flex items-center gap-2">
                                 <History className="h-5 w-5" />
-                                Score History
+                                CVSS Score Manager
                             </CardTitle>
-                            <CardDescription>Your previously calculated scores will appear here</CardDescription>
+                            <CardDescription>Manage your saved CVSS scores</CardDescription>
                         </div>
                         <div className="flex gap-2">
                             <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
@@ -461,7 +426,7 @@ export function ScoreHistory() {
                 </CardHeader>
                 <CardContent>
                     <p className="text-center text-sm text-muted-foreground py-8">
-                        No history yet. Start calculating CVSS scores to build your history.
+                        No scores yet. Start calculating CVSS scores to build your collection.
                     </p>
                 </CardContent>
             </Card>
@@ -472,12 +437,12 @@ export function ScoreHistory() {
         <Card>
             <CardHeader>
                 <div className="flex items-center justify-between">
-                    <div>
+                    <div className="space-y-2">
                         <CardTitle className="flex items-center gap-2">
                             <History className="h-5 w-5" />
-                            Score History
+                            CVSS Score Manager
                         </CardTitle>
-                        <CardDescription>{history.length} score(s) saved locally</CardDescription>
+                        <CardDescription>Manage {history.length} saved CVSS score(s)</CardDescription>
                     </div>
                     <div className="flex gap-2">
                         {selectedIds.size > 0
@@ -540,94 +505,94 @@ export function ScoreHistory() {
                         </FieldContent>
                     </Field>
                 </div>
-                <div className="max-h-96 overflow-y-auto rounded-lg border">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className="w-8">
-                                    <Checkbox
-                                        checked={selectedIds.size === sortedHistory.length && sortedHistory.length > 0}
-                                        onCheckedChange={(checked) => {
-                                            if (checked) {
-                                                setSelectedIds(new Set(sortedHistory.map((entry) => entry.id)));
-                                            }
-                                            else {
-                                                setSelectedIds(new Set());
-                                            }
-                                        }}
-                                    />
-                                </TableHead>
-                                <TableHead>Name</TableHead>
-                                <TableHead className="cursor-pointer select-none hover:bg-muted/50" onClick={() => handleSort(`score`)}>
-                                    <div className="flex items-center gap-1">
-                                        Score
-                                        {getSortIcon(`score`)}
-                                    </div>
-                                </TableHead>
-                                <TableHead
-                                    className="cursor-pointer select-none hover:bg-muted/50"
-                                    onClick={() => handleSort(`severity`)}
+                <Table containerClassName="max-h-96 overflow-auto border rounded-lg relative overscroll-contain">
+                    <TableHeader className="sticky top-0 bg-background z-10 rounded-lg overflow-hidden">
+                        <TableRow className="outline outline-border">
+                            <TableHead className="w-8">
+                                <Checkbox
+                                    checked={selectedIds.size === sortedHistory.length && sortedHistory.length > 0}
+                                    onCheckedChange={(checked) => {
+                                        if (checked) {
+                                            setSelectedIds(new Set(sortedHistory.map((entry) => entry.id)));
+                                        }
+                                        else {
+                                            setSelectedIds(new Set());
+                                        }
+                                    }}
+                                />
+                            </TableHead>
+                            <TableHead>Name</TableHead>
+                            <TableHead className="cursor-pointer select-none hover:bg-muted/50" onClick={() => handleSort(`score`)}>
+                                <div className="flex items-center gap-1">
+                                    Score
+                                    {getSortIcon(`score`)}
+                                </div>
+                            </TableHead>
+                            <TableHead
+                                className="cursor-pointer select-none hover:bg-muted/50"
+                                onClick={() => handleSort(`severity`)}
+                            >
+                                <div className="flex items-center gap-1">
+                                    Severity
+                                    {getSortIcon(`severity`)}
+                                </div>
+                            </TableHead>
+                            <TableHead>Vector</TableHead>
+                            <TableHead>Date</TableHead>
+                            <TableHead className="w-24"></TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {sortedHistory.map((entry) => {
+                            const isSelected = selectedIds.has(entry.id);
+                            return (
+                                <TableRow
+                                    key={entry.id}
+                                    className={isSelected ? `bg-sky-500/5 cursor-pointer` : `cursor-pointer`}
+                                    onClick={() => toggleSelection(entry.id)}
                                 >
-                                    <div className="flex items-center gap-1">
-                                        Severity
-                                        {getSortIcon(`severity`)}
-                                    </div>
-                                </TableHead>
-                                <TableHead>Vector</TableHead>
-                                <TableHead>Date</TableHead>
-                                <TableHead className="w-24"></TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {sortedHistory.map((entry) => {
-                                const isSelected = selectedIds.has(entry.id);
-                                return (
-                                    <TableRow
-                                        key={entry.id}
-                                        className={isSelected ? `bg-sky-500/5 cursor-pointer` : `cursor-pointer`}
-                                        onClick={() => toggleSelection(entry.id)}
-                                    >
-                                        <TableCell onClick={(e) => e.stopPropagation()}>
-                                            <Checkbox checked={isSelected} onCheckedChange={() => toggleSelection(entry.id)} />
-                                        </TableCell>
-                                        <TableCell className="font-semibold">{entry.name}</TableCell>
-                                        <TableCell>{entry.score.toFixed(1)}</TableCell>
-                                        <TableCell>
-                                            <Badge className={getSeverityColor(entry.severity)}>{entry.severity}</Badge>
-                                        </TableCell>
-                                        <TableCell className="font-mono text-xs max-w-xs truncate">{entry.vectorString}</TableCell>
-                                        <TableCell className="text-xs text-muted-foreground">
-                                            {dayjs(entry.timestamp).format(`ddd DD MMM, YYYY hh:mm`)}
-                                        </TableCell>
-                                        <TableCell onClick={(e) => e.stopPropagation()}>
-                                            <div className="flex gap-2">
-                                                <Button variant="secondary" size="icon-sm" onClick={() => startEdit(entry)} title="Edit name">
-                                                    <Edit className="size-3.5" />
-                                                </Button>
-                                                <Button
-                                                    variant="secondary"
-                                                    size="icon-sm"
-                                                    onClick={() => restoreEntry(entry)}
-                                                    title="Restore this score"
-                                                >
-                                                    <RotateCcw className="size-3.5" />
-                                                </Button>
-                                                <Button
-                                                    variant="destructive"
-                                                    size="icon-sm"
-                                                    onClick={() => deleteEntry(entry.id)}
-                                                    title="Delete this entry"
-                                                >
-                                                    <Trash2 className="size-3.5" />
-                                                </Button>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                );
-                            })}
-                        </TableBody>
-                    </Table>
-                </div>
+                                    <TableCell onClick={(e) => e.stopPropagation()}>
+                                        <Checkbox
+                                            checked={isSelected}
+                                            onCheckedChange={() => toggleSelection(entry.id)} />
+                                    </TableCell>
+                                    <TableCell className="font-semibold">{entry.name}</TableCell>
+                                    <TableCell>{entry.score.toFixed(1)}</TableCell>
+                                    <TableCell>
+                                        <Badge className={getSeverityColor(entry.severity)}>{entry.severity}</Badge>
+                                    </TableCell>
+                                    <TableCell className="font-mono text-xs max-w-xs truncate">{entry.vectorString}</TableCell>
+                                    <TableCell className="text-xs text-muted-foreground">
+                                        {dayjs(entry.timestamp).format(`ddd DD MMM, YYYY hh:mm`)}
+                                    </TableCell>
+                                    <TableCell onClick={(e) => e.stopPropagation()}>
+                                        <div className="flex gap-2">
+                                            <Button variant="secondary" size="icon-sm" onClick={() => startEdit(entry)} title="Edit name">
+                                                <Edit className="size-3.5" />
+                                            </Button>
+                                            <Button
+                                                variant="secondary"
+                                                size="icon-sm"
+                                                onClick={() => restoreEntry(entry)}
+                                                title="Restore this score"
+                                            >
+                                                <RotateCcw className="size-3.5" />
+                                            </Button>
+                                            <Button
+                                                variant="destructive"
+                                                size="icon-sm"
+                                                onClick={() => deleteEntry(entry.id)}
+                                                title="Delete this entry"
+                                            >
+                                                <Trash2 className="size-3.5" />
+                                            </Button>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            );
+                        })}
+                    </TableBody>
+                </Table>
             </CardContent>
 
             <ComparisonDialog
