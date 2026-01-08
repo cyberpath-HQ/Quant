@@ -50,7 +50,6 @@ import {
   Cell,
 } from "recharts";
 import { cn } from "@/lib/utils";
-import html2canvas from "html2canvas";
 import logoSvg from "@/assets/logo.svg";
 import { title as titleCase } from "radash";
 
@@ -652,6 +651,7 @@ function ChartDialog({ open, onOpenChange, selectedEntries, getSeverityColor }: 
 
   const getColorForSeverity = (severity: string): string => {
     const baseColor = customColors[severity] || severityColorMap[severity.toLowerCase()] || `#8884d8`;
+
     // Convert hex to rgba with transparency
     const hex = baseColor.replace(`#`, ``);
     const r = parseInt(hex.substr(0, 2), 16);
@@ -662,16 +662,24 @@ function ChartDialog({ open, onOpenChange, selectedEntries, getSeverityColor }: 
   };
 
   const barData = filteredSeverities.map((sev) => ({
-    name: sev,
+    name: severityLabels[sev] || titleCase(sev),
     count: severityCounts[sev],
     severity: sev,
   }));
 
   const donutData = filteredSeverities.map((sev) => ({
-    name: sev,
+    name: severityLabels[sev] || titleCase(sev),
     value: severityCounts[sev],
     color: getColorForSeverity(sev),
   }));
+
+  const maxCount = Math.max(...Object.values(severityCounts));
+  const yTicks = Array.from(
+    {
+      length: maxCount + 1,
+    },
+    (_, i) => i
+  );
 
   const customLegend = () => (
     <ul className={cn(`flex flex-wrap gap-4 justify-center`, chartType === `bar` && `mt-4`)}>
@@ -696,11 +704,11 @@ function ChartDialog({ open, onOpenChange, selectedEntries, getSeverityColor }: 
     }
 
     try {
-      const canvas = await html2canvas(chartRef.current, {
-        backgroundColor: `#ffffff`,
-        scale: 2,
-        useCORS: true,
-        allowTaint: false,
+      const domtoimage = (await import(`dom-to-image-more`)).default;
+
+      const blob = await domtoimage.toBlob(chartRef.current, {
+        bgcolor: `#ffffff`,
+        quality: 1,
       });
 
       // Load logo
@@ -709,45 +717,54 @@ function ChartDialog({ open, onOpenChange, selectedEntries, getSeverityColor }: 
       logoImg.src = logoSvg.src;
 
       logoImg.onload = () => {
+        const canvas = document.createElement(`canvas`);
         const ctx = canvas.getContext(`2d`);
-        if (!ctx) return;
+        if (!ctx) {
+          return;
+        }
 
-        // Add watermark
-        const logoSize = 50;
-        const padding = 10;
-        ctx.drawImage(
-          logoImg,
-          canvas.width - logoSize - padding,
-          canvas.height - logoSize - padding,
-          logoSize,
-          logoSize
-        );
+        const img = new Image();
+        img.onload = () => {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
 
-        // Convert to blob and download
-        canvas.toBlob((blob) => {
-          if (!blob) return;
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement(`a`);
-          a.href = url;
-          a.download = `cvss-chart-${Date.now()}.${exportFormat}`;
-          a.click();
-          URL.revokeObjectURL(url);
-          toast.success(`Chart exported as ${exportFormat.toUpperCase()}`);
-        }, `image/${exportFormat}`);
+          // Add watermark
+          const logoSize = 50;
+          const padding = 10;
+          ctx.drawImage(
+            logoImg,
+            canvas.width - logoSize - padding,
+            canvas.height - logoSize - padding,
+            logoSize,
+            logoSize
+          );
+
+          canvas.toBlob((finalBlob) => {
+            if (!finalBlob) {
+              return;
+            }
+            const url = URL.createObjectURL(finalBlob);
+            const a = document.createElement(`a`);
+            a.href = url;
+            a.download = `cvss-chart-${Date.now()}.${exportFormat}`;
+            a.click();
+            URL.revokeObjectURL(url);
+            toast.success(`Chart exported as ${exportFormat.toUpperCase()}`);
+          }, `image/${exportFormat}`);
+        };
+        img.src = URL.createObjectURL(blob);
       };
 
       logoImg.onerror = () => {
         // If logo fails, just export without watermark
-        canvas.toBlob((blob) => {
-          if (!blob) return;
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement(`a`);
-          a.href = url;
-          a.download = `cvss-chart-${Date.now()}.${exportFormat}`;
-          a.click();
-          URL.revokeObjectURL(url);
-          toast.success(`Chart exported as ${exportFormat.toUpperCase()}`);
-        }, `image/${exportFormat}`);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement(`a`);
+        a.href = url;
+        a.download = `cvss-chart-${Date.now()}.${exportFormat}`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast.success(`Chart exported as ${exportFormat.toUpperCase()}`);
       };
     } catch (error) {
       console.error(`Export failed:`, error);
@@ -787,7 +804,7 @@ function ChartDialog({ open, onOpenChange, selectedEntries, getSeverityColor }: 
                     type="number"
                     domain={[0, `dataMax`]}
                     allowDecimals={false}
-                    interval={0}
+                    ticks={yTicks}
                     label={
                       showYAxisLabel
                         ? {
@@ -817,8 +834,7 @@ function ChartDialog({ open, onOpenChange, selectedEntries, getSeverityColor }: 
                     labelLine={false}
                     label={
                       showFloatingLabels
-                        ? ({ name, percent }) =>
-                            `${severityLabels[name as string] ?? titleCase(name as string)} ${(percent ?? 0) * 100}%`
+                        ? ({ name, percent }) => `${severityLabels[name!] ?? titleCase(name!)} ${(percent ?? 0) * 100}%`
                         : false
                     }
                     outerRadius={120}
