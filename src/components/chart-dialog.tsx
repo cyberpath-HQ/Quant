@@ -1,6 +1,6 @@
 import type { ScoreHistoryEntry } from "@/lib/add-to-history";
 import {
-    useCallback, useRef, useState
+    useCallback, useMemo, useRef, useState
 } from "react";
 import { title as titleCase } from "radash";
 import { cn } from "@/lib/utils";
@@ -235,12 +235,15 @@ export function ChartDialog({
         return `${ label } ${ ((percent ?? 0) * 100).toFixed(2) }%`;
     };
 
-    const customLegend = () => (
+    const customLegend = useMemo(() => (
         <ul
             className={cn(
                 `flex flex-wrap gap-4 justify-center`,
-                chartType === `bar` && `mt-4`,
-                legendPosition === `below-title` && `mt-2 mb-4`
+                {
+                    "mt-4":      legendPosition === `below-chart` && showXAxisLabel && showXAxisTickLabels,
+                    "mt-2 mb-4": legendPosition === `below-title`,
+                    "-mt-2":     legendPosition === `below-chart` && !showXAxisLabel && !showXAxisTickLabels,
+                }
             )}
         >
             {filteredSeverities.map((sev) => (
@@ -255,7 +258,13 @@ export function ChartDialog({
                 </li>
             ))}
         </ul>
-    );
+    ), [
+        filteredSeverities,
+        getColorForSeverity,
+        legendPosition,
+        showXAxisLabel,
+        severityLabels,
+    ]);
 
     const exportChart = useCallback(async() => {
         if (!chartRef.current) {
@@ -362,7 +371,7 @@ export function ChartDialog({
                     <div ref={chartRef} className="relative">
                         <div className="text-center">
                             <h3 className="text-lg font-semibold">{title}</h3>
-                            {showLegend && legendPosition === `below-title` && customLegend()}
+                            {showLegend && legendPosition === `below-title` && customLegend}
                         </div>
                         <div className="h-96">
                             <ResponsiveContainer width="100%" height="100%">
@@ -378,6 +387,7 @@ export function ChartDialog({
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis
                           dataKey="name"
+                          tick={showXAxisTickLabels}
                           tickFormatter={showXAxisTickLabels ? undefined : () => ``}
                           label={
                         showXAxisLabel
@@ -397,6 +407,7 @@ export function ChartDialog({
                           ]}
                           allowDecimals={false}
                           ticks={yTicks}
+                          width={showYAxisLabel && yAxisLabel.trim() ? undefined : 25}
                           label={
                         showYAxisLabel
                           ? {
@@ -452,7 +463,7 @@ export function ChartDialog({
                 )}
                             </ResponsiveContainer>
                         </div>
-                        {showLegend && legendPosition === `below-chart` && customLegend()}
+                        {showLegend && legendPosition === `below-chart` && customLegend}
                         <img
                             src={logoBlack.src}
                             alt="CyberPath Quant Logo"
