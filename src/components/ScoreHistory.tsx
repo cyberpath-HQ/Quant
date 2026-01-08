@@ -21,8 +21,9 @@ import {
     Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
+import { Field } from "@/components/ui/field";
 import {
-    History, Trash2, RotateCcw, Download, Upload, GitCompare, X
+    History, Trash2, RotateCcw, Download, Upload, GitCompare, X, Edit
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -51,6 +52,14 @@ export function ScoreHistory() {
     const [
         search,
         setSearch,
+    ] = useState(``);
+    const [
+        editingId,
+        setEditingId,
+    ] = useState<string | null>(null);
+    const [
+        editName,
+        setEditName,
     ] = useState(``);
 
     // Load history from localStorage
@@ -102,6 +111,38 @@ export function ScoreHistory() {
         localStorage.removeItem(STORAGE_KEY);
         window.dispatchEvent(new CustomEvent(HISTORY_UPDATE_EVENT));
         toast.success(`History cleared`);
+    }, []);
+
+    const startEdit = useCallback((entry: ScoreHistoryEntry) => {
+        setEditingId(entry.id);
+        setEditName(entry.name);
+    }, []);
+
+    const saveEdit = useCallback(() => {
+        if (!editingId) {
+            return;
+        }
+        const updated = history.map((entry) => (entry.id === editingId
+? {
+    ...entry,
+    name: editName,
+}
+: entry));
+        setHistory(updated);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+        window.dispatchEvent(new CustomEvent(HISTORY_UPDATE_EVENT));
+        setEditingId(null);
+        setEditName(``);
+        toast.success(`Entry name updated`);
+    }, [
+        editingId,
+        editName,
+        history,
+    ]);
+
+    const cancelEdit = useCallback(() => {
+        setEditingId(null);
+        setEditName(``);
     }, []);
 
     const restoreEntry = useCallback((entry: ScoreHistoryEntry) => {
@@ -300,13 +341,13 @@ export function ScoreHistory() {
                         </CardTitle>
                         <CardDescription>{history.length} score(s) saved locally</CardDescription>
                         {selectedIds.size === 0 && (
-                            <div className="mt-2">
+                            <Field className="mt-2">
                                 <Input
                                     placeholder="Search by name or score..."
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                 />
-                            </div>
+                            </Field>
                         )}
                     </div>
                     <div className="flex gap-2">
@@ -354,21 +395,25 @@ export function ScoreHistory() {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-12">Select</TableHead>
+                                <TableHead className="w-8"></TableHead>
                                 <TableHead>Name</TableHead>
                                 <TableHead>Score</TableHead>
                                 <TableHead>Severity</TableHead>
                                 <TableHead>Vector</TableHead>
                                 <TableHead>Date</TableHead>
-                                <TableHead className="w-24">Actions</TableHead>
+                                <TableHead className="w-24"></TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {sortedHistory.map((entry) => {
                                 const isSelected = selectedIds.has(entry.id);
                                 return (
-                                    <TableRow key={entry.id} className={isSelected ? `bg-sky-500/5` : ``}>
-                                        <TableCell>
+                                    <TableRow
+                                        key={entry.id}
+                                        className={isSelected ? `bg-sky-500/5 cursor-pointer` : `cursor-pointer`}
+                                        onClick={() => toggleSelection(entry.id)}
+                                    >
+                                        <TableCell onClick={(e) => e.stopPropagation()}>
                                             <Checkbox checked={isSelected} onCheckedChange={() => toggleSelection(entry.id)} />
                                         </TableCell>
                                         <TableCell className="font-semibold">{entry.name}</TableCell>
@@ -380,11 +425,14 @@ export function ScoreHistory() {
                                         <TableCell className="text-xs text-muted-foreground">
                                             {dayjs(entry.timestamp).format(`ddd DD MMM, YYYY hh:mm`)}
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell onClick={(e) => e.stopPropagation()}>
                                             <div className="flex gap-1">
+                                                <Button variant="secondary" size="sm" onClick={() => startEdit(entry)} title="Edit name">
+                                                    <Edit className="h-4 w-4" />
+                                                </Button>
                                                 <Button
                                                     variant="secondary"
-                                                    size="icon"
+                                                    size="sm"
                                                     onClick={() => restoreEntry(entry)}
                                                     title="Restore this score"
                                                 >
@@ -392,7 +440,7 @@ export function ScoreHistory() {
                                                 </Button>
                                                 <Button
                                                     variant="destructive"
-                                                    size="icon"
+                                                    size="sm"
                                                     onClick={() => deleteEntry(entry.id)}
                                                     title="Delete this entry"
                                                 >
@@ -414,6 +462,26 @@ export function ScoreHistory() {
                 selectedEntries={history.filter((entry) => selectedIds.has(entry.id))}
                 getSeverityColor={getSeverityColor}
             />
+
+            <Dialog open={editingId !== null} onOpenChange={(open) => !open && cancelEdit()}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Edit Entry Name</DialogTitle>
+                        <DialogDescription>Update the name for this CVSS score entry.</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <Field>
+                            <Input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Enter new name..." />
+                        </Field>
+                        <div className="flex gap-2 justify-end">
+                            <Button variant="outline" onClick={cancelEdit}>
+                                Cancel
+                            </Button>
+                            <Button onClick={saveEdit}>Save</Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </Card>
     );
 }
