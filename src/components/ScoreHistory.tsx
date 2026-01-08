@@ -64,7 +64,6 @@ import {
     Cell
 } from "recharts";
 import { cn } from "@/lib/utils";
-import logoSvg from "@/assets/logo.svg";
 import { title as titleCase } from "radash";
 
 export function ScoreHistory() {
@@ -827,65 +826,19 @@ function ChartDialog({
             const domtoimage = (await import(`dom-to-image-more`)).default;
 
             const blob = await domtoimage.toBlob(chartRef.current, {
-                bgcolor: `#ffffff`,
-                quality: 1,
+                bgcolor:           `#ffffff`,
+                quality:           1,
+                scale:             2,
+                copyDefaultStyles: false,
             });
 
-            // Load logo
-            const logoImg = new Image();
-            logoImg.crossOrigin = `anonymous`;
-            logoImg.src = logoSvg.src;
-
-            logoImg.onload = () => {
-                const canvas = document.createElement(`canvas`);
-                const ctx = canvas.getContext(`2d`);
-                if (!ctx) {
-                    return;
-                }
-
-                const img = new Image();
-                img.onload = () => {
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    ctx.drawImage(img, 0, 0);
-
-                    // Add watermark
-                    const logoSize = 50;
-                    const padding = 10;
-                    ctx.drawImage(
-                        logoImg,
-                        canvas.width - logoSize - padding,
-                        canvas.height - logoSize - padding,
-                        logoSize,
-                        logoSize
-                    );
-
-                    canvas.toBlob((finalBlob) => {
-                        if (!finalBlob) {
-                            return;
-                        }
-                        const url = URL.createObjectURL(finalBlob);
-                        const a = document.createElement(`a`);
-                        a.href = url;
-                        a.download = `cvss-chart-${ Date.now() }.${ exportFormat }`;
-                        a.click();
-                        URL.revokeObjectURL(url);
-                        toast.success(`Chart exported as ${ exportFormat.toUpperCase() }`);
-                    }, `image/${ exportFormat }`);
-                };
-                img.src = URL.createObjectURL(blob);
-            };
-
-            logoImg.onerror = () => {
-                // If logo fails, just export without watermark
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement(`a`);
-                a.href = url;
-                a.download = `cvss-chart-${ Date.now() }.${ exportFormat }`;
-                a.click();
-                URL.revokeObjectURL(url);
-                toast.success(`Chart exported as ${ exportFormat.toUpperCase() }`);
-            };
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement(`a`);
+            a.href = url;
+            a.download = `cvss-chart-${ Date.now() }.${ exportFormat }`;
+            a.click();
+            URL.revokeObjectURL(url);
+            toast.success(`Chart exported as ${ exportFormat.toUpperCase() }`);
         }
         catch (error) {
             console.error(`Export failed:`, error);
@@ -901,91 +854,93 @@ function ChartDialog({
                     <DialogDescription>Customize and view charts for selected CVSS score entries.</DialogDescription>
                 </DialogHeader>
                 <div className="space-y-6">
-                    <div className="text-center">
-                        <h3 className="text-lg font-semibold">{title}</h3>
-                    </div>
-                    <div className="h-96" ref={chartRef}>
-                        <ResponsiveContainer width="100%" height="100%">
-                            {chartType === `bar`
+                    <div ref={chartRef}>
+                        <div className="text-center">
+                            <h3 className="text-lg font-semibold">{title}</h3>
+                        </div>
+                        <div className="h-96">
+                            <ResponsiveContainer width="100%" height="100%">
+                                {chartType === `bar`
 ? (
-                <BarChart data={barData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                        dataKey="name"
-                        label={
-                      showXAxisLabel
-                        ? {
-                            value:    xAxisLabel,
-                            position: `insideBottom`,
-                            offset:   -5,
-                        }
-                        : undefined
-                        }
-                    />
-                    <YAxis
-                        type="number"
-                        domain={[
-                            0,
-                            `dataMax`,
-                        ]}
-                        allowDecimals={false}
-                        ticks={yTicks}
-                        label={
-                      showYAxisLabel
-                        ? {
-                            value:    yAxisLabel,
-                            angle:    -90,
-                            position: `insideLeft`,
-                        }
-                        : undefined
-                        }
-                    />
-                    <Tooltip formatter={(value) => [
-                        value,
-                        tooltipLabel,
-                    ]} />
-                    {showLegend && <Legend content={customLegend} verticalAlign="bottom" height={36} />}
-                    <Bar dataKey="count" fill="#8884d8" radius={[
-                        barRadius,
-                        barRadius,
-                        0,
-                        0,
-                    ]}>
-                        {barData.map((entry, index) => (
-                            <Cell key={`cell-${ index }`} fill={getColorForSeverity(entry.severity)} />
-                        ))}
-                    </Bar>
-                </BarChart>
-              )
+                  <BarChart data={barData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis
+                          dataKey="name"
+                          label={
+                        showXAxisLabel
+                          ? {
+                              value:    xAxisLabel,
+                              position: `insideBottom`,
+                              offset:   -5,
+                          }
+                          : undefined
+                          }
+                      />
+                      <YAxis
+                          type="number"
+                          domain={[
+                              0,
+                              `dataMax`,
+                          ]}
+                          allowDecimals={false}
+                          ticks={yTicks}
+                          label={
+                        showYAxisLabel
+                          ? {
+                              value:    yAxisLabel,
+                              angle:    -90,
+                              position: `insideLeft`,
+                          }
+                          : undefined
+                          }
+                      />
+                      <Tooltip formatter={(value) => [
+                          value,
+                          tooltipLabel,
+                      ]} />
+                      {showLegend && <Legend content={customLegend} verticalAlign="bottom" height={36} />}
+                      <Bar dataKey="count" fill="#8884d8" radius={[
+                          barRadius,
+                          barRadius,
+                          0,
+                          0,
+                      ]}>
+                          {barData.map((entry, index) => (
+                              <Cell key={`cell-${ index }`} fill={getColorForSeverity(entry.severity)} />
+                          ))}
+                      </Bar>
+                  </BarChart>
+                )
 : (
-                <PieChart>
-                    {innerRadius > 0 && <circle cx="50%" cy="50%" r={innerRadius} fill={innerRadiusColor} />}
-                    <Pie
-                        data={donutData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={innerRadius}
-                        labelLine={false}
-                        label={
-                      showFloatingLabels
-                        ? ({
-                            name, percent,
-                        }) => `${ severityLabels[name!] ?? titleCase(name!) } ${ (percent ?? 0) * 100 }%`
-                        : false
-                        }
-                        outerRadius={120}
-                        fill="#8884d8"
-                        dataKey="value"
-                    >
-                        {donutData.map((entry, index) => (
-                            <Cell key={`cell-${ index }`} fill={entry.color} />
-                        ))}
-                    </Pie>
-                    <Tooltip />
-                    {showLegend && <Legend content={customLegend} verticalAlign="bottom" height={36} />}
-                </PieChart>
-              )}
-                        </ResponsiveContainer>
+                  <PieChart>
+                      {innerRadius > 0 && <circle cx="50%" cy="50%" r={innerRadius} fill={innerRadiusColor} />}
+                      <Pie
+                          data={donutData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={innerRadius}
+                          labelLine={false}
+                          label={
+                        showFloatingLabels
+                          ? ({
+                              name, percent,
+                          }) => `${ severityLabels[name!] ?? titleCase(name!) } ${ (percent ?? 0) * 100 }%`
+                          : false
+                          }
+                          outerRadius={120}
+                          fill="#8884d8"
+                          dataKey="value"
+                      >
+                          {donutData.map((entry, index) => (
+                              <Cell key={`cell-${ index }`} fill={entry.color} />
+                          ))}
+                      </Pie>
+                      <Tooltip />
+                      {showLegend && <Legend content={customLegend} verticalAlign="bottom" height={36} />}
+                  </PieChart>
+                )}
+                            </ResponsiveContainer>
+                        </div>
                     </div>
                     <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
