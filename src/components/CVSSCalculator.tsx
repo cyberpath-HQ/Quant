@@ -77,7 +77,7 @@ export function CVSSCalculator() {
         }
     }, []);
 
-    // Listen for restore events from ScoreHistory component
+    // Listen for restore events from CVSSScoreManager component
     useEffect(() => {
         const handleRestore = (event: CustomEvent) => {
             const {
