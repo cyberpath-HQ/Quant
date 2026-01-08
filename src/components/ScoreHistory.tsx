@@ -161,7 +161,7 @@ export function ScoreHistory() {
                 const updated = [
                     ...newEntries,
                     ...history,
-                ].slice(0, 50);
+                ];
                 setHistory(updated);
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
                 window.dispatchEvent(new CustomEvent(HISTORY_UPDATE_EVENT));
