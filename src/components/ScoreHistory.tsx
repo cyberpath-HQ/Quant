@@ -52,6 +52,7 @@ import {
 import { cn } from "@/lib/utils";
 import html2canvas from "html2canvas";
 import logoSvg from "@/assets/logo.svg";
+import { title as titleCase } from "radash";
 
 export function ScoreHistory() {
   const [history, setHistory] = useState<Array<ScoreHistoryEntry>>([]);
@@ -619,6 +620,9 @@ function ChartDialog({ open, onOpenChange, selectedEntries, getSeverityColor }: 
   const [yAxisLabel, setYAxisLabel] = useState(`Count`);
   const [tooltipLabel, setTooltipLabel] = useState(`Count`);
   const [barRadius, setBarRadius] = useState(0);
+  const [severityLabels, setSeverityLabels] = useState<Record<string, string>>({});
+  const [innerRadiusColor, setInnerRadiusColor] = useState(`#ffffff`);
+  const [showFloatingLabels, setShowFloatingLabels] = useState(true);
   const chartRef = useRef<HTMLDivElement>(null);
 
   const allSeverities = [`none`, `low`, `medium`, `high`, `critical`];
@@ -679,7 +683,7 @@ function ChartDialog({ open, onOpenChange, selectedEntries, getSeverityColor }: 
             }}
             className="w-3 h-3 rounded"
           ></div>
-          <span className="text-sm capitalize">{sev}</span>
+          <span className="text-sm">{severityLabels[sev] || titleCase(sev)}</span>
         </li>
       ))}
     </ul>
@@ -694,7 +698,9 @@ function ChartDialog({ open, onOpenChange, selectedEntries, getSeverityColor }: 
     try {
       const canvas = await html2canvas(chartRef.current, {
         backgroundColor: `#ffffff`,
-        scale: 2, // Higher resolution
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
       });
 
       // Load logo
@@ -781,6 +787,7 @@ function ChartDialog({ open, onOpenChange, selectedEntries, getSeverityColor }: 
                     type="number"
                     domain={[0, `dataMax`]}
                     allowDecimals={false}
+                    interval={0}
                     label={
                       showYAxisLabel
                         ? {
@@ -801,13 +808,19 @@ function ChartDialog({ open, onOpenChange, selectedEntries, getSeverityColor }: 
                 </BarChart>
               ) : (
                 <PieChart>
+                  {innerRadius > 0 && <circle cx="50%" cy="50%" r={innerRadius} fill={innerRadiusColor} />}
                   <Pie
                     data={donutData}
                     cx="50%"
                     cy="50%"
                     innerRadius={innerRadius}
                     labelLine={false}
-                    label={({ name, percent }) => `${name} ${percent ? (percent * 100).toFixed(0) : 0}%`}
+                    label={
+                      showFloatingLabels
+                        ? ({ name, percent }) =>
+                            `${severityLabels[name as string] ?? titleCase(name as string)} ${(percent ?? 0) * 100}%`
+                        : false
+                    }
                     outerRadius={120}
                     fill="#8884d8"
                     dataKey="value"
@@ -931,18 +944,38 @@ function ChartDialog({ open, onOpenChange, selectedEntries, getSeverityColor }: 
                 </>
               )}
               {chartType === `donut` && (
-                <Field>
-                  <FieldContent>
-                    <FieldLabel>Inner Radius</FieldLabel>
-                    <Slider
-                      value={[innerRadius]}
-                      onValueChange={(value: Array<number>) => setInnerRadius(value[0])}
-                      max={80}
-                      min={0}
-                      step={5}
-                    />
-                  </FieldContent>
-                </Field>
+                <>
+                  <Field>
+                    <FieldContent>
+                      <FieldLabel>Inner Radius</FieldLabel>
+                      <Slider
+                        value={[innerRadius]}
+                        onValueChange={(value: Array<number>) => setInnerRadius(value[0])}
+                        max={80}
+                        min={0}
+                        step={5}
+                      />
+                    </FieldContent>
+                  </Field>
+                  <Field>
+                    <FieldContent>
+                      <FieldLabel>Inner Radius Color</FieldLabel>
+                      <Input
+                        type="color"
+                        value={innerRadiusColor}
+                        onChange={(e) => setInnerRadiusColor(e.target.value)}
+                      />
+                    </FieldContent>
+                  </Field>
+                  <Field>
+                    <FieldContent>
+                      <FieldLabel className="flex items-center gap-2">
+                        Show Floating Labels
+                        <Switch checked={showFloatingLabels} onCheckedChange={setShowFloatingLabels} />
+                      </FieldLabel>
+                    </FieldContent>
+                  </Field>
+                </>
               )}
             </div>
             <div className="space-y-2">
@@ -960,6 +993,26 @@ function ChartDialog({ open, onOpenChange, selectedEntries, getSeverityColor }: 
                           [severity]: e.target.value,
                         }))
                       }
+                    />
+                  </FieldContent>
+                </Field>
+              ))}
+            </div>
+            <div className="space-y-2">
+              <FieldLabel>Severity Labels</FieldLabel>
+              {allSeverities.map((severity) => (
+                <Field key={severity}>
+                  <FieldContent>
+                    <FieldLabel className="text-sm">{severity}</FieldLabel>
+                    <Input
+                      value={severityLabels[severity] || titleCase(severity)}
+                      onChange={(e) =>
+                        setSeverityLabels((prev) => ({
+                          ...prev,
+                          [severity]: e.target.value,
+                        }))
+                      }
+                      placeholder={titleCase(severity)}
                     />
                   </FieldContent>
                 </Field>
