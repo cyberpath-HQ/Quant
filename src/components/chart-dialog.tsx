@@ -47,9 +47,6 @@ import {
     FieldSet
 } from "./ui/field";
 import { Input } from "./ui/input";
-import {
-    RadioGroup, RadioGroupItem
-} from "./ui/radio-group";
 import { Switch } from "./ui/switch";
 import { Slider } from "./ui/slider";
 import {
@@ -71,203 +68,714 @@ import {
     Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue
 } from "./ui/select";
 
+const ALL_SEVERITIES = [
+    `none`,
+    `low`,
+    `medium`,
+    `high`,
+    `critical`,
+];
+
+const SEVERITY_COLOR_MAP: Record<string, string> = {
+    none:     `#87CEEB`,
+    low:      `#32CD32`,
+    medium:   `#FFD700`,
+    high:     `#FF6347`,
+    critical: `#8A2BE2`,
+};
+
 interface ChartDialogProps {
     open:            boolean
     onOpenChange:    (open: boolean) => void
     selectedEntries: Array<ScoreHistoryEntry>
 }
 
+interface ChartSettingsProps {
+    chart_type:               `bar` | `donut`
+    set_chart_type:           (value: `bar` | `donut`) => void
+    title:                    string
+    set_title:                (value: string) => void
+    show_legend:              boolean
+    set_show_legend:          (value: boolean) => void
+    legend_position:          `below-title` | `below-chart`
+    set_legend_position:      (value: `below-title` | `below-chart`) => void
+    tooltip_content_type:     `count` | `percentage`
+    set_tooltip_content_type: (value: `count` | `percentage`) => void
+    transparency:             number
+    set_transparency:         (value: number) => void
+}
+
+function ChartSettings({
+    chart_type,
+    set_chart_type,
+    title,
+    set_title,
+    show_legend,
+    set_show_legend,
+    legend_position,
+    set_legend_position,
+    tooltip_content_type,
+    set_tooltip_content_type,
+    transparency,
+    set_transparency,
+}: ChartSettingsProps) {
+    return (
+        <AccordionItem value="chart-settings">
+            <AccordionTrigger>Chart Settings</AccordionTrigger>
+            <AccordionContent className="px-3">
+                <FieldSet>
+                    <FieldDescription>Configure the appearance and data of the chart.</FieldDescription>
+                    <FieldGroup>
+                        <Field>
+                            <FieldLabel>Title</FieldLabel>
+                            <Input value={title} onChange={(e) => set_title(e.target.value)} />
+                            <FieldDescription className="text-xs">
+                                Set a title for the chart to describe its content.
+                            </FieldDescription>
+                        </Field>
+                        <div className="grid grid-cols-2 gap-4">
+                            <Field>
+                                <FieldLabel>Chart Type</FieldLabel>
+                                <Select value={chart_type} onValueChange={set_chart_type}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select chart type" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectLabel>Chart Type</SelectLabel>
+                                            <SelectItem value="bar">Bar Chart</SelectItem>
+                                            <SelectItem value="donut">Donut Chart</SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                                <FieldDescription className="text-xs">
+                                    Choose between a bar chart or a donut chart to visualize the data.
+                                </FieldDescription>
+                            </Field>
+                            <Field>
+                                <FieldLabel>Tooltip Content</FieldLabel>
+                                <Select value={tooltip_content_type} onValueChange={set_tooltip_content_type}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select tooltip content" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectLabel>Tooltip Content</SelectLabel>
+                                            <SelectItem value="count">Count</SelectItem>
+                                            <SelectItem value="percentage">Percentage</SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                                <FieldDescription className="text-xs">
+                                    Choose whether the tooltip displays count or percentage values.
+                                </FieldDescription>
+                            </Field>
+                            <Field orientation={`horizontal`} className="self-center">
+                                <Switch checked={show_legend} onCheckedChange={set_show_legend} />
+                                <FieldContent>
+                                    <FieldLabel className="flex items-center gap-2">Show Legend</FieldLabel>
+                                    <FieldDescription className="text-xs">Toggle the display of the chart legend.</FieldDescription>
+                                </FieldContent>
+                            </Field>
+                            <Field>
+                                <FieldLabel>Legend Position</FieldLabel>
+                                <Select value={legend_position} onValueChange={set_legend_position}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select a legend position" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectLabel>Legend Position</SelectLabel>
+                                            <SelectItem value="below-title">Below Title</SelectItem>
+                                            <SelectItem value="below-chart">Below Chart</SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                                <FieldDescription className="text-xs">
+                                    Select the position of the legend in relation to the chart.
+                                </FieldDescription>
+                            </Field>
+                        </div>
+                    </FieldGroup>
+                    <Field>
+                        <FieldLabel>Transparency</FieldLabel>
+                        <div className="flex items-center gap-4 -my-2">
+                            <Slider
+                                value={[ transparency ]}
+                                onValueChange={(value: Array<number>) => set_transparency(value[0])}
+                                max={100}
+                                min={0}
+                                step={1}
+                                className="col-span-2"
+                            />
+                            <InputGroup className="w-40">
+                                <InputGroupAddon>
+                                    <InputGroupButton
+                                        variant="secondary"
+                                        size="icon-xs"
+                                        onClick={() => set_transparency(Math.max(0, transparency - 1))}
+                                        aria-label="Decrease chart transparency by 1"
+                                    >
+                                        <Minus />
+                                    </InputGroupButton>
+                                </InputGroupAddon>
+                                <InputGroupInput
+                                    id="input-secure-19"
+                                    type="number"
+                                    value={transparency}
+                                    onChange={(e) => set_transparency(Math.min(100, Math.max(0, Number(e.target.value))))}
+                                    min={0}
+                                    max={100}
+                                    step={1}
+                                    className="text-end"
+                                />
+                                <InputGroupAddon align={`inline-end`}>%</InputGroupAddon>
+                                <InputGroupAddon align="inline-end">
+                                    <InputGroupButton
+                                        variant="secondary"
+                                        size="icon-xs"
+                                        onClick={() => set_transparency(Math.min(100, transparency + 1))}
+                                        aria-label="Increase chart transparency by 1"
+                                    >
+                                        <Plus />
+                                    </InputGroupButton>
+                                </InputGroupAddon>
+                            </InputGroup>
+                        </div>
+                        <FieldDescription className="text-xs">
+                            Set the chart colors to {transparency}% transparency.
+                        </FieldDescription>
+                    </Field>
+                </FieldSet>
+            </AccordionContent>
+        </AccordionItem>
+    );
+}
+
+interface TypeSpecificSettingsProps {
+    chart_type:                  `bar` | `donut`
+    show_x_axis_label:           boolean
+    set_show_x_axis_label:       (value: boolean) => void
+    show_y_axis_label:           boolean
+    set_show_y_axis_label:       (value: boolean) => void
+    show_x_axis_tick_labels:     boolean
+    set_show_x_axis_tick_labels: (value: boolean) => void
+    x_axis_label:                string
+    set_x_axis_label:            (value: string) => void
+    y_axis_label:                string
+    set_y_axis_label:            (value: string) => void
+    tooltip_label:               string
+    set_tooltip_label:           (value: string) => void
+    bar_radius:                  number
+    set_bar_radius:              (value: number) => void
+    inner_radius:                number
+    set_inner_radius:            (value: number) => void
+    show_floating_labels:        boolean
+    set_show_floating_labels:    (value: boolean) => void
+    floating_label_type:         `count` | `percentage`
+    set_floating_label_type:     (value: `count` | `percentage`) => void
+}
+
+function TypeSpecificSettings({
+    chart_type,
+    show_x_axis_label,
+    set_show_x_axis_label,
+    show_y_axis_label,
+    set_show_y_axis_label,
+    show_x_axis_tick_labels,
+    set_show_x_axis_tick_labels,
+    x_axis_label,
+    set_x_axis_label,
+    y_axis_label,
+    set_y_axis_label,
+    tooltip_label,
+    set_tooltip_label,
+    bar_radius,
+    set_bar_radius,
+    inner_radius,
+    set_inner_radius,
+    show_floating_labels,
+    set_show_floating_labels,
+    floating_label_type,
+    set_floating_label_type,
+}: TypeSpecificSettingsProps) {
+    return (
+        <AccordionItem value="type-specific-settings">
+            <AccordionTrigger>{chart_type === `bar` ? `Bar Chart Settings` : `Donut Chart Settings`}</AccordionTrigger>
+            <AccordionContent className="px-3">
+                {chart_type === `bar` && (
+                    <FieldSet>
+                        <FieldDescription>Customize the appearance of the bar chart.</FieldDescription>
+                        <Field orientation={`horizontal`}>
+                            <Switch checked={show_x_axis_label} onCheckedChange={set_show_x_axis_label} />
+                            <FieldContent>
+                                <FieldLabel className="flex items-center gap-2">Show X-Axis Label</FieldLabel>
+                                <FieldDescription className="text-xs">Toggle the display of the X-Axis label.</FieldDescription>
+                            </FieldContent>
+                        </Field>
+                        <Field orientation={`horizontal`}>
+                            <Switch checked={show_y_axis_label} onCheckedChange={set_show_y_axis_label} />
+                            <FieldContent>
+                                <FieldLabel className="flex items-center gap-2">Show Y-Axis Label</FieldLabel>
+                                <FieldDescription className="text-xs">Toggle the display of the Y-Axis label.</FieldDescription>
+                            </FieldContent>
+                        </Field>
+
+                        <Field orientation={`horizontal`}>
+                            <Switch checked={show_x_axis_tick_labels} onCheckedChange={set_show_x_axis_tick_labels} />
+                            <FieldContent>
+                                <FieldLabel className="flex items-center gap-2">Show X-Axis Tick Labels</FieldLabel>
+                                <FieldDescription className="text-xs">
+                                    Toggle the display of tick labels on the X-axis.
+                                </FieldDescription>
+                            </FieldContent>
+                        </Field>
+
+                        <Field>
+                            <FieldContent>
+                                <FieldLabel>X-Axis Label</FieldLabel>
+                                <Input value={x_axis_label} onChange={(e) => set_x_axis_label(e.target.value)} />
+                                <FieldDescription className="text-xs">
+                                    Label for the X-Axis representing severity levels.
+                                </FieldDescription>
+                            </FieldContent>
+                        </Field>
+                        <Field>
+                            <FieldContent>
+                                <FieldLabel>Y-Axis Label</FieldLabel>
+                                <Input value={y_axis_label} onChange={(e) => set_y_axis_label(e.target.value)} />
+                                <FieldDescription className="text-xs">Label for the Y-Axis representing frequency.</FieldDescription>
+                            </FieldContent>
+                        </Field>
+
+                        <Field>
+                            <FieldContent>
+                                <FieldLabel>Tooltip Label</FieldLabel>
+                                <Input value={tooltip_label} onChange={(e) => set_tooltip_label(e.target.value)} />
+                                <FieldDescription className="text-xs">Label displayed in the tooltip for data points.</FieldDescription>
+                            </FieldContent>
+                        </Field>
+                        <Field>
+                            <FieldContent>
+                                <FieldLabel>Bar Top Radius</FieldLabel>
+                                <div className="flex items-center gap-4">
+                                    <Slider
+                                        value={[ bar_radius ]}
+                                        onValueChange={(value: Array<number>) => set_bar_radius(value[0])}
+                                        max={20}
+                                        min={0}
+                                        step={1}
+                                    />
+                                    <InputGroup className="w-42">
+                                        <InputGroupAddon>
+                                            <InputGroupButton
+                                                variant="secondary"
+                                                size="icon-xs"
+                                                onClick={() => set_bar_radius(Math.max(0, bar_radius - 1))}
+                                                aria-label="Decrease chart border radius by 1"
+                                            >
+                                                <Minus />
+                                            </InputGroupButton>
+                                        </InputGroupAddon>
+                                        <InputGroupInput
+                                            id="input-secure-19"
+                                            type="number"
+                                            value={bar_radius}
+                                            onChange={(e) => set_bar_radius(Math.min(20, Math.max(0, Number(e.target.value))))}
+                                            min={0}
+                                            max={20}
+                                            step={1}
+                                            className="text-end"
+                                        />
+                                        <InputGroupAddon align={`inline-end`}>px</InputGroupAddon>
+                                        <InputGroupAddon align="inline-end">
+                                            <InputGroupButton
+                                                variant="secondary"
+                                                size="icon-xs"
+                                                onClick={() => set_bar_radius(Math.min(20, bar_radius + 1))}
+                                                aria-label="Increase chart border radius by 1"
+                                            >
+                                                <Plus />
+                                            </InputGroupButton>
+                                        </InputGroupAddon>
+                                    </InputGroup>
+                                </div>
+                                <FieldDescription className="text-xs">
+                                    Set the border radius for the top corners of the bars to {bar_radius}px
+                                </FieldDescription>
+                            </FieldContent>
+                        </Field>
+                    </FieldSet>
+                )}
+                {chart_type === `donut` && (
+                    <FieldSet>
+                        <FieldDescription>Customize the appearance of the donut chart.</FieldDescription>
+                        <Field>
+                            <FieldLabel>Inner Radius</FieldLabel>
+                            <div className="flex items-center gap-4">
+                                <Slider
+                                    value={[ inner_radius ]}
+                                    onValueChange={(value: Array<number>) => set_inner_radius(value[0])}
+                                    max={80}
+                                    min={0}
+                                    step={1}
+                                />
+                                <InputGroup className="w-42">
+                                    <InputGroupAddon>
+                                        <InputGroupButton
+                                            variant="secondary"
+                                            size="icon-xs"
+                                            onClick={() => set_inner_radius(Math.max(0, inner_radius - 1))}
+                                            aria-label="Decrease chart inner radius by 1"
+                                        >
+                                            <Minus />
+                                        </InputGroupButton>
+                                    </InputGroupAddon>
+                                    <InputGroupInput
+                                        id="input-secure-19"
+                                        type="number"
+                                        value={inner_radius}
+                                        onChange={(e) => set_inner_radius(Math.min(80, Math.max(0, Number(e.target.value))))}
+                                        min={0}
+                                        max={80}
+                                        step={1}
+                                        className="text-end"
+                                    />
+                                    <InputGroupAddon align={`inline-end`}>%</InputGroupAddon>
+                                    <InputGroupAddon align="inline-end">
+                                        <InputGroupButton
+                                            variant="secondary"
+                                            size="icon-xs"
+                                            onClick={() => set_inner_radius(Math.min(80, inner_radius + 1))}
+                                            aria-label="Increase chart inner radius by 1"
+                                        >
+                                            <Plus />
+                                        </InputGroupButton>
+                                    </InputGroupAddon>
+                                </InputGroup>
+                            </div>
+                            <FieldDescription className="text-xs">
+                                Set the inner radius of the donut chart to {inner_radius}% of the outer radius.
+                            </FieldDescription>
+                        </Field>
+                        <div className="grid grid-cols-2">
+                            <Field orientation={`horizontal`} className="self-center">
+                                <Switch checked={show_floating_labels} onCheckedChange={set_show_floating_labels} />
+                                <FieldContent>
+                                    <FieldLabel className="flex items-center gap-2">Show Floating Labels</FieldLabel>
+                                    <FieldDescription className="text-xs">
+                                        Toggle the display of floating labels on the donut segments.
+                                    </FieldDescription>
+                                </FieldContent>
+                            </Field>
+                            <Field>
+                                <FieldLabel>Floating Label Content</FieldLabel>
+                                <Select value={floating_label_type} onValueChange={set_floating_label_type}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select floating label content" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectLabel>Floating Label Content</SelectLabel>
+                                            <SelectItem value="count">Count</SelectItem>
+                                            <SelectItem value="percentage">Percentage</SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                                <FieldDescription className="text-xs">
+                                    Choose whether floating labels display count or percentage values.
+                                </FieldDescription>
+                            </Field>
+                        </div>
+                    </FieldSet>
+                )}
+            </AccordionContent>
+        </AccordionItem>
+    );
+}
+
+interface CustomizationProps {
+    custom_colors:       Record<string, string>
+    set_custom_colors:   (updater: (prev: Record<string, string>) => Record<string, string>) => void
+    severity_labels:     Record<string, string>
+    set_severity_labels: (updater: (prev: Record<string, string>) => Record<string, string>) => void
+}
+
+function Customization({
+    custom_colors, set_custom_colors, severity_labels, set_severity_labels,
+}: CustomizationProps) {
+    return (
+        <AccordionItem value="customization">
+            <AccordionTrigger>Customization</AccordionTrigger>
+            <AccordionContent className="px-3">
+                <FieldSet>
+                    <FieldDescription>Personalize chart colors and severity labels.</FieldDescription>
+                    <div className="flex flex-col gap-4">
+                        {ALL_SEVERITIES.map((severity, i) => (
+                            <>
+                                <FieldSet key={severity} className="grid grid-cols-2 gap-4">
+                                    <div className="flex flex-col col-span-full">
+                                        <FieldLegend className="text-sm! font-medium!">{titleCase(severity)} Severity</FieldLegend>
+                                        <FieldDescription className="text-xs">
+                                            Customize the color and label for {severity} severity entries.
+                                        </FieldDescription>
+                                    </div>
+
+                                    <Field>
+                                        <FieldLabel>Color</FieldLabel>
+                                        <ColorPicker
+                                            value={custom_colors[severity] || SEVERITY_COLOR_MAP[severity.toLowerCase()] || `#8884d8`}
+                                            onValueChange={(e) => set_custom_colors((prev) => ({
+                                                ...prev,
+                                                [severity]: e,
+                                            }))
+                                            }
+                                            defaultFormat="hex"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <ColorPickerTrigger asChild>
+                                                    <Button variant="outline" className="flex items-center gap-2 px-3">
+                                                        <ColorPickerSwatch className="size-4" />
+                                                        {custom_colors[severity] || SEVERITY_COLOR_MAP[severity.toLowerCase()] || `#8884d8`}
+                                                    </Button>
+                                                </ColorPickerTrigger>
+                                            </div>
+                                            <ColorPickerContent>
+                                                <ColorPickerArea />
+                                                <div className="flex items-center gap-2">
+                                                    <ColorPickerEyeDropper />
+                                                    <div className="flex flex-1 flex-col gap-2">
+                                                        <ColorPickerHueSlider />
+                                                        <ColorPickerAlphaSlider />
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <ColorPickerFormatSelect />
+                                                    <ColorPickerInput />
+                                                </div>
+                                            </ColorPickerContent>
+                                        </ColorPicker>
+                                    </Field>
+                                    <Field key={severity}>
+                                        <FieldLabel className="text-sm">{titleCase(severity)} Label</FieldLabel>
+                                        <Input
+                                            value={severity_labels[severity] || titleCase(severity)}
+                                            onChange={(e) => set_severity_labels((prev) => ({
+                                                ...prev,
+                                                [severity]: e.target.value,
+                                            }))
+                                            }
+                                            placeholder={titleCase(severity)}
+                                        />
+                                    </Field>
+                                </FieldSet>
+                                {i < ALL_SEVERITIES.length - 1 && <FieldSeparator />}
+                            </>
+                        ))}
+                    </div>
+                </FieldSet>
+            </AccordionContent>
+        </AccordionItem>
+    );
+}
+
 export function ChartDialog({
     open, onOpenChange, selectedEntries,
 }: ChartDialogProps): React.ReactElement {
     const [
-        chartType,
-        setChartType,
+        chart_type,
+        set_chart_type,
     ] = useState<`bar` | `donut`>(`bar`);
     const [
         title,
-        setTitle,
+        set_title,
     ] = useState(`CVSS Scores Chart`);
     const [
-        showLegend,
-        setShowLegend,
+        show_legend,
+        set_show_legend,
     ] = useState(true);
     const [
-        showXAxisLabel,
-        setShowXAxisLabel,
+        show_x_axis_label,
+        set_show_x_axis_label,
     ] = useState(true);
     const [
-        showYAxisLabel,
-        setShowYAxisLabel,
+        show_y_axis_label,
+        set_show_y_axis_label,
     ] = useState(true);
     const [
-        innerRadius,
-        setInnerRadius,
+        inner_radius,
+        set_inner_radius,
     ] = useState(60);
     const [
-        customColors,
-        setCustomColors,
+        custom_colors,
+        set_custom_colors,
     ] = useState<Record<string, string>>({});
-    const [
-        exportFormat,
-        setExportFormat,
-    ] = useState<`png` | `webp`>(`png`);
     const [
         transparency,
-        setTransparency,
+        set_transparency,
     ] = useState(70);
     const [
-        xAxisLabel,
-        setXAxisLabel,
+        x_axis_label,
+        set_x_axis_label,
     ] = useState(`Severity`);
     const [
-        yAxisLabel,
-        setYAxisLabel,
+        y_axis_label,
+        set_y_axis_label,
     ] = useState(`Count`);
     const [
-        tooltipLabel,
-        setTooltipLabel,
+        tooltip_label,
+        set_tooltip_label,
     ] = useState(`Count`);
     const [
-        barRadius,
-        setBarRadius,
+        bar_radius,
+        set_bar_radius,
     ] = useState(5);
     const [
-        severityLabels,
-        setSeverityLabels,
+        severity_labels,
+        set_severity_labels,
     ] = useState<Record<string, string>>({});
     const [
-        showFloatingLabels,
-        setShowFloatingLabels,
+        show_floating_labels,
+        set_show_floating_labels,
     ] = useState(true);
     const [
-        tooltipContentType,
-        setTooltipContentType,
+        tooltip_content_type,
+        set_tooltip_content_type,
     ] = useState<`count` | `percentage`>(`count`);
     const [
-        floatingLabelType,
-        setFloatingLabelType,
+        floating_label_type,
+        set_floating_label_type,
     ] = useState<`count` | `percentage`>(`percentage`);
     const [
-        showXAxisTickLabels,
-        setShowXAxisTickLabels,
+        show_x_axis_tick_labels,
+        set_show_x_axis_tick_labels,
     ] = useState(true);
     const [
-        legendPosition,
-        setLegendPosition,
+        legend_position,
+        set_legend_position,
     ] = useState<`below-title` | `below-chart`>(`below-chart`);
-    const chartRef = useRef<HTMLDivElement>(null);
+    const chart_ref = useRef<HTMLDivElement>(null);
 
-    const allSeverities = [
-        `none`,
-        `low`,
-        `medium`,
-        `high`,
-        `critical`,
-    ];
-
-    // Prepare data aggregated by severity
-    const severityCounts = allSeverities.reduce((acc, sev) => {
-        acc[sev] = 0;
-        return acc;
-    }, {} as Record<string, number>);
-
-    selectedEntries.forEach((entry) => {
-        const sev = entry.severity.toLowerCase();
-        if (allSeverities.includes(sev)) {
-            severityCounts[sev]++;
-        }
-    });
+    const severity_counts = useMemo(() => {
+        const counts = ALL_SEVERITIES.reduce((acc, sev) => {
+            acc[sev] = 0;
+            return acc;
+        }, {} as Record<string, number>);
+        selectedEntries.forEach((entry) => {
+            const sev = entry.severity.toLowerCase();
+            if (ALL_SEVERITIES.includes(sev)) {
+                counts[sev]++;
+            }
+        });
+        return counts;
+    }, [ selectedEntries ]);
 
     const total = selectedEntries.length;
 
-    const filteredSeverities = allSeverities.filter((sev) => severityCounts[sev] > 0);
-
-    const severityColorMap: Record<string, string> = {
-        none:     `#87CEEB`,
-        low:      `#32CD32`,
-        medium:   `#FFD700`,
-        high:     `#FF6347`,
-        critical: `#8A2BE2`,
-    };
-
-    const getColorForSeverity = (severity: string): string => {
-        const baseColor = customColors[severity] || severityColorMap[severity.toLowerCase()] || `#8884d8`;
-
-        // Convert hex to rgba with transparency
-        const hex = baseColor.replace(`#`, ``);
-        const r = parseInt(hex.substr(0, 2), 16);
-        const g = parseInt(hex.substr(2, 2), 16);
-        const b = parseInt(hex.substr(4, 2), 16);
-        const alpha = transparency / 100;
-        return `rgba(${ r }, ${ g }, ${ b }, ${ alpha })`;
-    };
-
-    const barData = filteredSeverities.map((sev) => ({
-        name:     severityLabels[sev] || titleCase(sev),
-        count:    severityCounts[sev],
-        severity: sev,
-    }));
-
-    const donutData = filteredSeverities.map((sev) => ({
-        name:  severityLabels[sev] || titleCase(sev),
-        value: severityCounts[sev],
-        color: getColorForSeverity(sev),
-    }));
-
-    const maxCount = Math.max(...Object.values(severityCounts));
-    const yTicks = Array.from(
-        {
-            length: maxCount + 1,
-        },
-        (_, i) => i
+    const filtered_severities = useMemo(
+        () => ALL_SEVERITIES.filter((sev) => severity_counts[sev] > 0),
+        [ severity_counts ]
     );
 
-    const getFloatingLabel = ({
-        name, value, percent,
-    }: { name:    string
-        value:    number
-        percent?: number }) => {
-        const label = severityLabels[name] ?? titleCase(name);
-        if (floatingLabelType === `count`) {
-            return `${ label } ${ value }`;
-        }
-        return `${ label } ${ ((percent ?? 0) * 100).toFixed(2) }%`;
-    };
+    const get_color_for_severity = useCallback(
+        (severity: string): string => {
+            const base_color = custom_colors[severity] || SEVERITY_COLOR_MAP[severity.toLowerCase()] || `#8884d8`;
+            const hex = base_color.replace(`#`, ``);
+            const r = parseInt(hex.substr(0, 2), 16);
+            const g = parseInt(hex.substr(2, 2), 16);
+            const b = parseInt(hex.substr(4, 2), 16);
+            const alpha = transparency / 100;
+            return `rgba(${ r }, ${ g }, ${ b }, ${ alpha })`;
+        },
+        [
+            custom_colors,
+            transparency,
+        ]
+    );
 
-    const customLegend = useMemo(() => (
-        <ul
-            className={cn(
-                `flex flex-wrap gap-4 justify-center`,
-                {
-                    "mt-4":      legendPosition === `below-chart` && showXAxisLabel && showXAxisTickLabels,
-                    "mt-2 mb-4": legendPosition === `below-title`,
-                    "-mt-2":     legendPosition === `below-chart` && !showXAxisLabel && !showXAxisTickLabels,
-                }
-            )}
-        >
-            {filteredSeverities.map((sev) => (
-                <li key={sev} className="flex items-center gap-1">
-                    <div
-                        style={{
-                            backgroundColor: getColorForSeverity(sev),
-                        }}
-                        className="w-3 h-3 rounded"
-                    ></div>
-                    <span className="text-sm">{severityLabels[sev] || titleCase(sev)}</span>
-                </li>
-            ))}
-        </ul>
-    ), [
-        filteredSeverities,
-        getColorForSeverity,
-        legendPosition,
-        showXAxisLabel,
-        severityLabels,
-    ]);
+    const bar_data = useMemo(
+        () => filtered_severities.map((sev) => ({
+            name:     severity_labels[sev] || titleCase(sev),
+            count:    severity_counts[sev],
+            severity: sev,
+        })),
+        [
+            filtered_severities,
+            severity_labels,
+            severity_counts,
+        ]
+    );
 
-    const exportChart = useCallback(async() => {
-        if (!chartRef.current) {
+    const donut_data = useMemo(
+        () => filtered_severities.map((sev) => ({
+            name:  severity_labels[sev] || titleCase(sev),
+            value: severity_counts[sev],
+            color: get_color_for_severity(sev),
+        })),
+        [
+            filtered_severities,
+            severity_labels,
+            severity_counts,
+            get_color_for_severity,
+        ]
+    );
+
+    const max_count = useMemo(() => Math.max(...Object.values(severity_counts)), [ severity_counts ]);
+    const y_ticks = useMemo(() => Array.from({
+        length: max_count + 1,
+    }, (_, i) => i), [ max_count ]);
+
+    const get_floating_label = useCallback(
+        ({
+            name, value, percent,
+        }: { name?:   string
+            value?:   number
+            percent?: number }) => {
+            const label = severity_labels[name ?? ``] ?? titleCase(name ?? ``);
+            if (floating_label_type === `count`) {
+                return `${ label } ${ value ?? 0 }`;
+            }
+            return `${ label } ${ ((percent ?? 0) * 100).toFixed(2) }%`;
+        },
+        [
+            severity_labels,
+            floating_label_type,
+        ]
+    );
+
+    const custom_legend = useMemo(
+        () => (
+            <ul
+                className={cn(`flex flex-wrap gap-4 justify-center`, {
+                    "mt-4":      legend_position === `below-chart` && show_x_axis_label && show_x_axis_tick_labels,
+                    "mt-2 mb-4": legend_position === `below-title`,
+                    "-mt-2":     legend_position === `below-chart` && !show_x_axis_label && !show_x_axis_tick_labels,
+                })}
+            >
+                {filtered_severities.map((sev) => (
+                    <li key={sev} className="flex items-center gap-1">
+                        <div
+                            style={{
+                                backgroundColor: get_color_for_severity(sev),
+                            }}
+                            className="w-3 h-3 rounded"
+                        ></div>
+                        <span className="text-sm">{severity_labels[sev] || titleCase(sev)}</span>
+                    </li>
+                ))}
+            </ul>
+        ),
+        [
+            filtered_severities,
+            get_color_for_severity,
+            legend_position,
+            show_x_axis_label,
+            severity_labels,
+        ]
+    );
+
+    const export_chart = useCallback(async() => {
+        if (!chart_ref.current) {
             toast.error(`Chart not found`);
             return;
         }
@@ -275,7 +783,7 @@ export function ChartDialog({
         try {
             const domtoimage = (await import(`dom-to-image-more`)).default;
 
-            const blob = await domtoimage.toBlob(chartRef.current, {
+            const blob = await domtoimage.toBlob(chart_ref.current, {
                 bgcolor:           `#ffffff`,
                 quality:           1,
                 scale:             2,
@@ -285,59 +793,59 @@ export function ChartDialog({
             const url = URL.createObjectURL(blob);
             const a = document.createElement(`a`);
             a.href = url;
-            a.download = `cvss-chart-${ Date.now() }.${ exportFormat }`;
+            a.download = `cvss-chart-${ Date.now() }.png`;
             a.click();
             URL.revokeObjectURL(url);
-            toast.success(`Chart exported as ${ exportFormat.toUpperCase() }`);
+            toast.success(`Chart exported as PNG`);
         }
         catch (error) {
             console.error(`Export failed:`, error);
             toast.error(`Failed to export chart`);
         }
-    }, [ exportFormat ]);
+    }, []);
 
-    const shareEmbeddableCode = useCallback(() => {
-        const embeddableCode = `<iframe src="${ window.location.origin }/embed/chart?${ new URLSearchParams({
-            chart_type:              chartType,
+    const share_embeddable_code = useCallback(() => {
+        const embeddable_code = `<iframe src="${ window.location.origin }/embed/chart?${ new URLSearchParams({
+            chart_type:              chart_type,
             title,
-            show_legend:             JSON.stringify(showLegend),
-            show_x_axis_label:       JSON.stringify(showXAxisLabel),
-            show_y_axis_label:       JSON.stringify(showYAxisLabel),
-            inner_radius:            JSON.stringify(innerRadius),
-            custom_colors:           JSON.stringify(customColors),
+            show_legend:             JSON.stringify(show_legend),
+            show_x_axis_label:       JSON.stringify(show_x_axis_label),
+            show_y_axis_label:       JSON.stringify(show_y_axis_label),
+            inner_radius:            JSON.stringify(inner_radius),
+            custom_colors:           JSON.stringify(custom_colors),
             transparency:            JSON.stringify(transparency),
-            x_axis_label:            xAxisLabel,
-            y_axis_label:            yAxisLabel,
-            tooltip_label:           tooltipLabel,
-            bar_radius:              JSON.stringify(barRadius),
-            severity_labels:         JSON.stringify(severityLabels),
-            show_floating_labels:    JSON.stringify(showFloatingLabels),
-            tooltip_content_type:    tooltipContentType,
-            floating_label_type:     floatingLabelType,
-            show_x_axis_tick_labels: JSON.stringify(showXAxisTickLabels),
-            legend_position:         legendPosition,
+            x_axis_label:            x_axis_label,
+            y_axis_label:            y_axis_label,
+            tooltip_label:           tooltip_label,
+            bar_radius:              JSON.stringify(bar_radius),
+            severity_labels:         JSON.stringify(severity_labels),
+            show_floating_labels:    JSON.stringify(show_floating_labels),
+            tooltip_content_type:    tooltip_content_type,
+            floating_label_type:     floating_label_type,
+            show_x_axis_tick_labels: JSON.stringify(show_x_axis_tick_labels),
+            legend_position:         legend_position,
         }).toString() }" width="400" height="600" style="border:none;"></iframe>`;
-        navigator.clipboard.writeText(embeddableCode);
+        navigator.clipboard.writeText(embeddable_code);
         toast.success(`Embeddable code copied`);
     }, [
-        chartType,
+        chart_type,
         title,
-        showLegend,
-        showXAxisLabel,
-        showYAxisLabel,
-        innerRadius,
-        customColors,
+        show_legend,
+        show_x_axis_label,
+        show_y_axis_label,
+        inner_radius,
+        custom_colors,
         transparency,
-        xAxisLabel,
-        yAxisLabel,
-        tooltipLabel,
-        barRadius,
-        severityLabels,
-        showFloatingLabels,
-        tooltipContentType,
-        floatingLabelType,
-        showXAxisTickLabels,
-        legendPosition,
+        x_axis_label,
+        y_axis_label,
+        tooltip_label,
+        bar_radius,
+        severity_labels,
+        show_floating_labels,
+        tooltip_content_type,
+        floating_label_type,
+        show_x_axis_tick_labels,
+        legend_position,
     ]);
 
     return (
@@ -356,11 +864,11 @@ export function ChartDialog({
                         <DropdownMenuContent>
                             <DropdownMenuLabel className="text-xs">Export options</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={exportChart}>
+                            <DropdownMenuItem onClick={export_chart}>
                                 <Download className="size-3.5 mr-2" />
                                 Download
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={shareEmbeddableCode}>
+                            <DropdownMenuItem onClick={share_embeddable_code}>
                                 <CodeXml className="size-3.5 mr-2" />
                                 Embeddable code
                             </DropdownMenuItem>
@@ -368,33 +876,33 @@ export function ChartDialog({
                     </DropdownMenu>
                 </DialogHeader>
                 <div className="space-y-6">
-                    <div ref={chartRef} className="relative">
+                    <div ref={chart_ref} className="relative">
                         <div className="text-center">
                             <h3 className="text-lg font-semibold">{title}</h3>
-                            {showLegend && legendPosition === `below-title` && customLegend}
+                            {show_legend && legend_position === `below-title` && custom_legend}
                         </div>
                         <div className="h-96">
                             <ResponsiveContainer width="100%" height="100%">
-                                {chartType === `bar`
+                                {chart_type === `bar`
 ? (
                   <BarChart
-                      data={barData}
+                      data={bar_data}
                       margin={{
-                          left:   showYAxisLabel && yAxisLabel.trim() ? 20 : 0,
-                          bottom: showXAxisLabel && xAxisLabel.trim() ? 20 : 5,
+                          left:   show_y_axis_label && y_axis_label.trim() ? 20 : 0,
+                          bottom: show_x_axis_label && x_axis_label.trim() ? 20 : 5,
                       }}
                   >
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis
                           dataKey="name"
-                          tick={showXAxisTickLabels}
-                          tickFormatter={showXAxisTickLabels ? undefined : () => ``}
+                          tick={show_x_axis_tick_labels}
+                          tickFormatter={show_x_axis_tick_labels ? undefined : () => ``}
                           label={
-                        showXAxisLabel
+                        show_x_axis_label
                           ? {
-                              value:    xAxisLabel,
+                              value:    x_axis_label,
                               position: `bottom`,
-                              offset:   showXAxisTickLabels ? 5 : -5,
+                              offset:   show_x_axis_tick_labels ? 5 : -5,
                           }
                           : undefined
                           }
@@ -406,12 +914,12 @@ export function ChartDialog({
                               `dataMax`,
                           ]}
                           allowDecimals={false}
-                          ticks={yTicks}
-                          width={showYAxisLabel && yAxisLabel.trim() ? undefined : 25}
+                          ticks={y_ticks}
+                          width={show_y_axis_label && y_axis_label.trim() ? undefined : 25}
                           label={
-                        showYAxisLabel
+                        show_y_axis_label
                           ? {
-                              value:    yAxisLabel,
+                              value:    y_axis_label,
                               angle:    -90,
                               position: `insideLeft`,
                           }
@@ -420,18 +928,18 @@ export function ChartDialog({
                       />
                       <Tooltip
                           formatter={(value) => [
-                        tooltipContentType === `count` ? value : `${ (((value as number) / total) * 100).toFixed(2) }%`,
-                        tooltipLabel,
+                        tooltip_content_type === `count` ? value : `${ (((value as number) / total) * 100).toFixed(2) }%`,
+                        tooltip_label,
                           ]}
                       />
                       <Bar dataKey="count" fill="#8884d8" radius={[
-                          barRadius,
-                          barRadius,
+                          bar_radius,
+                          bar_radius,
                           0,
                           0,
                       ]}>
-                          {barData.map((entry, index) => (
-                              <Cell key={`cell-${ index }`} fill={getColorForSeverity(entry.severity)} />
+                          {bar_data.map((entry, index) => (
+                              <Cell key={`cell-${ index }`} fill={get_color_for_severity(entry.severity)} />
                           ))}
                       </Bar>
                   </BarChart>
@@ -439,23 +947,23 @@ export function ChartDialog({
 : (
                   <PieChart>
                       <Pie
-                          data={donutData}
+                          data={donut_data}
                           cx="50%"
                           cy="50%"
-                          innerRadius={innerRadius}
+                          innerRadius={inner_radius}
                           labelLine={false}
-                          label={showFloatingLabels ? getFloatingLabel : false}
+                          label={show_floating_labels ? get_floating_label : false}
                           outerRadius={120}
                           fill="#8884d8"
                           dataKey="value"
                       >
-                          {donutData.map((entry, index) => (
+                          {donut_data.map((entry, index) => (
                               <Cell key={`cell-${ index }`} fill={entry.color} />
                           ))}
                       </Pie>
                       <Tooltip
                           formatter={(value, name) => [
-                        tooltipContentType === `count` ? value : `${ (((value as number) / total) * 100).toFixed(2) }%`,
+                        tooltip_content_type === `count` ? value : `${ (((value as number) / total) * 100).toFixed(2) }%`,
                         name,
                           ]}
                       />
@@ -463,7 +971,7 @@ export function ChartDialog({
                 )}
                             </ResponsiveContainer>
                         </div>
-                        {showLegend && legendPosition === `below-chart` && customLegend}
+                        {show_legend && legend_position === `below-chart` && custom_legend}
                         <img
                             src={logoBlack.src}
                             alt="CyberPath Quant Logo"
@@ -471,412 +979,49 @@ export function ChartDialog({
                         />
                     </div>
                     <Accordion type="multiple">
-                        <AccordionItem value="chart-settings">
-                            <AccordionTrigger>Chart Settings</AccordionTrigger>
-                            <AccordionContent className="px-3">
-                                <FieldSet>
-                                    <FieldDescription>Configure the appearance and data of the chart.</FieldDescription>
-                                    <FieldGroup>
-                                        <Field>
-                                            <FieldLabel>Title</FieldLabel>
-                                            <Input value={title} onChange={(e) => setTitle(e.target.value)} />
-                                            <FieldDescription className="text-xs">
-                                                Set a title for the chart to describe its content.
-                                            </FieldDescription>
-                                        </Field>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <Field>
-                                                <FieldLabel>Chart Type</FieldLabel>
-                                                <Select value={chartType} onValueChange={(value: `bar` | `donut`) => setChartType(value)}>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Select chart type" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectGroup>
-                                                            <SelectLabel>Chart Type</SelectLabel>
-                                                            <SelectItem value="bar">Bar Chart</SelectItem>
-                                                            <SelectItem value="donut">Donut Chart</SelectItem>
-                                                        </SelectGroup>
-                                                    </SelectContent>
-                                                </Select>
-                                                <FieldDescription className="text-xs">
-                                                    Choose between a bar chart or a donut chart to visualize the data.
-                                                </FieldDescription>
-                                            </Field>
-                                            <Field>
-                                                <FieldLabel>Tooltip Content</FieldLabel>
-                                                <Select
-                                                    value={tooltipContentType}
-                                                    onValueChange={(value: `count` | `percentage`) => setTooltipContentType(value)}
-                                                >
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Select tooltip content" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectGroup>
-                                                            <SelectLabel>Tooltip Content</SelectLabel>
-                                                            <SelectItem value="count">Count</SelectItem>
-                                                            <SelectItem value="percentage">Percentage</SelectItem>
-                                                        </SelectGroup>
-                                                    </SelectContent>
-                                                </Select>
-                                                <FieldDescription className="text-xs">
-                                                    Choose whether the tooltip displays count or percentage values.
-                                                </FieldDescription>
-                                            </Field>
-                                            <Field orientation={`horizontal`} className="self-center">
-                                                <Switch checked={showLegend} onCheckedChange={setShowLegend} />
-                                                <FieldContent>
-                                                    <FieldLabel className="flex items-center gap-2">Show Legend</FieldLabel>
-                                                    <FieldDescription className="text-xs">
-                                                        Toggle the display of the chart legend.
-                                                    </FieldDescription>
-                                                </FieldContent>
-                                            </Field>
-                                            <Field>
-                                                <FieldLabel>Legend Position</FieldLabel>
-                                                <Select
-                                                    value={legendPosition}
-                                                    onValueChange={(value: `below-title` | `below-chart`) => setLegendPosition(value)}
-                                                >
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Select a legend position" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectGroup>
-                                                            <SelectLabel>Legend Position</SelectLabel>
-                                                            <SelectItem value="below-title">Below Title</SelectItem>
-                                                            <SelectItem value="below-chart">Below Chart</SelectItem>
-                                                        </SelectGroup>
-                                                    </SelectContent>
-                                                </Select>
-                                                <FieldDescription className="text-xs">
-                                                    Select the position of the legend in relation to the chart.
-                                                </FieldDescription>
-                                            </Field>
-                                        </div>
-                                    </FieldGroup>
-                                    <Field>
-                                        <FieldLabel>Transparency</FieldLabel>
-                                        <div className="flex items-center gap-4 -my-2">
-                                            <Slider
-                                                value={[ transparency ]}
-                                                onValueChange={(value: Array<number>) => setTransparency(value[0])}
-                                                max={100}
-                                                min={0}
-                                                step={1}
-                                                className="col-span-2"
-                                            />
-                                            <InputGroup className="w-40">
-                                                <InputGroupAddon>
-                                                    <InputGroupButton
-                                                        variant="secondary"
-                                                        size="icon-xs"
-                                                        onClick={() => setTransparency(Math.max(0, transparency - 1))}
-                                                        aria-label="Decrease chart transparency by 1"
-                                                    >
-                                                        <Minus />
-                                                    </InputGroupButton>
-                                                </InputGroupAddon>
-                                                <InputGroupInput
-                                                    id="input-secure-19"
-                                                    type="number"
-                                                    value={transparency}
-                                                    onChange={(e) => setTransparency(Math.min(100, Math.max(0, Number(e.target.value))))}
-                                                    min={0}
-                                                    max={100}
-                                                    step={1}
-                                                    className="text-end"
-                                                />
-                                                <InputGroupAddon align={`inline-end`}>%</InputGroupAddon>
-                                                <InputGroupAddon align="inline-end">
-                                                    <InputGroupButton
-                                                        variant="secondary"
-                                                        size="icon-xs"
-                                                        onClick={() => setTransparency(Math.min(100, transparency + 1))}
-                                                        aria-label="Increase chart transparency by 1"
-                                                    >
-                                                        <Plus />
-                                                    </InputGroupButton>
-                                                </InputGroupAddon>
-                                            </InputGroup>
-                                        </div>
-                                        <FieldDescription className="text-xs">
-                                            Set the chart colors to {transparency}% transparency.
-                                        </FieldDescription>
-                                    </Field>
-                                </FieldSet>
-                            </AccordionContent>
-                        </AccordionItem>
-                        <AccordionItem value="type-specific-settings">
-                            <AccordionTrigger>{chartType === `bar` ? `Bar Chart Settings` : `Donut Chart Settings`}</AccordionTrigger>
-                            <AccordionContent className="px-3">
-                                {chartType === `bar` && (
-                                    <FieldSet>
-                                        <FieldDescription>Customize the appearance of the bar chart.</FieldDescription>
-                                        <Field orientation={`horizontal`}>
-                                            <Switch checked={showXAxisLabel} onCheckedChange={setShowXAxisLabel} />
-                                            <FieldContent>
-                                                <FieldLabel className="flex items-center gap-2">Show X-Axis Label</FieldLabel>
-                                                <FieldDescription className="text-xs">Toggle the display of the X-Axis label.</FieldDescription>
-                                            </FieldContent>
-                                        </Field>
-                                        <Field orientation={`horizontal`}>
-                                            <Switch checked={showYAxisLabel} onCheckedChange={setShowYAxisLabel} />
-                                            <FieldContent>
-                                                <FieldLabel className="flex items-center gap-2">Show Y-Axis Label</FieldLabel>
-                                                <FieldDescription className="text-xs">Toggle the display of the Y-Axis label.</FieldDescription>
-                                            </FieldContent>
-                                        </Field>
-
-                                        <Field orientation={`horizontal`}>
-                                            <Switch checked={showXAxisTickLabels} onCheckedChange={setShowXAxisTickLabels} />
-                                            <FieldContent>
-                                                <FieldLabel className="flex items-center gap-2">Show X-Axis Tick Labels</FieldLabel>
-                                                <FieldDescription className="text-xs">
-                                                    Toggle the display of tick labels on the X-axis.
-                                                </FieldDescription>
-                                            </FieldContent>
-                                        </Field>
-
-                                        <Field>
-                                            <FieldContent>
-                                                <FieldLabel>X-Axis Label</FieldLabel>
-                                                <Input value={xAxisLabel} onChange={(e) => setXAxisLabel(e.target.value)} />
-                                                <FieldDescription className="text-xs">
-                                                    Label for the X-Axis representing severity levels.
-                                                </FieldDescription>
-                                            </FieldContent>
-                                        </Field>
-                                        <Field>
-                                            <FieldContent>
-                                                <FieldLabel>Y-Axis Label</FieldLabel>
-                                                <Input value={yAxisLabel} onChange={(e) => setYAxisLabel(e.target.value)} />
-                                                <FieldDescription className="text-xs">
-                                                    Label for the Y-Axis representing frequency.
-                                                </FieldDescription>
-                                            </FieldContent>
-                                        </Field>
-
-                                        <Field>
-                                            <FieldContent>
-                                                <FieldLabel>Tooltip Label</FieldLabel>
-                                                <Input value={tooltipLabel} onChange={(e) => setTooltipLabel(e.target.value)} />
-                                                <FieldDescription className="text-xs">
-                                                    Label displayed in the tooltip for data points.
-                                                </FieldDescription>
-                                            </FieldContent>
-                                        </Field>
-                                        <Field>
-                                            <FieldContent>
-                                                <FieldLabel>Bar Top Radius</FieldLabel>
-                                                <div className="flex items-center gap-4">
-                                                    <Slider
-                                                        value={[ barRadius ]}
-                                                        onValueChange={(value: Array<number>) => setBarRadius(value[0])}
-                                                        max={20}
-                                                        min={0}
-                                                        step={1}
-                                                    />
-                                                    <InputGroup className="w-42">
-                                                        <InputGroupAddon>
-                                                            <InputGroupButton
-                                                                variant="secondary"
-                                                                size="icon-xs"
-                                                                onClick={() => setBarRadius(Math.max(0, barRadius - 1))}
-                                                                aria-label="Decrease chart border radius by 1"
-                                                            >
-                                                                <Minus />
-                                                            </InputGroupButton>
-                                                        </InputGroupAddon>
-                                                        <InputGroupInput
-                                                            id="input-secure-19"
-                                                            type="number"
-                                                            value={barRadius}
-                                                            onChange={(e) => setBarRadius(Math.min(20, Math.max(0, Number(e.target.value))))}
-                                                            min={0}
-                                                            max={20}
-                                                            step={1}
-                                                            className="text-end"
-                                                        />
-                                                        <InputGroupAddon align={`inline-end`}>px</InputGroupAddon>
-                                                        <InputGroupAddon align="inline-end">
-                                                            <InputGroupButton
-                                                                variant="secondary"
-                                                                size="icon-xs"
-                                                                onClick={() => setBarRadius(Math.min(20, barRadius + 1))}
-                                                                aria-label="Increase chart border radius by 1"
-                                                            >
-                                                                <Plus />
-                                                            </InputGroupButton>
-                                                        </InputGroupAddon>
-                                                    </InputGroup>
-                                                </div>
-                                                <FieldDescription className="text-xs">
-                                                    Set the border radius for the top corners of the bars to {barRadius}px
-                                                </FieldDescription>
-                                            </FieldContent>
-                                        </Field>
-                                    </FieldSet>
-                                )}
-                                {chartType === `donut` && (
-                                    <FieldSet>
-                                        <FieldDescription>Customize the appearance of the donut chart.</FieldDescription>
-                                        <Field>
-                                            <FieldLabel>Inner Radius</FieldLabel>
-                                            <div className="flex items-center gap-4">
-                                                <Slider
-                                                    value={[ innerRadius ]}
-                                                    onValueChange={(value: Array<number>) => setInnerRadius(value[0])}
-                                                    max={80}
-                                                    min={0}
-                                                    step={1}
-                                                />
-                                                <InputGroup className="w-42">
-                                                    <InputGroupAddon>
-                                                        <InputGroupButton
-                                                            variant="secondary"
-                                                            size="icon-xs"
-                                                            onClick={() => setInnerRadius(Math.max(0, innerRadius - 1))}
-                                                            aria-label="Decrease chart inner radius by 1"
-                                                        >
-                                                            <Minus />
-                                                        </InputGroupButton>
-                                                    </InputGroupAddon>
-                                                    <InputGroupInput
-                                                        id="input-secure-19"
-                                                        type="number"
-                                                        value={innerRadius}
-                                                        onChange={(e) => setInnerRadius(Math.min(80, Math.max(0, Number(e.target.value))))}
-                                                        min={0}
-                                                        max={80}
-                                                        step={1}
-                                                        className="text-end"
-                                                    />
-                                                    <InputGroupAddon align={`inline-end`}>%</InputGroupAddon>
-                                                    <InputGroupAddon align="inline-end">
-                                                        <InputGroupButton
-                                                            variant="secondary"
-                                                            size="icon-xs"
-                                                            onClick={() => setInnerRadius(Math.min(80, innerRadius + 1))}
-                                                            aria-label="Increase chart inner radius by 1"
-                                                        >
-                                                            <Plus />
-                                                        </InputGroupButton>
-                                                    </InputGroupAddon>
-                                                </InputGroup>
-                                            </div>
-                                            <FieldDescription className="text-xs">
-                                                Set the inner radius of the donut chart to {innerRadius}% of the outer radius.
-                                            </FieldDescription>
-                                        </Field>
-                                        <div className="grid grid-cols-2">
-                                            <Field orientation={`horizontal`} className="self-center">
-                                                <Switch checked={showFloatingLabels} onCheckedChange={setShowFloatingLabels} />
-                                                <FieldContent>
-                                                    <FieldLabel className="flex items-center gap-2">Show Floating Labels</FieldLabel>
-                                                    <FieldDescription className="text-xs">
-                                                        Toggle the display of floating labels on the donut segments.
-                                                    </FieldDescription>
-                                                </FieldContent>
-                                            </Field>
-                                            <Field>
-                                                <FieldLabel>Floating Label Content</FieldLabel>
-                                                <Select
-                                                    value={floatingLabelType}
-                                                    onValueChange={(value: `count` | `percentage`) => setFloatingLabelType(value)}
-                                                >
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Select floating label content" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectGroup>
-                                                            <SelectLabel>Floating Label Content</SelectLabel>
-                                                            <SelectItem value="count">Count</SelectItem>
-                                                            <SelectItem value="percentage">Percentage</SelectItem>
-                                                        </SelectGroup>
-                                                    </SelectContent>
-                                                </Select>
-                                                <FieldDescription className="text-xs">
-                                                    Choose whether floating labels display count or percentage values.
-                                                </FieldDescription>
-                                            </Field>
-                                        </div>
-                                    </FieldSet>
-                                )}
-                            </AccordionContent>
-                        </AccordionItem>
-                        <AccordionItem value="customization">
-                            <AccordionTrigger>Customization</AccordionTrigger>
-                            <AccordionContent className="px-3">
-                                <FieldSet>
-                                    <FieldDescription>Personalize chart colors and severity labels.</FieldDescription>
-                                    <div className="flex flex-col gap-4">
-                                        {allSeverities.map((severity, i) => (
-                                            <>
-                                                <FieldSet key={severity} className="grid grid-cols-2 gap-4">
-                                                    <div className="flex flex-col col-span-full">
-                                                        <FieldLegend className="text-sm! font-medium!">{titleCase(severity)} Severity</FieldLegend>
-                                                        <FieldDescription className="text-xs">
-                                                            Customize the color and label for {severity} severity entries.
-                                                        </FieldDescription>
-                                                    </div>
-
-                                                    <Field>
-                                                        <FieldLabel>Color</FieldLabel>
-                                                        <ColorPicker
-                                                            value={customColors[severity] || severityColorMap[severity.toLowerCase()] || `#8884d8`}
-                                                            onValueChange={(e) => setCustomColors((prev) => ({
-                                                                ...prev,
-                                                                [severity]: e,
-                                                            }))
-                                                            }
-                                                            defaultFormat="hex"
-                                                        >
-                                                            <div className="flex items-center gap-3">
-                                                                <ColorPickerTrigger asChild>
-                                                                    <Button variant="outline" className="flex items-center gap-2 px-3">
-                                                                        <ColorPickerSwatch className="size-4" />
-                                                                        {customColors[severity] || severityColorMap[severity.toLowerCase()] || `#8884d8`}
-                                                                    </Button>
-                                                                </ColorPickerTrigger>
-                                                            </div>
-                                                            <ColorPickerContent>
-                                                                <ColorPickerArea />
-                                                                <div className="flex items-center gap-2">
-                                                                    <ColorPickerEyeDropper />
-                                                                    <div className="flex flex-1 flex-col gap-2">
-                                                                        <ColorPickerHueSlider />
-                                                                        <ColorPickerAlphaSlider />
-                                                                    </div>
-                                                                </div>
-                                                                <div className="flex items-center gap-2">
-                                                                    <ColorPickerFormatSelect />
-                                                                    <ColorPickerInput />
-                                                                </div>
-                                                            </ColorPickerContent>
-                                                        </ColorPicker>
-                                                    </Field>
-                                                    <Field key={severity}>
-                                                        <FieldLabel className="text-sm">{titleCase(severity)} Label</FieldLabel>
-                                                        <Input
-                                                            value={severityLabels[severity] || titleCase(severity)}
-                                                            onChange={(e) => setSeverityLabels((prev) => ({
-                                                                ...prev,
-                                                                [severity]: e.target.value,
-                                                            }))
-                                                            }
-                                                            placeholder={titleCase(severity)}
-                                                        />
-                                                    </Field>
-                                                </FieldSet>
-                                                {i < allSeverities.length - 1 && <FieldSeparator />}
-                                            </>
-                                        ))}
-                                    </div>
-                                </FieldSet>
-                            </AccordionContent>
-                        </AccordionItem>
+                        <ChartSettings
+                            chart_type={chart_type}
+                            set_chart_type={set_chart_type}
+                            title={title}
+                            set_title={set_title}
+                            show_legend={show_legend}
+                            set_show_legend={set_show_legend}
+                            legend_position={legend_position}
+                            set_legend_position={set_legend_position}
+                            tooltip_content_type={tooltip_content_type}
+                            set_tooltip_content_type={set_tooltip_content_type}
+                            transparency={transparency}
+                            set_transparency={set_transparency}
+                        />
+                        <TypeSpecificSettings
+                            chart_type={chart_type}
+                            show_x_axis_label={show_x_axis_label}
+                            set_show_x_axis_label={set_show_x_axis_label}
+                            show_y_axis_label={show_y_axis_label}
+                            set_show_y_axis_label={set_show_y_axis_label}
+                            show_x_axis_tick_labels={show_x_axis_tick_labels}
+                            set_show_x_axis_tick_labels={set_show_x_axis_tick_labels}
+                            x_axis_label={x_axis_label}
+                            set_x_axis_label={set_x_axis_label}
+                            y_axis_label={y_axis_label}
+                            set_y_axis_label={set_y_axis_label}
+                            tooltip_label={tooltip_label}
+                            set_tooltip_label={set_tooltip_label}
+                            bar_radius={bar_radius}
+                            set_bar_radius={set_bar_radius}
+                            inner_radius={inner_radius}
+                            set_inner_radius={set_inner_radius}
+                            show_floating_labels={show_floating_labels}
+                            set_show_floating_labels={set_show_floating_labels}
+                            floating_label_type={floating_label_type}
+                            set_floating_label_type={set_floating_label_type}
+                        />
+                        <Customization
+                            custom_colors={custom_colors}
+                            set_custom_colors={set_custom_colors}
+                            severity_labels={severity_labels}
+                            set_severity_labels={set_severity_labels}
+                        />
                     </Accordion>
                 </div>
             </DialogContent>
