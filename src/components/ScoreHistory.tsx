@@ -25,6 +25,13 @@ import {
     Field, FieldContent, FieldDescription, FieldLabel
 } from "@/components/ui/field";
 import {
+    Select, SelectContent, SelectItem, SelectTrigger, SelectValue
+} from "@/components/ui/select";
+import {
+    Tabs, TabsContent, TabsList, TabsTrigger
+} from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
+import {
     History,
     Trash2,
     RotateCcw,
@@ -35,7 +42,8 @@ import {
     Edit,
     ChevronUp,
     ChevronDown,
-    ArrowUpDown
+    ArrowUpDown,
+    BarChart3
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -44,6 +52,19 @@ import {
 import { vectorParser } from "@/lib/cvss";
 import dayjs from "dayjs";
 import { ComparisonDialog } from "./comparison-dialog";
+import {
+    BarChart,
+    Bar,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    Legend,
+    ResponsiveContainer,
+    PieChart,
+    Pie,
+    Cell
+} from "recharts";
 
 export function ScoreHistory() {
     const [
@@ -57,6 +78,10 @@ export function ScoreHistory() {
     const [
         isCompareDialogOpen,
         setIsCompareDialogOpen,
+    ] = useState(false);
+    const [
+        isChartDialogOpen,
+        setIsChartDialogOpen,
     ] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [
@@ -449,6 +474,10 @@ export function ScoreHistory() {
                       <GitCompare className="h-4 w-4 mr-1" />
                       Compare ({selectedIds.size})
                   </Button>
+                  <Button variant="secondary" size="sm" onClick={() => setIsChartDialogOpen(true)}>
+                      <BarChart3 className="h-4 w-4 mr-1" />
+                      Chart ({selectedIds.size})
+                  </Button>
               </>
             )
 : (
@@ -579,6 +608,13 @@ export function ScoreHistory() {
                 getSeverityColor={getSeverityColor}
             />
 
+            <ChartDialog
+                open={isChartDialogOpen}
+                onOpenChange={setIsChartDialogOpen}
+                selectedEntries={history.filter((entry) => selectedIds.has(entry.id))}
+                getSeverityColor={getSeverityColor}
+            />
+
             <Dialog open={editingId !== null} onOpenChange={(open) => !open && cancelEdit()}>
                 <DialogContent>
                     <DialogHeader>
@@ -593,7 +629,8 @@ export function ScoreHistory() {
                                     id="edit-entry-name"
                                     value={editName}
                                     onChange={(e) => setEditName(e.target.value)}
-                                    placeholder="Enter new name..." />
+                                    placeholder="Enter new name..."
+                                />
                                 <FieldDescription className="text-xs">
                                     Provide a descriptive name for this score entry.
                                 </FieldDescription>
@@ -609,5 +646,253 @@ export function ScoreHistory() {
                 </DialogContent>
             </Dialog>
         </Card>
+    );
+}
+
+interface ChartDialogProps {
+    open:             boolean
+    onOpenChange:     (open: boolean) => void
+    selectedEntries:  Array<ScoreHistoryEntry>
+    getSeverityColor: (severity: string) => string
+}
+
+function ChartDialog({
+    open, onOpenChange, selectedEntries, getSeverityColor,
+}: ChartDialogProps): React.ReactElement {
+    const [
+        chartType,
+        setChartType,
+    ] = useState<`bar` | `donut`>(`bar`);
+    const [
+        title,
+        setTitle,
+    ] = useState(`CVSS Scores Chart`);
+    const [
+        isShowLegend,
+        setIsShowLegend,
+    ] = useState(true);
+    const [
+        xAxisLabel,
+        setXAxisLabel,
+    ] = useState(`Entries`);
+    const [
+        yAxisLabel,
+        setYAxisLabel,
+    ] = useState(`Score`);
+    const [
+        isShowXAxis,
+        setIsShowXAxis,
+    ] = useState(true);
+    const [
+        isShowYAxis,
+        setIsShowYAxis,
+    ] = useState(true);
+    const [
+        customColors,
+        setCustomColors,
+    ] = useState<Record<string, string>>({});
+
+    // Prepare data for bar chart
+    const barData = selectedEntries.map((entry) => ({
+        name:     entry.name.length > 15 ? entry.name.substring(0, 15) + `...` : entry.name,
+        score:    entry.score,
+        severity: entry.severity,
+        fullName: entry.name,
+    }));
+
+    // Prepare data for donut chart
+    const severityCounts = selectedEntries.reduce((acc, entry) => {
+        acc[entry.severity] = (acc[entry.severity] || 0) + 1;
+        return acc;
+    }, {} as Record<string, number>);
+
+    const donutData = Object.entries(severityCounts).map(([
+        severity,
+        count,
+    ]) => ({
+        name:  severity,
+        value: count,
+        color: getSeverityColor(severity),
+    }));
+
+    const severityColorMap: Record<string, string> = {
+        none:     `#87CEEB`,
+        low:      `#32CD32`,
+        medium:   `#FFD700`,
+        high:     `#FF6347`,
+        critical: `#8A2BE2`,
+    };
+
+    const getColorForSeverity = (severity: string): string => customColors[severity] || severityColorMap[severity.toLowerCase()] || `#8884d8`;
+
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                    <DialogTitle>Chart Configuration</DialogTitle>
+                    <DialogDescription>Customize and view charts for selected CVSS score entries.</DialogDescription>
+                </DialogHeader>
+                <div className="space-y-6">
+                    <Tabs defaultValue="chart" className="w-full">
+                        <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="chart">Chart View</TabsTrigger>
+                            <TabsTrigger value="settings">Settings</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="chart" className="space-y-4">
+                            <div className="text-center">
+                                <h3 className="text-lg font-semibold">{title}</h3>
+                            </div>
+                            <div className="h-96">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    {chartType === `bar`
+? (
+                    <BarChart data={barData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        {isShowXAxis && (
+                            <XAxis
+                                dataKey="name"
+                                label={{
+                                    value:    xAxisLabel,
+                                    position: `insideBottom`,
+                                    offset:   -5,
+                                }}
+                            />
+                        )}
+                        {isShowYAxis && (
+                            <YAxis
+                                label={{
+                                    value:    yAxisLabel,
+                                    angle:    -90,
+                                    position: `insideLeft`,
+                                }}
+                            />
+                        )}
+                        <Tooltip
+                            formatter={(value, _name) => [
+                                value,
+                                `Score`,
+                            ]}
+                            labelFormatter={(label) => barData.find((d) => d.name === label)?.fullName ?? label}
+                        />
+                        {isShowLegend && <Legend />}
+                        <Bar dataKey="score" fill="#8884d8">
+                            {barData.map((entry, index) => (
+                                <Cell key={`cell-${ index }`} fill={getColorForSeverity(entry.severity)} />
+                            ))}
+                        </Bar>
+                    </BarChart>
+                  )
+: (
+                    <PieChart>
+                        <Pie
+                            data={donutData}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            label={({
+                                name, percent,
+                            }) => `${ name } ${ percent ? (percent * 100).toFixed(0) : 0 }%`}
+                            outerRadius={120}
+                            fill="#8884d8"
+                            dataKey="value"
+                        >
+                            {donutData.map((entry, index) => (
+                                <Cell key={`cell-${ index }`} fill={entry.color} />
+                            ))}
+                        </Pie>
+                        <Tooltip />
+                        {isShowLegend && <Legend />}
+                    </PieChart>
+                  )}
+                                </ResponsiveContainer>
+                            </div>
+                        </TabsContent>
+                        <TabsContent value="settings" className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <Field>
+                                    <FieldContent>
+                                        <FieldLabel>Chart Type</FieldLabel>
+                                        <Select value={chartType} onValueChange={(value: `bar` | `donut`) => setChartType(value)}>
+                                            <SelectTrigger>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="bar">Bar Chart</SelectItem>
+                                                <SelectItem value="donut">Donut Chart</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </FieldContent>
+                                </Field>
+                                <Field>
+                                    <FieldContent>
+                                        <FieldLabel>Title</FieldLabel>
+                                        <Input value={title} onChange={(e) => setTitle(e.target.value)} />
+                                    </FieldContent>
+                                </Field>
+                                <Field>
+                                    <FieldContent>
+                                        <FieldLabel className="flex items-center gap-2">
+                                            Show Legend
+                                            <Switch checked={isShowLegend} onCheckedChange={setIsShowLegend} />
+                                        </FieldLabel>
+                                    </FieldContent>
+                                </Field>
+                                {chartType === `bar` && (
+                                    <>
+                                        <Field>
+                                            <FieldContent>
+                                                <FieldLabel>X-Axis Label</FieldLabel>
+                                                <Input value={xAxisLabel} onChange={(e) => setXAxisLabel(e.target.value)} />
+                                            </FieldContent>
+                                        </Field>
+                                        <Field>
+                                            <FieldContent>
+                                                <FieldLabel>Y-Axis Label</FieldLabel>
+                                                <Input value={yAxisLabel} onChange={(e) => setYAxisLabel(e.target.value)} />
+                                            </FieldContent>
+                                        </Field>
+                                        <Field>
+                                            <FieldContent>
+                                                <FieldLabel className="flex items-center gap-2">
+                                                    Show X-Axis
+                                                    <Switch checked={isShowXAxis} onCheckedChange={setIsShowXAxis} />
+                                                </FieldLabel>
+                                            </FieldContent>
+                                        </Field>
+                                        <Field>
+                                            <FieldContent>
+                                                <FieldLabel className="flex items-center gap-2">
+                                                    Show Y-Axis
+                                                    <Switch checked={isShowYAxis} onCheckedChange={setIsShowYAxis} />
+                                                </FieldLabel>
+                                            </FieldContent>
+                                        </Field>
+                                    </>
+                                )}
+                            </div>
+                            <div className="space-y-2">
+                                <FieldLabel>Custom Colors</FieldLabel>
+                                {Object.keys(severityCounts).map((severity) => (
+                                    <Field key={severity}>
+                                        <FieldContent>
+                                            <FieldLabel className="text-sm">{severity}</FieldLabel>
+                                            <Input
+                                                type="color"
+                                                value={customColors[severity] || getColorForSeverity(severity)}
+                                                onChange={(e) => setCustomColors((prev) => ({
+                                                    ...prev,
+                                                    [severity]: e.target.value,
+                                                }))
+                                                }
+                                            />
+                                        </FieldContent>
+                                    </Field>
+                                ))}
+                            </div>
+                        </TabsContent>
+                    </Tabs>
+                </div>
+            </DialogContent>
+        </Dialog>
     );
 }
