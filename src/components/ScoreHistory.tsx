@@ -63,6 +63,7 @@ import {
     Pie,
     Cell
 } from "recharts";
+import { cn } from "@/lib/utils";
 
 export function ScoreHistory() {
     const [
@@ -744,7 +745,7 @@ function ChartDialog({
     }));
 
     const customLegend = () => (
-        <ul className="flex flex-wrap gap-4 justify-center">
+        <ul className={cn(`flex flex-wrap gap-4 justify-center`, chartType === `bar` && `mt-4`)}>
             {filteredSeverities.map((sev) => (
                 <li key={sev} className="flex items-center gap-1">
                     <div
