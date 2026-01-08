@@ -9,15 +9,15 @@ export {
     getSeverityRating,
     generateVector,
     parseVector,
-    createDefaultMetrics,
+    DEFAULT_METRICS,
     calculateMetricContribution,
     calculateAllMetricContributions,
-    calculateOptionImpact,
+    calculateOptionImpact
 } from "./scoring";
 
 export {
     CVSS_V4_LOOKUP,
     METRIC_LEVELS,
     MAX_COMPOSED,
-    MAX_SEVERITY,
+    MAX_SEVERITY
 } from "./lookup";

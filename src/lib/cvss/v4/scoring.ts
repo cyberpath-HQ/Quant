@@ -470,38 +470,7 @@ export function generateVector(metrics: CVSSv4Metrics): string {
  */
 export function parseVector(vector: string): CVSSv4Metrics {
     const metrics: CVSSv4Metrics = {
-        AV:  `N`,
-        AC:  `L`,
-        AT:  `N`,
-        PR:  `N`,
-        UI:  `N`,
-        VC:  `N`,
-        VI:  `N`,
-        VA:  `N`,
-        SC:  `N`,
-        SI:  `N`,
-        SA:  `N`,
-        E:   `X`,
-        MAV: `X`,
-        MAC: `X`,
-        MAT: `X`,
-        MPR: `X`,
-        MUI: `X`,
-        MVC: `X`,
-        MVI: `X`,
-        MVA: `X`,
-        MSC: `X`,
-        MSI: `X`,
-        MSA: `X`,
-        CR:  `X`,
-        IR:  `X`,
-        AR:  `X`,
-        S:   `X`,
-        AU:  `X`,
-        R:   `X`,
-        V:   `X`,
-        RE:  `X`,
-        U:   `X`,
+        ...DEFAULT_METRICS,
     };
 
     const parts = vector.split(`/`);
@@ -522,45 +491,41 @@ export function parseVector(vector: string): CVSSv4Metrics {
     return metrics;
 }
 
-/**
- * Create default CVSS v4.0 metrics object with all base metrics at highest severity
- */
-export function createDefaultMetrics(): CVSSv4Metrics {
-    return {
-        AV:  `N`,
-        AC:  `L`,
-        AT:  `N`,
-        PR:  `N`,
-        UI:  `N`,
-        VC:  `N`,
-        VI:  `N`,
-        VA:  `N`,
-        SC:  `N`,
-        SI:  `N`,
-        SA:  `N`,
-        E:   `X`,
-        MAV: `X`,
-        MAC: `X`,
-        MAT: `X`,
-        MPR: `X`,
-        MUI: `X`,
-        MVC: `X`,
-        MVI: `X`,
-        MVA: `X`,
-        MSC: `X`,
-        MSI: `X`,
-        MSA: `X`,
-        CR:  `X`,
-        IR:  `X`,
-        AR:  `X`,
-        S:   `X`,
-        AU:  `X`,
-        R:   `X`,
-        V:   `X`,
-        RE:  `X`,
-        U:   `X`,
-    };
-}
+// Default metrics for initialization
+export const DEFAULT_METRICS: CVSSv4Metrics = {
+    AV:  `N`,
+    AC:  `L`,
+    AT:  `N`,
+    PR:  `N`,
+    UI:  `N`,
+    VC:  `N`,
+    VI:  `N`,
+    VA:  `N`,
+    SC:  `N`,
+    SI:  `N`,
+    SA:  `N`,
+    E:   `X`,
+    CR:  `X`,
+    IR:  `X`,
+    AR:  `X`,
+    MAV: `X`,
+    MAC: `X`,
+    MAT: `X`,
+    MPR: `X`,
+    MUI: `X`,
+    MVC: `X`,
+    MVI: `X`,
+    MVA: `X`,
+    MSC: `X`,
+    MSI: `X`,
+    MSA: `X`,
+    S:   `X`,
+    AU:  `X`,
+    R:   `X`,
+    V:   `X`,
+    RE:  `X`,
+    U:   `X`,
+};
 
 /** Next lower MacroVectors for interpolation */
 interface NextLowerMacroVectors {
@@ -712,15 +677,15 @@ export function calculateOptionImpact(
     optionValue: string
 ): number {
     const currentScore = calculateCVSSv4Score(metrics).score;
-    
+
     // Create a copy with this specific option selected
     const testMetrics = {
         ...metrics,
         [metricKey]: optionValue,
     };
-    
+
     const testScore = calculateCVSSv4Score(testMetrics).score;
-    
+
     // Return the delta: positive means selecting this option increases score
     return testScore - currentScore;
 }
@@ -745,38 +710,7 @@ export function calculateMetricContribution(
 
     // Define neutral values for each metric (least impactful)
     const neutralValues: Partial<Record<keyof CVSSv4Metrics, string>> = {
-        AV:  `P`,   // Physical
-        AC:  `H`,   // High
-        AT:  `P`,   // Present
-        PR:  `H`,   // High
-        UI:  `A`,   // Active
-        VC:  `N`,   // None
-        VI:  `N`,   // None
-        VA:  `N`,   // None
-        SC:  `N`,   // None
-        SI:  `N`,   // None
-        SA:  `N`,   // None
-        E:   `X`,    // Not Defined
-        CR:  `X`,   // Not Defined
-        IR:  `X`,   // Not Defined
-        AR:  `X`,   // Not Defined
-        MAV: `X`,  // Not Defined
-        MAC: `X`,  // Not Defined
-        MAT: `X`,  // Not Defined
-        MPR: `X`,  // Not Defined
-        MUI: `X`,  // Not Defined
-        MVC: `X`,  // Not Defined
-        MVI: `X`,  // Not Defined
-        MVA: `X`,  // Not Defined
-        MSC: `X`,  // Not Defined
-        MSI: `X`,  // Not Defined
-        MSA: `X`,  // Not Defined
-        S:   `X`,    // Not Defined
-        AU:  `X`,   // Not Defined
-        R:   `X`,    // Not Defined
-        V:   `X`,    // Not Defined
-        RE:  `X`,   // Not Defined
-        U:   `X`,    // Not Defined
+        ...DEFAULT_METRICS,
     };
 
     const neutralValue = neutralValues[metricKey];
