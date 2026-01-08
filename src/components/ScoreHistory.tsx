@@ -25,7 +25,16 @@ import {
     Field, FieldContent, FieldDescription, FieldLabel
 } from "@/components/ui/field";
 import {
-    History, Trash2, RotateCcw, Download, Upload, GitCompare, X, Edit
+    History,
+    Trash2,
+    RotateCcw,
+    Download,
+    Upload,
+    GitCompare,
+    X,
+    Edit,
+    ChevronUp,
+    ChevronDown
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -63,6 +72,14 @@ export function ScoreHistory() {
         editName,
         setEditName,
     ] = useState(``);
+    const [
+        sortColumn,
+        setSortColumn,
+    ] = useState<`score` | `severity` | null>(null);
+    const [
+        sortDirection,
+        setSortDirection,
+    ] = useState<`asc` | `desc`>(`desc`);
 
     // Load history from localStorage
     useEffect(() => {
@@ -124,12 +141,13 @@ export function ScoreHistory() {
         if (!editingId) {
             return;
         }
-        const updated = history.map((entry) => (entry.id === editingId
-? {
-    ...entry,
-    name: editName,
-}
-: entry));
+        const updated = history.map((entry) => entry.id === editingId
+        ? {
+            ...entry,
+            name: editName,
+        }
+        : entry
+        );
         setHistory(updated);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
         window.dispatchEvent(new CustomEvent(HISTORY_UPDATE_EVENT));
@@ -289,12 +307,68 @@ export function ScoreHistory() {
         }
     }, []);
 
+    const getSeveritySortValue = useCallback((severity: string): number => {
+        switch (severity.toLowerCase()) {
+            case `none`:
+                return 0;
+            case `low`:
+                return 1;
+            case `medium`:
+                return 2;
+            case `high`:
+                return 3;
+            case `critical`:
+                return 4;
+            default:
+                return 0;
+        }
+    }, []);
+
+    const handleSort = useCallback(
+        (column: `score` | `severity`) => {
+            if (sortColumn === column) {
+                setSortDirection(sortDirection === `asc` ? `desc` : `asc`);
+            }
+            else {
+                setSortColumn(column);
+                setSortDirection(`asc`);
+            }
+        },
+        [
+            sortColumn,
+            sortDirection,
+        ]
+    );
+
     const filteredHistory = history.filter(
         (entry) => entry.name.toLowerCase().includes(search.toLowerCase()) || entry.score.toString().includes(search)
     );
-    const sortedHistory = [ ...filteredHistory ].sort(
-        (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-    );
+    const sortedHistory = [ ...filteredHistory ].sort((a, b) => {
+        if (!sortColumn) {
+            // Default sort by timestamp (newest first)
+            return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+        }
+
+        let aValue: number;
+        let bValue: number;
+
+        if (sortColumn === `score`) {
+            aValue = a.score;
+            bValue = b.score;
+        }
+        else {
+            // severity
+            aValue = getSeveritySortValue(a.severity);
+            bValue = getSeveritySortValue(b.severity);
+        }
+
+        if (aValue === bValue) {
+            // Secondary sort by timestamp
+            return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+        }
+
+        return sortDirection === `asc` ? aValue - bValue : bValue - aValue;
+    });
 
     if (history.length === 0) {
         return (
@@ -387,9 +461,7 @@ export function ScoreHistory() {
                 <div className="mb-4 flex items-center">
                     <Field className="max-w-96">
                         <FieldContent>
-                            <FieldLabel htmlFor="search-history">
-                                Search History
-                            </FieldLabel>
+                            <FieldLabel htmlFor="search-history">Search History</FieldLabel>
                             <Input
                                 placeholder="Search by name or score"
                                 value={search}
@@ -408,8 +480,35 @@ export function ScoreHistory() {
                             <TableRow>
                                 <TableHead className="w-8"></TableHead>
                                 <TableHead>Name</TableHead>
-                                <TableHead>Score</TableHead>
-                                <TableHead>Severity</TableHead>
+                                <TableHead className="cursor-pointer select-none hover:bg-muted/50" onClick={() => handleSort(`score`)}>
+                                    <div className="flex items-center gap-1">
+                                        Score
+                                        {sortColumn === `score` &&
+                      (sortDirection === `asc`
+? (
+                        <ChevronUp className="h-4 w-4" />
+                      )
+: (
+                        <ChevronDown className="h-4 w-4" />
+                      ))}
+                                    </div>
+                                </TableHead>
+                                <TableHead
+                                    className="cursor-pointer select-none hover:bg-muted/50"
+                                    onClick={() => handleSort(`severity`)}
+                                >
+                                    <div className="flex items-center gap-1">
+                                        Severity
+                                        {sortColumn === `severity` &&
+                      (sortDirection === `asc`
+? (
+                        <ChevronUp className="h-4 w-4" />
+                      )
+: (
+                        <ChevronDown className="h-4 w-4" />
+                      ))}
+                                    </div>
+                                </TableHead>
                                 <TableHead>Vector</TableHead>
                                 <TableHead>Date</TableHead>
                                 <TableHead className="w-24"></TableHead>
@@ -438,11 +537,7 @@ export function ScoreHistory() {
                                         </TableCell>
                                         <TableCell onClick={(e) => e.stopPropagation()}>
                                             <div className="flex gap-2">
-                                                <Button
-                                                    variant="secondary"
-                                                    size="icon-sm"
-                                                    onClick={() => startEdit(entry)}
-                                                    title="Edit name">
+                                                <Button variant="secondary" size="icon-sm" onClick={() => startEdit(entry)} title="Edit name">
                                                     <Edit className="size-3.5" />
                                                 </Button>
                                                 <Button
