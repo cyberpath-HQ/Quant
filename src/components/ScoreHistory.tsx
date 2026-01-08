@@ -20,6 +20,7 @@ import {
 import {
     Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
 import {
     History, Trash2, RotateCcw, Download, Upload, GitCompare, X
 } from "lucide-react";
@@ -47,6 +48,10 @@ export function ScoreHistory() {
         setIsCompareDialogOpen,
     ] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [
+        search,
+        setSearch,
+    ] = useState(``);
 
     // Load history from localStorage
     useEffect(() => {
@@ -241,6 +246,13 @@ export function ScoreHistory() {
         }
     }, []);
 
+    const filteredHistory = history.filter(
+        (entry) => entry.name.toLowerCase().includes(search.toLowerCase()) || entry.score.toString().includes(search)
+    );
+    const sortedHistory = [ ...filteredHistory ].sort(
+        (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+
     if (history.length === 0) {
         return (
             <Card>
@@ -287,6 +299,15 @@ export function ScoreHistory() {
                             Score History
                         </CardTitle>
                         <CardDescription>{history.length} score(s) saved locally</CardDescription>
+                        {selectedIds.size === 0 && (
+                            <div className="mt-2">
+                                <Input
+                                    placeholder="Search by name or score..."
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                />
+                            </div>
+                        )}
                     </div>
                     <div className="flex gap-2">
                         {selectedIds.size > 0
@@ -329,50 +350,61 @@ export function ScoreHistory() {
                 </div>
             </CardHeader>
             <CardContent>
-                <div className="space-y-2 max-h-96 overflow-y-auto p-4">
-                    {history.map((entry) => {
-                        const isSelected = selectedIds.has(entry.id);
-                        return (
-                            <div
-                                key={entry.id}
-                                className={`flex items-center gap-3 rounded-lg border p-3 transition-all ${
-                  isSelected ? `border-sky-500 bg-sky-500/5` : `bg-card hover:shadow-sm`
-                                }`}
-                            >
-                                <Checkbox checked={isSelected} onCheckedChange={() => toggleSelection(entry.id)} className="mt-1" />
-                                <div className="flex-1 space-y-1">
-                                    <h4 className="text-lg font-semibold">{entry.name}</h4>
-                                    <div className="flex items-center gap-2 text-sm">
-                                        <span className="font-medium">Score: {entry.score.toFixed(1)}</span>
-                                        <Badge className={getSeverityColor(entry.severity)}>{entry.severity}</Badge>
-                                    </div>
-                                    <p className="text-xs text-muted-foreground font-mono truncate max-w-md">{entry.vectorString}</p>
-                                    <p className="text-xs text-muted-foreground">
-                                        {dayjs(entry.timestamp).format(`ddd DD MMM, YYYY hh:mm`)}
-                                    </p>
-                                </div>
-
-                                <div className="flex gap-2 ml-4">
-                                    <Button
-                                        variant={`secondary`}
-                                        size="icon"
-                                        onClick={() => restoreEntry(entry)}
-                                        title="Restore this score"
-                                    >
-                                        <RotateCcw className="h-4 w-4" />
-                                    </Button>
-                                    <Button
-                                        variant={`destructive`}
-                                        size="icon"
-                                        onClick={() => deleteEntry(entry.id)}
-                                        title="Delete this entry"
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            </div>
-                        );
-                    })}
+                <div className="max-h-96 overflow-y-auto rounded-lg border">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-12">Select</TableHead>
+                                <TableHead>Name</TableHead>
+                                <TableHead>Score</TableHead>
+                                <TableHead>Severity</TableHead>
+                                <TableHead>Vector</TableHead>
+                                <TableHead>Date</TableHead>
+                                <TableHead className="w-24">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {sortedHistory.map((entry) => {
+                                const isSelected = selectedIds.has(entry.id);
+                                return (
+                                    <TableRow key={entry.id} className={isSelected ? `bg-sky-500/5` : ``}>
+                                        <TableCell>
+                                            <Checkbox checked={isSelected} onCheckedChange={() => toggleSelection(entry.id)} />
+                                        </TableCell>
+                                        <TableCell className="font-semibold">{entry.name}</TableCell>
+                                        <TableCell>{entry.score.toFixed(1)}</TableCell>
+                                        <TableCell>
+                                            <Badge className={getSeverityColor(entry.severity)}>{entry.severity}</Badge>
+                                        </TableCell>
+                                        <TableCell className="font-mono text-xs max-w-xs truncate">{entry.vectorString}</TableCell>
+                                        <TableCell className="text-xs text-muted-foreground">
+                                            {dayjs(entry.timestamp).format(`ddd DD MMM, YYYY hh:mm`)}
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex gap-1">
+                                                <Button
+                                                    variant="secondary"
+                                                    size="icon"
+                                                    onClick={() => restoreEntry(entry)}
+                                                    title="Restore this score"
+                                                >
+                                                    <RotateCcw className="h-4 w-4" />
+                                                </Button>
+                                                <Button
+                                                    variant="destructive"
+                                                    size="icon"
+                                                    onClick={() => deleteEntry(entry.id)}
+                                                    title="Delete this entry"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            })}
+                        </TableBody>
+                    </Table>
                 </div>
             </CardContent>
 
