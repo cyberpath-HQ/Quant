@@ -20,7 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import {
     CodeXml,
-    Copy, Download, EllipsisVertical, History, MoreHorizontalIcon, Settings, Share2
+    Copy, EllipsisVertical, History, Settings, Share2
 } from "lucide-react";
 import {
     toast, Toaster
@@ -52,6 +52,7 @@ import {
 } from "./ui/dropdown-menu";
 import { Input } from "./ui/input";
 import { addToHistory } from "../lib/add-to-history";
+import { DEFAULT_METRICS } from "@/lib/cvss/v4/scoring";
 
 interface CVSS40CalculatorProps {
     initialMetrics?:                    Partial<CVSSv4Metrics>
@@ -60,41 +61,6 @@ interface CVSS40CalculatorProps {
     shouldShowContributions:            boolean
     setShouldShowContributions:         (value: boolean) => void
 }
-
-const DEFAULT_METRICS: CVSSv4Metrics = {
-    AV:  `N`,
-    AC:  `L`,
-    AT:  `N`,
-    PR:  `N`,
-    UI:  `N`,
-    VC:  `N`,
-    VI:  `N`,
-    VA:  `N`,
-    SC:  `N`,
-    SI:  `N`,
-    SA:  `N`,
-    E:   `X`,
-    CR:  `X`,
-    IR:  `X`,
-    AR:  `X`,
-    MAV: `X`,
-    MAC: `X`,
-    MAT: `X`,
-    MPR: `X`,
-    MUI: `X`,
-    MVC: `X`,
-    MVI: `X`,
-    MVA: `X`,
-    MSC: `X`,
-    MSI: `X`,
-    MSA: `X`,
-    S:   `X`,
-    AU:  `X`,
-    R:   `X`,
-    V:   `X`,
-    RE:  `X`,
-    U:   `X`,
-};
 
 export function CVSS40Calculator({
     initialMetrics,
