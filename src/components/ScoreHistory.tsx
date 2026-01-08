@@ -34,7 +34,8 @@ import {
     X,
     Edit,
     ChevronUp,
-    ChevronDown
+    ChevronDown,
+    ArrowUpDown
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -79,7 +80,7 @@ export function ScoreHistory() {
     const [
         sortDirection,
         setSortDirection,
-    ] = useState<`asc` | `desc`>(`desc`);
+    ] = useState<`asc` | `desc` | `none`>(`none`);
 
     // Load history from localStorage
     useEffect(() => {
@@ -327,7 +328,15 @@ export function ScoreHistory() {
     const handleSort = useCallback(
         (column: `score` | `severity`) => {
             if (sortColumn === column) {
-                setSortDirection(sortDirection === `asc` ? `desc` : `asc`);
+                if (sortDirection === `none`) {
+                    setSortDirection(`asc`);
+                }
+                else if (sortDirection === `asc`) {
+                    setSortDirection(`desc`);
+                }
+                else {
+                    setSortDirection(`none`);
+                }
             }
             else {
                 setSortColumn(column);
@@ -340,11 +349,24 @@ export function ScoreHistory() {
         ]
     );
 
+    const getSortIcon = useCallback(
+        (column: `score` | `severity`) => {
+            if (sortColumn === column && sortDirection !== `none`) {
+                return sortDirection === `asc` ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />;
+            }
+            return <ArrowUpDown className="h-4 w-4 opacity-50" />;
+        },
+        [
+            sortColumn,
+            sortDirection,
+        ]
+    );
+
     const filteredHistory = history.filter(
         (entry) => entry.name.toLowerCase().includes(search.toLowerCase()) || entry.score.toString().includes(search)
     );
     const sortedHistory = [ ...filteredHistory ].sort((a, b) => {
-        if (!sortColumn) {
+        if (!sortColumn || sortDirection === `none`) {
             // Default sort by timestamp (newest first)
             return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
         }
@@ -483,14 +505,7 @@ export function ScoreHistory() {
                                 <TableHead className="cursor-pointer select-none hover:bg-muted/50" onClick={() => handleSort(`score`)}>
                                     <div className="flex items-center gap-1">
                                         Score
-                                        {sortColumn === `score` &&
-                      (sortDirection === `asc`
-? (
-                        <ChevronUp className="h-4 w-4" />
-                      )
-: (
-                        <ChevronDown className="h-4 w-4" />
-                      ))}
+                                        {getSortIcon(`score`)}
                                     </div>
                                 </TableHead>
                                 <TableHead
@@ -499,14 +514,7 @@ export function ScoreHistory() {
                                 >
                                     <div className="flex items-center gap-1">
                                         Severity
-                                        {sortColumn === `severity` &&
-                      (sortDirection === `asc`
-? (
-                        <ChevronUp className="h-4 w-4" />
-                      )
-: (
-                        <ChevronDown className="h-4 w-4" />
-                      ))}
+                                        {getSortIcon(`severity`)}
                                     </div>
                                 </TableHead>
                                 <TableHead>Vector</TableHead>
