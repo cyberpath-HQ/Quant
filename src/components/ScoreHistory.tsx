@@ -738,79 +738,85 @@ function ComparisonDialog({
                 </DialogHeader>
 
                 <div className="space-y-6 mt-4">
-                    <div className="grid gap-4 grid-cols-2">
-                        {selectedEntries.map((entry, index) => (
-                            <Card key={entry.id} className="border-2">
-                                <CardContent className="p-4 space-y-3">
-                                    <div className="space-y-1">
-                                        <h4 className="font-semibold text-sm text-muted-foreground">Score {index + 1}</h4>
-                                        <h5 className="font-bold text-lg">{entry.name}</h5>
-                                    </div>
+                    {
+                        selectedEntries.length === 2 && (
+                            <>
+                                <div className="grid gap-4 grid-cols-2">
+                                    {selectedEntries.map((entry, index) => (
+                                        <Card key={entry.id} className="border-2">
+                                            <CardContent className="p-4 space-y-3">
+                                                <div className="space-y-1">
+                                                    <h4 className="font-semibold text-sm text-muted-foreground">Score {index + 1}</h4>
+                                                    <h5 className="font-bold text-lg">{entry.name}</h5>
+                                                </div>
 
-                                    <div className="space-y-2">
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-sm text-muted-foreground">Version</span>
-                                            <Badge variant="outline">{entry.version}</Badge>
+                                                <div className="space-y-2">
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-sm text-muted-foreground">Version</span>
+                                                        <Badge variant="outline">{entry.version}</Badge>
+                                                    </div>
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-sm text-muted-foreground">Score</span>
+                                                        <span className="text-2xl font-bold">{entry.score.toFixed(1)}</span>
+                                                    </div>
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-sm text-muted-foreground">Severity</span>
+                                                        <Badge className={getSeverityColor(entry.severity)}>{entry.severity}</Badge>
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <span className="text-sm text-muted-foreground">Vector</span>
+                                                        <p className="text-xs font-mono bg-muted p-2 rounded break-all">{entry.vectorString}</p>
+                                                    </div>
+                                                    <div className="text-xs text-muted-foreground">
+                                                        {dayjs(entry.timestamp).format(`MMM DD, YYYY HH:mm`)}
+                                                    </div>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    ))}
+                                </div>
+
+                                {metricDifferences && metricDifferences.length > 0 && (
+                                    <div className="space-y-3">
+                                        <div className="flex items-center gap-2">
+                                            <h4 className="font-semibold">Metric Differences</h4>
+                                            <Badge variant="outline">{metricDifferences.length} changed</Badge>
                                         </div>
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-sm text-muted-foreground">Score</span>
-                                            <span className="text-2xl font-bold">{entry.score.toFixed(1)}</span>
-                                        </div>
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-sm text-muted-foreground">Severity</span>
-                                            <Badge className={getSeverityColor(entry.severity)}>{entry.severity}</Badge>
-                                        </div>
-                                        <div className="space-y-1">
-                                            <span className="text-sm text-muted-foreground">Vector</span>
-                                            <p className="text-xs font-mono bg-muted p-2 rounded break-all">{entry.vectorString}</p>
-                                        </div>
-                                        <div className="text-xs text-muted-foreground">
-                                            {dayjs(entry.timestamp).format(`MMM DD, YYYY HH:mm`)}
+                                        <div className="rounded-lg border overflow-hidden">
+                                            <Table>
+                                                <TableHeader className="bg-muted">
+                                                    <TableRow>
+                                                        <TableHead>Metric</TableHead>
+                                                        <TableHead>Score 1</TableHead>
+                                                        <TableHead>Score 2</TableHead>
+                                                    </TableRow>
+                                                </TableHeader>
+                                                <TableBody>
+                                                    {metricDifferences.map((diff) => (
+                                                        <TableRow key={diff.key}>
+                                                            <TableCell className="font-semibold">
+                                                                {getMetricLabel(diff.key, selectedEntries[0].version)}
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <span className="font-mono text-sm bg-red-100 dark:bg-red-950 px-2 py-1 rounded">
+                                                                    {getMetricValueLabel(diff.key, diff.first, selectedEntries[0].version)}
+                                                                </span>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <span className="font-mono text-sm bg-green-100 dark:bg-green-950 px-2 py-1 rounded">
+                                                                    {getMetricValueLabel(diff.key, diff.second, selectedEntries[0].version)}
+                                                                </span>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                                </TableBody>
+                                            </Table>
                                         </div>
                                     </div>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-
-                    {metricDifferences && metricDifferences.length > 0 && (
-                        <div className="space-y-3">
-                            <div className="flex items-center gap-2">
-                                <h4 className="font-semibold">Metric Differences</h4>
-                                <Badge variant="outline">{metricDifferences.length} changed</Badge>
-                            </div>
-                            <div className="rounded-lg border overflow-hidden">
-                                <Table>
-                                    <TableHeader className="bg-muted">
-                                        <TableRow>
-                                            <TableHead>Metric</TableHead>
-                                            <TableHead>Score 1</TableHead>
-                                            <TableHead>Score 2</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {metricDifferences.map((diff) => (
-                                            <TableRow key={diff.key}>
-                                                <TableCell className="font-semibold">
-                                                    {getMetricLabel(diff.key, selectedEntries[0].version)}
-                                                </TableCell>
-                                                <TableCell>
-                                                    <span className="font-mono text-sm bg-red-100 dark:bg-red-950 px-2 py-1 rounded">
-                                                        {getMetricValueLabel(diff.key, diff.first, selectedEntries[0].version)}
-                                                    </span>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <span className="font-mono text-sm bg-green-100 dark:bg-green-950 px-2 py-1 rounded">
-                                                        {getMetricValueLabel(diff.key, diff.second, selectedEntries[0].version)}
-                                                    </span>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </div>
-                        </div>
-                    )}
+                                )}
+                            </>
+                        )
+                    }
 
                     {selectedEntries.length === 2 && selectedEntries[0].version !== selectedEntries[1].version && (
                         <div className="rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 p-4">
