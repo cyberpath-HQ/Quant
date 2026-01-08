@@ -562,7 +562,6 @@ export function ScoreHistory() {
         open={isChartDialogOpen}
         onOpenChange={setIsChartDialogOpen}
         selectedEntries={history.filter((entry) => selectedIds.has(entry.id))}
-        getSeverityColor={getSeverityColor}
       />
 
       <Dialog open={editingId !== null} onOpenChange={(open) => !open && cancelEdit()}>
@@ -603,10 +602,9 @@ interface ChartDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   selectedEntries: Array<ScoreHistoryEntry>;
-  getSeverityColor: (severity: string) => string;
 }
 
-function ChartDialog({ open, onOpenChange, selectedEntries, getSeverityColor }: ChartDialogProps): React.ReactElement {
+function ChartDialog({ open, onOpenChange, selectedEntries }: ChartDialogProps): React.ReactElement {
   const [chartType, setChartType] = useState<`bar` | `donut`>(`bar`);
   const [title, setTitle] = useState(`CVSS Scores Chart`);
   const [showLegend, setShowLegend] = useState(true);
@@ -621,7 +619,6 @@ function ChartDialog({ open, onOpenChange, selectedEntries, getSeverityColor }: 
   const [tooltipLabel, setTooltipLabel] = useState(`Count`);
   const [barRadius, setBarRadius] = useState(0);
   const [severityLabels, setSeverityLabels] = useState<Record<string, string>>({});
-  const [innerRadiusColor, setInnerRadiusColor] = useState(`#ffffff`);
   const [showFloatingLabels, setShowFloatingLabels] = useState(true);
   const chartRef = useRef<HTMLDivElement>(null);
 
@@ -781,7 +778,6 @@ function ChartDialog({ open, onOpenChange, selectedEntries, getSeverityColor }: 
                   </BarChart>
                 ) : (
                   <PieChart>
-                    {innerRadius > 0 && <circle cx="50%" cy="50%" r={innerRadius} fill={innerRadiusColor} />}
                     <Pie
                       data={donutData}
                       cx="50%"
@@ -791,7 +787,7 @@ function ChartDialog({ open, onOpenChange, selectedEntries, getSeverityColor }: 
                       label={
                         showFloatingLabels
                           ? ({ name, percent }) =>
-                              `${severityLabels[name!] ?? titleCase(name!)} ${(percent ?? 0) * 100}%`
+                              `${severityLabels[name!] ?? titleCase(name!)} ${((percent ?? 0) * 100).toFixed(2)}%`
                           : false
                       }
                       outerRadius={120}
@@ -933,16 +929,6 @@ function ChartDialog({ open, onOpenChange, selectedEntries, getSeverityColor }: 
                         max={80}
                         min={0}
                         step={5}
-                      />
-                    </FieldContent>
-                  </Field>
-                  <Field>
-                    <FieldContent>
-                      <FieldLabel>Inner Radius Color</FieldLabel>
-                      <Input
-                        type="color"
-                        value={innerRadiusColor}
-                        onChange={(e) => setInnerRadiusColor(e.target.value)}
                       />
                     </FieldContent>
                   </Field>
