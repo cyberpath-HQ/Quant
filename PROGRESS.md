@@ -54,9 +54,10 @@ scoring application supporting CVSS v4.0, v3.1, v3.0, and v2.0.
 
 - [x] URL parameter parsing for vector strings
 - [x] Automatic tab switching based on vector version
-- [x] Score history tracking with localStorage
-- [x] Score history component with restore/delete functionality
-- [x] History export to JSON
+- [x] Comprehensive CVSS score management with localStorage
+- [x] CVSS Score Manager component with sorting, comparing, editing, deleting, restoring, charting, and import/export
+      functionality
+- [x] History export to JSON and import from JSON
 - [x] Metric impact visualization component
 - [x] Integration of all advanced components into main app
 
