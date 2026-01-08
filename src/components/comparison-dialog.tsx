@@ -1,24 +1,30 @@
 import type { ScoreHistoryEntry } from "@/lib/add-to-history";
 import { vectorParser } from "@/lib/cvss";
-import type {
-    cvss40Metrics, cvss3Metrics, cvss2Metrics
+import {
+    cvss2Metrics,
+    cvss3Metrics,
+    cvss40Metrics
 } from "@/lib/cvss/metrics-data";
 import dayjs from "dayjs";
-import {
-    GitCompare, Badge, Table
-} from "lucide-react";
+import { GitCompare } from "lucide-react";
 import {
     useCallback, useMemo
 } from "react";
-import type {
+import {
     Card, CardContent
 } from "./ui/card";
 import {
-    Dialog, DialogContent, DialogDescription, DialogTitle, type DialogHeader
+    Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle
 } from "./ui/dialog";
-import type {
-    TableHeader, TableRow, TableHead, TableBody, TableCell
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow
 } from "./ui/table";
+import { Badge } from "./ui/badge";
 
 interface ComparisonDialogProps {
     open:             boolean
