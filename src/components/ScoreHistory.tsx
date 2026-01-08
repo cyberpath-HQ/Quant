@@ -21,7 +21,9 @@ import {
     Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Field } from "@/components/ui/field";
+import {
+    Field, FieldContent, FieldDescription, FieldLabel
+} from "@/components/ui/field";
 import {
     History, Trash2, RotateCcw, Download, Upload, GitCompare, X, Edit
 } from "lucide-react";
@@ -340,15 +342,6 @@ export function ScoreHistory() {
                             Score History
                         </CardTitle>
                         <CardDescription>{history.length} score(s) saved locally</CardDescription>
-                        {selectedIds.size === 0 && (
-                            <Field className="mt-2">
-                                <Input
-                                    placeholder="Search by name or score..."
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                />
-                            </Field>
-                        )}
                     </div>
                     <div className="flex gap-2">
                         {selectedIds.size > 0
@@ -391,6 +384,24 @@ export function ScoreHistory() {
                 </div>
             </CardHeader>
             <CardContent>
+                <div className="mb-4 flex items-center">
+                    <Field className="max-w-96">
+                        <FieldContent>
+                            <FieldLabel htmlFor="search-history">
+                                Search History
+                            </FieldLabel>
+                            <Input
+                                placeholder="Search by name or score"
+                                value={search}
+                                id="search-history"
+                                onChange={(e) => setSearch(e.target.value)}
+                            />
+                            <FieldDescription className="text-xs">
+                                Search your history by name or score to quickly find specific entries.
+                            </FieldDescription>
+                        </FieldContent>
+                    </Field>
+                </div>
                 <div className="max-h-96 overflow-y-auto rounded-lg border">
                     <Table>
                         <TableHeader>
@@ -426,25 +437,29 @@ export function ScoreHistory() {
                                             {dayjs(entry.timestamp).format(`ddd DD MMM, YYYY hh:mm`)}
                                         </TableCell>
                                         <TableCell onClick={(e) => e.stopPropagation()}>
-                                            <div className="flex gap-1">
-                                                <Button variant="secondary" size="sm" onClick={() => startEdit(entry)} title="Edit name">
-                                                    <Edit className="h-4 w-4" />
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    variant="secondary"
+                                                    size="icon-sm"
+                                                    onClick={() => startEdit(entry)}
+                                                    title="Edit name">
+                                                    <Edit className="size-3.5" />
                                                 </Button>
                                                 <Button
                                                     variant="secondary"
-                                                    size="sm"
+                                                    size="icon-sm"
                                                     onClick={() => restoreEntry(entry)}
                                                     title="Restore this score"
                                                 >
-                                                    <RotateCcw className="h-4 w-4" />
+                                                    <RotateCcw className="size-3.5" />
                                                 </Button>
                                                 <Button
                                                     variant="destructive"
-                                                    size="sm"
+                                                    size="icon-sm"
                                                     onClick={() => deleteEntry(entry.id)}
                                                     title="Delete this entry"
                                                 >
-                                                    <Trash2 className="h-4 w-4" />
+                                                    <Trash2 className="size-3.5" />
                                                 </Button>
                                             </div>
                                         </TableCell>
