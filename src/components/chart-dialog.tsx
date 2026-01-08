@@ -9,21 +9,42 @@ import {
     Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle
 } from "./ui/dialog";
 import {
-    DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger
 } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
 import {
     CodeXml, Download, EllipsisVertical, Minus, Plus
 } from "lucide-react";
 import {
-    Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis
+    Bar,
+    BarChart,
+    CartesianGrid,
+    Cell,
+    Pie,
+    PieChart,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis
 } from "recharts";
 import logoBlack from "@/assets/logo.svg";
 import {
     Accordion, AccordionContent, AccordionItem, AccordionTrigger
 } from "./ui/accordion";
 import {
-    Field, FieldContent, FieldDescription, FieldGroup, FieldLabel, FieldLegend, FieldSeparator, FieldSet
+    Field,
+    FieldContent,
+    FieldDescription,
+    FieldGroup,
+    FieldLabel,
+    FieldLegend,
+    FieldSeparator,
+    FieldSet
 } from "./ui/field";
 import { Input } from "./ui/input";
 import {
@@ -35,7 +56,16 @@ import {
     InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput
 } from "./ui/input-group";
 import {
-    ColorPicker, ColorPickerAlphaSlider, ColorPickerArea, ColorPickerContent, ColorPickerEyeDropper, ColorPickerFormatSelect, ColorPickerHueSlider, ColorPickerInput, ColorPickerSwatch, ColorPickerTrigger
+    ColorPicker,
+    ColorPickerAlphaSlider,
+    ColorPickerArea,
+    ColorPickerContent,
+    ColorPickerEyeDropper,
+    ColorPickerFormatSelect,
+    ColorPickerHueSlider,
+    ColorPickerInput,
+    ColorPickerSwatch,
+    ColorPickerTrigger
 } from "./ui/color-picker";
 import {
     Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue
@@ -203,11 +233,16 @@ export function ChartDialog({
             return `${ label } ${ value }`;
         }
         return `${ label } ${ ((percent ?? 0) * 100).toFixed(2) }%`;
-
     };
 
     const customLegend = () => (
-        <ul className={cn(`flex flex-wrap gap-4 justify-center`, chartType === `bar` && `mt-4`, legendPosition === `below-title` && `mt-2 mb-4`)}>
+        <ul
+            className={cn(
+                `flex flex-wrap gap-4 justify-center`,
+                chartType === `bar` && `mt-4`,
+                legendPosition === `below-title` && `mt-2 mb-4`
+            )}
+        >
             {filteredSeverities.map((sev) => (
                 <li key={sev} className="flex items-center gap-1">
                     <div
@@ -310,9 +345,7 @@ export function ChartDialog({
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
-                            <DropdownMenuLabel className="text-xs">
-                                Export options
-                            </DropdownMenuLabel>
+                            <DropdownMenuLabel className="text-xs">Export options</DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={exportChart}>
                                 <Download className="size-3.5 mr-2" />
@@ -335,7 +368,13 @@ export function ChartDialog({
                             <ResponsiveContainer width="100%" height="100%">
                                 {chartType === `bar`
 ? (
-                  <BarChart data={barData}>
+                  <BarChart
+                      data={barData}
+                      margin={{
+                          left:   showYAxisLabel && yAxisLabel.trim() ? 20 : 0,
+                          bottom: showXAxisLabel && xAxisLabel.trim() ? 20 : 5,
+                      }}
+                  >
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis
                           dataKey="name"
@@ -344,8 +383,8 @@ export function ChartDialog({
                         showXAxisLabel
                           ? {
                               value:    xAxisLabel,
-                              position: `insideBottom`,
-                              offset:   -10,
+                              position: `bottom`,
+                              offset:   showXAxisTickLabels ? 5 : -5,
                           }
                           : undefined
                           }
@@ -368,10 +407,12 @@ export function ChartDialog({
                           : undefined
                           }
                       />
-                      <Tooltip formatter={(value) => [
-                          tooltipContentType === `count` ? value : `${ ((value as number) / total * 100).toFixed(2) }%`,
-                          tooltipLabel,
-                      ]} />
+                      <Tooltip
+                          formatter={(value) => [
+                        tooltipContentType === `count` ? value : `${ (((value as number) / total) * 100).toFixed(2) }%`,
+                        tooltipLabel,
+                          ]}
+                      />
                       <Bar dataKey="count" fill="#8884d8" radius={[
                           barRadius,
                           barRadius,
@@ -392,11 +433,7 @@ export function ChartDialog({
                           cy="50%"
                           innerRadius={innerRadius}
                           labelLine={false}
-                          label={
-                        showFloatingLabels
-                          ? getFloatingLabel
-                          : false
-                          }
+                          label={showFloatingLabels ? getFloatingLabel : false}
                           outerRadius={120}
                           fill="#8884d8"
                           dataKey="value"
@@ -405,10 +442,12 @@ export function ChartDialog({
                               <Cell key={`cell-${ index }`} fill={entry.color} />
                           ))}
                       </Pie>
-                      <Tooltip formatter={(value, name) => [
-                          tooltipContentType === `count` ? value : `${ ((value as number) / total * 100).toFixed(2) }%`,
-                          name,
-                      ]} />
+                      <Tooltip
+                          formatter={(value, name) => [
+                        tooltipContentType === `count` ? value : `${ (((value as number) / total) * 100).toFixed(2) }%`,
+                        name,
+                          ]}
+                      />
                   </PieChart>
                 )}
                             </ResponsiveContainer>
@@ -422,9 +461,7 @@ export function ChartDialog({
                     </div>
                     <Accordion type="multiple">
                         <AccordionItem value="chart-settings">
-                            <AccordionTrigger>
-                                Chart Settings
-                            </AccordionTrigger>
+                            <AccordionTrigger>Chart Settings</AccordionTrigger>
                             <AccordionContent className="px-3">
                                 <FieldSet>
                                     <FieldDescription>Configure the appearance and data of the chart.</FieldDescription>
@@ -439,18 +476,13 @@ export function ChartDialog({
                                         <div className="grid grid-cols-2 gap-4">
                                             <Field>
                                                 <FieldLabel>Chart Type</FieldLabel>
-                                                <Select
-                                                    value={chartType}
-                                                    onValueChange={(value: `bar` | `donut`) => setChartType(value)}
-                                                >
+                                                <Select value={chartType} onValueChange={(value: `bar` | `donut`) => setChartType(value)}>
                                                     <SelectTrigger>
                                                         <SelectValue placeholder="Select chart type" />
                                                     </SelectTrigger>
                                                     <SelectContent>
                                                         <SelectGroup>
-                                                            <SelectLabel>
-                                                                Chart Type
-                                                            </SelectLabel>
+                                                            <SelectLabel>Chart Type</SelectLabel>
                                                             <SelectItem value="bar">Bar Chart</SelectItem>
                                                             <SelectItem value="donut">Donut Chart</SelectItem>
                                                         </SelectGroup>
@@ -471,9 +503,7 @@ export function ChartDialog({
                                                     </SelectTrigger>
                                                     <SelectContent>
                                                         <SelectGroup>
-                                                            <SelectLabel>
-                                                                Tooltip Content
-                                                            </SelectLabel>
+                                                            <SelectLabel>Tooltip Content</SelectLabel>
                                                             <SelectItem value="count">Count</SelectItem>
                                                             <SelectItem value="percentage">Percentage</SelectItem>
                                                         </SelectGroup>
@@ -486,9 +516,7 @@ export function ChartDialog({
                                             <Field orientation={`horizontal`} className="self-center">
                                                 <Switch checked={showLegend} onCheckedChange={setShowLegend} />
                                                 <FieldContent>
-                                                    <FieldLabel className="flex items-center gap-2">
-                                                        Show Legend
-                                                    </FieldLabel>
+                                                    <FieldLabel className="flex items-center gap-2">Show Legend</FieldLabel>
                                                     <FieldDescription className="text-xs">
                                                         Toggle the display of the chart legend.
                                                     </FieldDescription>
@@ -498,15 +526,14 @@ export function ChartDialog({
                                                 <FieldLabel>Legend Position</FieldLabel>
                                                 <Select
                                                     value={legendPosition}
-                                                    onValueChange={(value: `below-title` | `below-chart`) => setLegendPosition(value)}>
+                                                    onValueChange={(value: `below-title` | `below-chart`) => setLegendPosition(value)}
+                                                >
                                                     <SelectTrigger>
                                                         <SelectValue placeholder="Select a legend position" />
                                                     </SelectTrigger>
                                                     <SelectContent>
                                                         <SelectGroup>
-                                                            <SelectLabel>
-                                                                Legend Position
-                                                            </SelectLabel>
+                                                            <SelectLabel>Legend Position</SelectLabel>
                                                             <SelectItem value="below-title">Below Title</SelectItem>
                                                             <SelectItem value="below-chart">Below Chart</SelectItem>
                                                         </SelectGroup>
@@ -550,9 +577,7 @@ export function ChartDialog({
                                                     step={1}
                                                     className="text-end"
                                                 />
-                                                <InputGroupAddon align={`inline-end`}>
-                                                    %
-                                                </InputGroupAddon>
+                                                <InputGroupAddon align={`inline-end`}>%</InputGroupAddon>
                                                 <InputGroupAddon align="inline-end">
                                                     <InputGroupButton
                                                         variant="secondary"
@@ -573,9 +598,7 @@ export function ChartDialog({
                             </AccordionContent>
                         </AccordionItem>
                         <AccordionItem value="type-specific-settings">
-                            <AccordionTrigger>
-                                {chartType === `bar` ? `Bar Chart Settings` : `Donut Chart Settings`}
-                            </AccordionTrigger>
+                            <AccordionTrigger>{chartType === `bar` ? `Bar Chart Settings` : `Donut Chart Settings`}</AccordionTrigger>
                             <AccordionContent className="px-3">
                                 {chartType === `bar` && (
                                     <FieldSet>
@@ -583,32 +606,22 @@ export function ChartDialog({
                                         <Field orientation={`horizontal`}>
                                             <Switch checked={showXAxisLabel} onCheckedChange={setShowXAxisLabel} />
                                             <FieldContent>
-                                                <FieldLabel className="flex items-center gap-2">
-                                                    Show X-Axis Label
-                                                </FieldLabel>
-                                                <FieldDescription className="text-xs">
-                                                    Toggle the display of the X-Axis label.
-                                                </FieldDescription>
+                                                <FieldLabel className="flex items-center gap-2">Show X-Axis Label</FieldLabel>
+                                                <FieldDescription className="text-xs">Toggle the display of the X-Axis label.</FieldDescription>
                                             </FieldContent>
                                         </Field>
                                         <Field orientation={`horizontal`}>
                                             <Switch checked={showYAxisLabel} onCheckedChange={setShowYAxisLabel} />
                                             <FieldContent>
-                                                <FieldLabel className="flex items-center gap-2">
-                                                    Show Y-Axis Label
-                                                </FieldLabel>
-                                                <FieldDescription className="text-xs">
-                                                    Toggle the display of the Y-Axis label.
-                                                </FieldDescription>
+                                                <FieldLabel className="flex items-center gap-2">Show Y-Axis Label</FieldLabel>
+                                                <FieldDescription className="text-xs">Toggle the display of the Y-Axis label.</FieldDescription>
                                             </FieldContent>
                                         </Field>
 
                                         <Field orientation={`horizontal`}>
                                             <Switch checked={showXAxisTickLabels} onCheckedChange={setShowXAxisTickLabels} />
                                             <FieldContent>
-                                                <FieldLabel className="flex items-center gap-2">
-                                                    Show X-Axis Tick Labels
-                                                </FieldLabel>
+                                                <FieldLabel className="flex items-center gap-2">Show X-Axis Tick Labels</FieldLabel>
                                                 <FieldDescription className="text-xs">
                                                     Toggle the display of tick labels on the X-axis.
                                                 </FieldDescription>
@@ -618,9 +631,7 @@ export function ChartDialog({
                                         <Field>
                                             <FieldContent>
                                                 <FieldLabel>X-Axis Label</FieldLabel>
-                                                <Input
-                                                    value={xAxisLabel}
-                                                    onChange={(e) => setXAxisLabel(e.target.value)} />
+                                                <Input value={xAxisLabel} onChange={(e) => setXAxisLabel(e.target.value)} />
                                                 <FieldDescription className="text-xs">
                                                     Label for the X-Axis representing severity levels.
                                                 </FieldDescription>
@@ -629,9 +640,7 @@ export function ChartDialog({
                                         <Field>
                                             <FieldContent>
                                                 <FieldLabel>Y-Axis Label</FieldLabel>
-                                                <Input
-                                                    value={yAxisLabel}
-                                                    onChange={(e) => setYAxisLabel(e.target.value)} />
+                                                <Input value={yAxisLabel} onChange={(e) => setYAxisLabel(e.target.value)} />
                                                 <FieldDescription className="text-xs">
                                                     Label for the Y-Axis representing frequency.
                                                 </FieldDescription>
@@ -679,9 +688,7 @@ export function ChartDialog({
                                                             step={1}
                                                             className="text-end"
                                                         />
-                                                        <InputGroupAddon align={`inline-end`}>
-                                                            px
-                                                        </InputGroupAddon>
+                                                        <InputGroupAddon align={`inline-end`}>px</InputGroupAddon>
                                                         <InputGroupAddon align="inline-end">
                                                             <InputGroupButton
                                                                 variant="secondary"
@@ -735,9 +742,7 @@ export function ChartDialog({
                                                         step={1}
                                                         className="text-end"
                                                     />
-                                                    <InputGroupAddon align={`inline-end`}>
-                                                        %
-                                                    </InputGroupAddon>
+                                                    <InputGroupAddon align={`inline-end`}>%</InputGroupAddon>
                                                     <InputGroupAddon align="inline-end">
                                                         <InputGroupButton
                                                             variant="secondary"
@@ -758,9 +763,7 @@ export function ChartDialog({
                                             <Field orientation={`horizontal`} className="self-center">
                                                 <Switch checked={showFloatingLabels} onCheckedChange={setShowFloatingLabels} />
                                                 <FieldContent>
-                                                    <FieldLabel className="flex items-center gap-2">
-                                                        Show Floating Labels
-                                                    </FieldLabel>
+                                                    <FieldLabel className="flex items-center gap-2">Show Floating Labels</FieldLabel>
                                                     <FieldDescription className="text-xs">
                                                         Toggle the display of floating labels on the donut segments.
                                                     </FieldDescription>
@@ -777,9 +780,7 @@ export function ChartDialog({
                                                     </SelectTrigger>
                                                     <SelectContent>
                                                         <SelectGroup>
-                                                            <SelectLabel>
-                                                                Floating Label Content
-                                                            </SelectLabel>
+                                                            <SelectLabel>Floating Label Content</SelectLabel>
                                                             <SelectItem value="count">Count</SelectItem>
                                                             <SelectItem value="percentage">Percentage</SelectItem>
                                                         </SelectGroup>
@@ -795,9 +796,7 @@ export function ChartDialog({
                             </AccordionContent>
                         </AccordionItem>
                         <AccordionItem value="customization">
-                            <AccordionTrigger>
-                                Customization
-                            </AccordionTrigger>
+                            <AccordionTrigger>Customization</AccordionTrigger>
                             <AccordionContent className="px-3">
                                 <FieldSet>
                                     <FieldDescription>Personalize chart colors and severity labels.</FieldDescription>
@@ -806,9 +805,7 @@ export function ChartDialog({
                                             <>
                                                 <FieldSet key={severity} className="grid grid-cols-2 gap-4">
                                                     <div className="flex flex-col col-span-full">
-                                                        <FieldLegend className="text-sm! font-medium!">
-                                                            {titleCase(severity)} Severity
-                                                        </FieldLegend>
+                                                        <FieldLegend className="text-sm! font-medium!">{titleCase(severity)} Severity</FieldLegend>
                                                         <FieldDescription className="text-xs">
                                                             Customize the color and label for {severity} severity entries.
                                                         </FieldDescription>
@@ -821,15 +818,13 @@ export function ChartDialog({
                                                             onValueChange={(e) => setCustomColors((prev) => ({
                                                                 ...prev,
                                                                 [severity]: e,
-                                                            }))}
+                                                            }))
+                                                            }
                                                             defaultFormat="hex"
                                                         >
                                                             <div className="flex items-center gap-3">
                                                                 <ColorPickerTrigger asChild>
-                                                                    <Button
-                                                                        variant="outline"
-                                                                        className="flex items-center gap-2 px-3"
-                                                                    >
+                                                                    <Button variant="outline" className="flex items-center gap-2 px-3">
                                                                         <ColorPickerSwatch className="size-4" />
                                                                         {customColors[severity] || severityColorMap[severity.toLowerCase()] || `#8884d8`}
                                                                     </Button>
@@ -852,9 +847,7 @@ export function ChartDialog({
                                                         </ColorPicker>
                                                     </Field>
                                                     <Field key={severity}>
-                                                        <FieldLabel className="text-sm">
-                                                            {titleCase(severity)} Label
-                                                        </FieldLabel>
+                                                        <FieldLabel className="text-sm">{titleCase(severity)} Label</FieldLabel>
                                                         <Input
                                                             value={severityLabels[severity] || titleCase(severity)}
                                                             onChange={(e) => setSeverityLabels((prev) => ({
@@ -866,9 +859,7 @@ export function ChartDialog({
                                                         />
                                                     </Field>
                                                 </FieldSet>
-                                                {
-                                                    i < allSeverities.length - 1 && <FieldSeparator />
-                                                }
+                                                {i < allSeverities.length - 1 && <FieldSeparator />}
                                             </>
                                         ))}
                                     </div>
