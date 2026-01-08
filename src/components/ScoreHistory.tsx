@@ -587,7 +587,17 @@ export function ScoreHistory() {
                     </DialogHeader>
                     <div className="space-y-4">
                         <Field>
-                            <Input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Enter new name..." />
+                            <FieldContent>
+                                <FieldLabel htmlFor="edit-entry-name">Entry Name</FieldLabel>
+                                <Input
+                                    id="edit-entry-name"
+                                    value={editName}
+                                    onChange={(e) => setEditName(e.target.value)}
+                                    placeholder="Enter new name..." />
+                                <FieldDescription className="text-xs">
+                                    Provide a descriptive name for this score entry.
+                                </FieldDescription>
+                            </FieldContent>
                         </Field>
                         <div className="flex gap-2 justify-end">
                             <Button variant="outline" onClick={cancelEdit}>
