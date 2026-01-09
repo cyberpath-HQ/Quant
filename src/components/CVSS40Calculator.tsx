@@ -403,7 +403,7 @@ export const CVSS40Calculator: FC<CVSS40CalculatorProps> = ({
                                             <DropdownMenuSeparator />
                                             <DropdownMenuItem onClick={() => setIsSaveDialogOpen(true)}>
                                                 <History className="size-3.5 mr-2" />
-                                                Save to History
+                                                Save to Score Manager
                                             </DropdownMenuItem>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
@@ -453,10 +453,14 @@ export const CVSS40Calculator: FC<CVSS40CalculatorProps> = ({
                 </div>
             </div>
 
-            <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
+            <Dialog
+                open={isSaveDialogOpen}
+                onOpenChange={setIsSaveDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Save Score to History</DialogTitle>
+                        <DialogTitle>
+                            Save Score to History
+                        </DialogTitle>
                         <DialogDescription>
                             Enter a name for this CVSS score to save it in your history.
                         </DialogDescription>
@@ -485,10 +489,14 @@ export const CVSS40Calculator: FC<CVSS40CalculatorProps> = ({
                         </Field>
                     </div>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsSaveDialogOpen(false)}>
+                        <Button
+                            variant="outline"
+                            onClick={() => setIsSaveDialogOpen(false)}>
                             Cancel
                         </Button>
-                        <Button id="save-to-history" onClick={handleSaveToHistory}>
+                        <Button
+                            id="save-to-history"
+                            onClick={handleSaveToHistory}>
                             Save
                         </Button>
                     </DialogFooter>
