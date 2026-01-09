@@ -1,11 +1,12 @@
+import { set } from "astro:schema";
 import {
     useCallback,
     useEffect, useState
 } from "react";
 
 export interface UseThemeResult {
-    theme:             `light` | `dark`
-    setTheme:          (theme: `light` | `dark`) => void
+    theme:    `light` | `dark`
+    setTheme: (theme: `light` | `dark`) => void
 }
 
 export function useTheme(): UseThemeResult {
@@ -27,6 +28,19 @@ export function useTheme(): UseThemeResult {
 
         return `light`;
     });
+
+    // Listen for system theme changes
+    useEffect(() => {
+        const observer = new MutationObserver(() => {
+            const isDark = document.documentElement.classList.contains(`dark`);
+            setTheme(isDark ? `dark` : `light`);
+        });
+        observer.observe(document.documentElement, {
+            attributes:      true,
+            attributeFilter: [ `class` ],
+        });
+        return () => observer.disconnect();
+    }, []);
 
     useEffect(() => {
         const root = document.documentElement;
