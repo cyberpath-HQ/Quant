@@ -35,6 +35,7 @@ export const RGB_BLUE_END = 6;
 export const HUNDRED = 100;
 export const THROTTLE_DELAY = 100;
 export const DEFAULT_FRACTION_DIGITS = 2;
+export const IMPACT_FRACTION_DIGITS = 1;
 export const BAR_CHART_DEFAULT_LEFT_MARGIN = 20;
 export const BAR_CHART_DEFAULT_BOTTOM_MARGIN = 20;
 export const BAR_CHART_FALLBACK_BOTTOM_MARGIN = 5;
@@ -135,3 +136,54 @@ export const DEFAULT_SETTINGS = {
     should_show_x_axis_tick_labels: true,
     legend_position:                LEGEND_POSITION_BELOW_CHART,
 };
+
+// CVSS Calculator Constants
+export const CVSS_VERSION_2_0 = `2.0` as const;
+export const CVSS_VERSION_3_0 = `3.0` as const;
+export const CVSS_VERSION_3_1 = `3.1` as const;
+export const CVSS_VERSION_4_0 = `4.0` as const;
+
+export const CVSS_DEFAULT_ACTIVE_GROUP = `base-metrics`;
+export const CVSS_METRICS_TAB_REPLACE_TEXT = `Metrics`;
+export const CVSS_METRICS_TAB_TEMPORAL_TEXT = `Temporal`;
+export const CVSS_METRICS_TAB_THREAT_TEXT = `Threat`;
+export const CVSS_VECTOR_COPIED_MESSAGE = `Vector string copied`;
+export const CVSS_SHAREABLE_LINK_MESSAGE = `Shareable link copied`;
+export const CVSS_EMBEDDABLE_CODE_MESSAGE = `Embeddable code copied`;
+export const CVSS_SCORE_SAVED_MESSAGE = `Score saved to history`;
+export const CVSS_CONFIGURE_METRICS_TITLE = `Configure Metrics`;
+export const CVSS_SCORE_UPDATES_SUBTITLE = `Score updates in real-time`;
+export const CVSS_SETTINGS_BUTTON_LABEL = `Settings`;
+export const CVSS_ALTERNATIVE_DESCRIPTIONS_LABEL = `Use Alternative Descriptions`;
+export const CVSS_ALTERNATIVE_DESCRIPTIONS_DESC = `Toggle to switch between official not-so-clear and alternative, more explanatory metric descriptions.`;
+export const CVSS_SHOW_CONTRIBUTIONS_LABEL = `Show Score Contributions`;
+export const CVSS_SHOW_CONTRIBUTIONS_DESC = `Display how much each metric option contributes to the overall vulnerability score.`;
+export const CVSS_VECTOR_LABEL = `Vector`;
+export const CVSS_COPY_VECTOR_LABEL = `Copy Vector`;
+export const CVSS_SHARE_LINK_LABEL = `Share Link`;
+export const CVSS_EMBEDDABLE_CODE_LABEL = `Embeddable code`;
+export const CVSS_EXPORT_OPTIONS_LABEL = `Export options`;
+export const CVSS_PERSISTENCE_LABEL = `Persistence`;
+export const CVSS_SAVE_TO_HISTORY_LABEL = `Save to Score Manager`;
+export const CVSS_SAVE_DIALOG_TITLE = `Save Score to History`;
+export const CVSS_SAVE_DIALOG_DESC = `Enter a name for this CVSS score to save it in your history.`;
+export const CVSS_HISTORY_NAME_LABEL = `History Name`;
+export const CVSS_HISTORY_NAME_PLACEHOLDER = `Enter a name for this score`;
+export const CVSS_HISTORY_NAME_HELPER = `A descriptive name to help you identify this score in your history.`;
+export const CVSS_CANCEL_BUTTON = `Cancel`;
+export const CVSS_SAVE_BUTTON = `Save`;
+export const CVSS_GRID_COLS_4 = 4;
+export const CVSS_GRID_COLS_3 = 3;
+export const CVSS_EMBED_PATH_40 = `cvss40`;
+export const CVSS_EMBED_PATH_2 = `cvss2`;
+export const CVSS_EMBED_PATH_3_PREFIX = `cvss3`;
+export const CVSS_EMBED_IFRAME_WIDTH = `400`;
+export const CVSS_EMBED_IFRAME_HEIGHT = `600`;
+export const CVSS_EMBED_IFRAME_STYLE = `border:none;`;
+export const CVSS_QUERY_PARAM_VECTOR = `vector`;
+export const CVSS_LOGO_ALT = `CyberPath Quant Logo`;
+export const CVSS_ENTER_KEY = `Enter`;
+export const CVSS_THEME_LIGHT_ATTR = `data-light-theme`;
+export const CVSS_THEME_DARK_ATTR = `data-dark-theme`;
+export const CVSS_IMAGE_LOADING = `lazy`;
+export const CVSS_SEVERITY_RATING_PREFIX = `CVSS v`;
