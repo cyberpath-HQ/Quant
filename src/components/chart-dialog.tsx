@@ -1,6 +1,6 @@
 import type { ScoreHistoryEntry } from "@/lib/add-to-history";
 import {
-    useCallback, useMemo, useRef, useState,
+    useCallback, useEffect, useMemo, useRef, useState,
     type FC
 } from "react";
 import { title as titleCase } from "radash";
@@ -69,6 +69,8 @@ import {
 import {
     Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue
 } from "./ui/select";
+import { Spinner } from "./ui/spinner";
+import { useTheme } from "@/hooks/use-theme";
 
 const ALL_SEVERITIES = [
     `none`,
@@ -111,6 +113,27 @@ const BAR_CHART_FALLBACK_BOTTOM_MARGIN = 5;
 const BAR_CHART_X_AXIS_DEFAULT_OFFSET = 5;
 const BAR_CHART_X_AXIS_FALLBACK_OFFSET = -5;
 const BAR_CHART_Y_AXIS_FALLBACK_WIDTH = 25;
+
+const DEFAULT_SETTINGS = {
+    chart_type:                     `bar` as `bar` | `donut`,
+    title:                          `CVSS Scores Chart`,
+    should_show_legend:             true,
+    should_show_x_axis_label:       true,
+    should_show_y_axis_label:       true,
+    inner_radius:                   DEFAULT_INNER_RADIUS,
+    custom_colors:                  {} as Record<string, string>,
+    transparency:                   DEFAULT_TRANSPARENCY,
+    x_axis_label:                   `Severity`,
+    y_axis_label:                   `Count`,
+    tooltip_label:                  `Count`,
+    bar_radius:                     DEFAULT_BAR_RADIUS,
+    severity_labels:                {} as Record<string, string>,
+    should_show_floating_labels:    true,
+    tooltip_content_type:           `count` as `count` | `percentage`,
+    floating_label_type:            `percentage` as `count` | `percentage`,
+    should_show_x_axis_tick_labels: true,
+    legend_position:                `below-chart` as `below-title` | `below-chart`,
+};
 
 interface ChartDialogProps {
     open:            boolean
@@ -386,89 +409,91 @@ const TypeSpecificSettings: FC<TypeSpecificSettingsProps> = ({
                         <FieldDescription>
                             Customize the appearance of the bar chart.
                         </FieldDescription>
-                        <Field orientation={`horizontal`}>
-                            <Switch
-                                checked={show_x_axis_label}
-                                onCheckedChange={set_show_x_axis_label} />
-                            <FieldContent>
-                                <FieldLabel className="flex items-center gap-2">
-                                    Show X-Axis Label
-                                </FieldLabel>
-                                <FieldDescription className="text-xs">
-                                    Toggle the display of the X-Axis label.
-                                </FieldDescription>
-                            </FieldContent>
-                        </Field>
-                        <Field orientation={`horizontal`}>
-                            <Switch
-                                checked={show_y_axis_label}
-                                onCheckedChange={set_show_y_axis_label} />
-                            <FieldContent>
-                                <FieldLabel className="flex items-center gap-2">
-                                    Show Y-Axis Label
-                                </FieldLabel>
-                                <FieldDescription className="text-xs">
-                                    Toggle the display of the Y-Axis label.
-                                </FieldDescription>
-                            </FieldContent>
-                        </Field>
-
-                        <Field orientation={`horizontal`}>
-                            <Switch
-                                checked={show_x_axis_tick_labels}
-                                onCheckedChange={set_show_x_axis_tick_labels} />
-                            <FieldContent>
-                                <FieldLabel className="flex items-center gap-2">
-                                    Show X-Axis Tick Labels
-                                </FieldLabel>
-                                <FieldDescription className="text-xs">
-                                    Toggle the display of tick labels on the X-axis.
-                                </FieldDescription>
-                            </FieldContent>
-                        </Field>
-
+                        <div className="grid grid-cols-2 gap-4">
+                            <FieldGroup className="col-span-full grid grid-cols-2 gap-4">
+                                <div className="flex flex-col gap-4">
+                                    <Field orientation={`horizontal`}>
+                                        <Switch
+                                            checked={show_x_axis_label}
+                                            onCheckedChange={set_show_x_axis_label} />
+                                        <FieldContent>
+                                            <FieldLabel className="flex items-center gap-2">
+                                                Show X-Axis Label
+                                            </FieldLabel>
+                                            <FieldDescription className="text-xs">
+                                                Toggle the display of the X-Axis label.
+                                            </FieldDescription>
+                                        </FieldContent>
+                                    </Field>
+                                    <Field orientation={`horizontal`}>
+                                        <Switch
+                                            checked={show_x_axis_tick_labels}
+                                            onCheckedChange={set_show_x_axis_tick_labels} />
+                                        <FieldContent>
+                                            <FieldLabel className="flex items-center gap-2">
+                                                Show X-Axis Tick Labels
+                                            </FieldLabel>
+                                            <FieldDescription className="text-xs">
+                                                Toggle the display of tick labels on the X-axis.
+                                            </FieldDescription>
+                                        </FieldContent>
+                                    </Field>
+                                </div>
+                                <Field className="self-start">
+                                    <FieldLabel>
+                                        X-Axis Label
+                                    </FieldLabel>
+                                    <Input
+                                        value={x_axis_label}
+                                        disabled={!show_x_axis_label}
+                                        onChange={(e) => set_x_axis_label(e.target.value)}
+                                    />
+                                    <FieldDescription className="text-xs">
+                                        Label for the X-Axis representing severity levels.
+                                    </FieldDescription>
+                                </Field>
+                            </FieldGroup>
+                            <FieldSeparator className="col-span-full" />
+                            <FieldGroup className="col-span-full grid grid-cols-2 gap-4">
+                                <Field orientation={`horizontal`}>
+                                    <Switch
+                                        checked={show_y_axis_label}
+                                        onCheckedChange={set_show_y_axis_label} />
+                                    <FieldContent>
+                                        <FieldLabel className="flex items-center gap-2">
+                                            Show Y-Axis Label
+                                        </FieldLabel>
+                                        <FieldDescription className="text-xs">
+                                            Toggle the display of the Y-Axis label.
+                                        </FieldDescription>
+                                    </FieldContent>
+                                </Field>
+                                <Field>
+                                    <FieldLabel>
+                                        Y-Axis Label
+                                    </FieldLabel>
+                                    <Input
+                                        value={y_axis_label}
+                                        disabled={!show_y_axis_label}
+                                        onChange={(e) => set_y_axis_label(e.target.value)}
+                                    />
+                                    <FieldDescription className="text-xs">
+                                        Label for the Y-Axis representing frequency.
+                                    </FieldDescription>
+                                </Field>
+                            </FieldGroup>
+                        </div>
                         <Field>
-                            <FieldContent>
-                                <FieldLabel>
-                                    X-Axis Label
-                                </FieldLabel>
-                                <Input
-                                    value={x_axis_label}
-                                    onChange={(e) => set_x_axis_label(e.target.value)}
-                                />
-                                <FieldDescription className="text-xs">
-                                    Label for the X-Axis representing severity levels.
-                                </FieldDescription>
-                            </FieldContent>
-                        </Field>
-                        <Field>
-                            <FieldContent>
-                                <FieldLabel>
-                                    Y-Axis Label
-                                </FieldLabel>
-                                <Input
-                                    value={y_axis_label}
-                                    onChange={(e) => set_y_axis_label(e.target.value)}
-                                />
-                                <FieldDescription className="text-xs">
-                                    Label for the Y-Axis representing frequency.
-                                </FieldDescription>
-                            </FieldContent>
-                        </Field>
-
-                        <Field>
-                            <FieldContent>
-                                <FieldLabel>
-                                    Tooltip Label
-                                </FieldLabel>
-                                <Input
-                                    value={tooltip_label}
-                                    onChange={(e) => set_tooltip_label(e.target.value)}
-                                />
-                                <FieldDescription className="text-xs">
-                                    Label displayed in the tooltip for data points.
-                                </FieldDescription>
-                            </FieldContent>
+                            <FieldLabel>
+                                Tooltip Label
+                            </FieldLabel>
+                            <Input
+                                value={tooltip_label}
+                                onChange={(e) => set_tooltip_label(e.target.value)}
+                            />
+                            <FieldDescription className="text-xs">
+                                Label displayed in the tooltip for data points.
+                            </FieldDescription>
                         </Field>
                         <Field>
                             <FieldContent>
@@ -752,78 +777,56 @@ export const ChartDialog: FC<ChartDialogProps> = ({
     open, onOpenChange, selectedEntries,
 }) => {
     const [
-        chart_type,
-        set_chart_type,
-    ] = useState<`bar` | `donut`>(`bar`);
+        settings,
+        setSettings,
+    ] = useState(DEFAULT_SETTINGS);
     const [
-        title,
-        set_title,
-    ] = useState(`CVSS Scores Chart`);
-    const [
-        should_show_legend,
-        set_show_legend,
+        should_show_loading,
+        setShouldShowLoading,
     ] = useState(true);
-    const [
-        should_show_x_axis_label,
-        set_show_x_axis_label,
-    ] = useState(true);
-    const [
-        should_show_y_axis_label,
-        set_show_y_axis_label,
-    ] = useState(true);
-    const [
-        inner_radius,
-        set_inner_radius,
-    ] = useState(DEFAULT_INNER_RADIUS);
-    const [
-        custom_colors,
-        set_custom_colors,
-    ] = useState<Record<string, string>>({});
-    const [
-        transparency,
-        set_transparency,
-    ] = useState(DEFAULT_TRANSPARENCY);
-    const [
-        x_axis_label,
-        set_x_axis_label,
-    ] = useState(`Severity`);
-    const [
-        y_axis_label,
-        set_y_axis_label,
-    ] = useState(`Count`);
-    const [
-        tooltip_label,
-        set_tooltip_label,
-    ] = useState(`Count`);
-    const [
-        bar_radius,
-        set_bar_radius,
-    ] = useState(DEFAULT_BAR_RADIUS);
-    const [
-        severity_labels,
-        set_severity_labels,
-    ] = useState<Record<string, string>>({});
-    const [
-        should_show_floating_labels,
-        set_show_floating_labels,
-    ] = useState(true);
-    const [
-        tooltip_content_type,
-        set_tooltip_content_type,
-    ] = useState<`count` | `percentage`>(`count`);
-    const [
-        floating_label_type,
-        set_floating_label_type,
-    ] = useState<`count` | `percentage`>(`percentage`);
-    const [
-        should_show_x_axis_tick_labels,
-        set_show_x_axis_tick_labels,
-    ] = useState(true);
-    const [
-        legend_position,
-        set_legend_position,
-    ] = useState<`below-title` | `below-chart`>(`below-chart`);
     const chart_ref = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const saved = localStorage.getItem(`chart-dialog-settings`);
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                setSettings((prev) => ({
+                    ...prev,
+                    ...parsed,
+                }));
+            }
+            catch (e) {
+                console.error(`Failed to parse chart settings`, e);
+            }
+        }
+        setShouldShowLoading(false);
+    }, []);
+
+    useEffect(() => {
+        localStorage.setItem(`chart-dialog-settings`, JSON.stringify(settings));
+    }, [ settings ]);
+
+    const {
+        chart_type,
+        title,
+        should_show_legend,
+        should_show_x_axis_label,
+        should_show_y_axis_label,
+        inner_radius,
+        custom_colors,
+        transparency,
+        x_axis_label,
+        y_axis_label,
+        tooltip_label,
+        bar_radius,
+        severity_labels,
+        should_show_floating_labels,
+        tooltip_content_type,
+        floating_label_type,
+        should_show_x_axis_tick_labels,
+        legend_position,
+    } = settings;
 
     const severity_counts = useMemo(() => {
         const counts = ALL_SEVERITIES.reduce((acc, sev) => {
@@ -957,6 +960,10 @@ export const ChartDialog: FC<ChartDialogProps> = ({
         ]
     );
 
+    const {
+        theme,
+    } = useTheme();
+
     const export_chart = useCallback(async() => {
         if (!chart_ref.current) {
             toast.error(`Chart not found`);
@@ -967,7 +974,7 @@ export const ChartDialog: FC<ChartDialogProps> = ({
             const domtoimage = (await import(`dom-to-image-more`)).default;
 
             const blob = await domtoimage.toBlob(chart_ref.current, {
-                bgcolor:           `#ffffff`,
+                bgcolor:           theme === `dark` ? `#18181B` : `#ffffff`,
                 quality:           1,
                 scale:             2,
                 copyDefaultStyles: false,
@@ -985,7 +992,7 @@ export const ChartDialog: FC<ChartDialogProps> = ({
             console.error(`Export failed:`, error);
             toast.error(`Failed to export chart`);
         }
-    }, []);
+    }, [theme]);
 
     const share_embeddable_code = useCallback(() => {
         const embeddable_code = `<iframe src="${ window.location.origin }/embed/chart?${ new URLSearchParams({
@@ -1067,221 +1074,285 @@ export const ChartDialog: FC<ChartDialogProps> = ({
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </DialogHeader>
-                <div className="space-y-6">
-                    <div
-                        ref={chart_ref}
-                        className="relative">
-                        <div className="text-center">
-                            <h3 className={cn(
-                                `text-lg font-semibold dark:text-foreground/95`,
-                                {
-                                    "mb-4": legend_position !== `below-title`,
-                                }
-                            )}>
-                                {title}
-                            </h3>
-                            {should_show_legend && legend_position === `below-title` && custom_legend}
+                {
+                    should_show_loading
+                    ? (
+                        <div className="flex justify-center p-8">
+                            <Spinner />
                         </div>
-                        <div className="h-96">
-                            <ResponsiveContainer width="100%" height="100%">
-                                {
-                                    chart_type === `bar`
-                                    ? (
-                                        <BarChart
-                                            data={bar_data}
-                                            margin={{
-                                                left:   should_show_y_axis_label && y_axis_label.trim()
-                                                        ? BAR_CHART_DEFAULT_LEFT_MARGIN
-                                                        : ZERO,
-                                                bottom: should_show_x_axis_label && x_axis_label.trim()
-                                                        ? BAR_CHART_DEFAULT_BOTTOM_MARGIN
-                                                        : BAR_CHART_FALLBACK_BOTTOM_MARGIN,
-                                            }}
-                                        >
-                                            <CartesianGrid strokeDasharray="3 3" />
-                                            <XAxis
-                                                dataKey="name"
-                                                tick={
-                                                    should_show_x_axis_tick_labels
-                                                    ? {
-                                                        className: `dark:fill-foreground/80`,
-                                                    }
-                                                    : false
-                                                }
-                                                tickFormatter={
-                                                    should_show_x_axis_tick_labels
-                                                    ? undefined
-                                                    : (): string => ``
-                                                }
-                                                label={
-                                                    should_show_x_axis_label
-                                                    ? {
-                                                        value:    x_axis_label,
-                                                        position: `bottom`,
-                                                        offset:   should_show_x_axis_tick_labels
-                                                                  ? BAR_CHART_X_AXIS_DEFAULT_OFFSET
-                                                                  : BAR_CHART_X_AXIS_FALLBACK_OFFSET,
-                                                        className: `dark:fill-foreground/90`,
-                                                    }
-                                                    : undefined
-                                                }
-                                            />
-                                            <YAxis
-                                                type="number"
-                                                domain={[
-                                                    ZERO,
-                                                    `dataMax`,
-                                                ]}
-                                                allowDecimals={false}
-                                                ticks={y_ticks}
-                                                width={
-                                                    should_show_y_axis_label && y_axis_label.trim()
-                                                    ? undefined
-                                                    : BAR_CHART_Y_AXIS_FALLBACK_WIDTH
-                                                }
-                                                tick={{
-                                                    className: `dark:fill-foreground/80`,
+                    )
+                    : (
+                        <div className="space-y-6">
+                            <div
+                                ref={chart_ref}
+                                className="relative">
+                                <div className="text-center">
+                                    <h3 className={cn(
+                                        `text-lg font-semibold dark:text-foreground/95`,
+                                        {
+                                            "mb-4": legend_position !== `below-title`,
+                                        }
+                                    )}>
+                                        {title}
+                                    </h3>
+                                    {should_show_legend && legend_position === `below-title` && custom_legend}
+                                </div>
+                                <div className="h-96">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        {
+                                        chart_type === `bar`
+                                        ? (
+                                            <BarChart
+                                                data={bar_data}
+                                                margin={{
+                                                    left:   should_show_y_axis_label && y_axis_label.trim()
+                                                            ? BAR_CHART_DEFAULT_LEFT_MARGIN
+                                                            : ZERO,
+                                                    bottom: should_show_x_axis_label && x_axis_label.trim()
+                                                            ? BAR_CHART_DEFAULT_BOTTOM_MARGIN
+                                                            : BAR_CHART_FALLBACK_BOTTOM_MARGIN,
                                                 }}
-                                                label={
-                                                    should_show_y_axis_label
-                                                    ? {
-                                                        value:     y_axis_label,
-                                                        angle:     -90,
-                                                        position:  `insideLeft`,
-                                                        className: `dark:fill-foreground/90`,
-                                                    }
-                                                    : undefined
-                                                }
-                                            />
-                                            <Tooltip
-                                                formatter={
-                                                    (value) => [
-                                                        tooltip_content_type === `count`
-                                                        ? value
-                                                        : `${ (((value as number) / total) * HUNDRED).toFixed(DEFAULT_FRACTION_DIGITS) }%`,
-                                                        tooltip_label,
-                                                    ]
-                                                }
-                                            />
-                                            <Bar dataKey="count" fill="#8884d8" radius={[
-                                                bar_radius,
-                                                bar_radius,
-                                                ZERO,
-                                                ZERO,
-                                            ]}>
-                                                {bar_data.map((entry, index) => (
-                                                    <Cell
-                                                        key={`cell-${ index }`}
-                                                        fill={get_color_for_severity(entry.severity)}
-                                                    />
-                                                ))}
-                                            </Bar>
-                                        </BarChart>
-                                    )
-                                    : (
-                                        <PieChart>
-                                            <Pie
-                                                data={donut_data}
-                                                cx="50%"
-                                                cy="50%"
-                                                innerRadius={inner_radius}
-                                                labelLine={false}
-                                                label={should_show_floating_labels ? get_floating_label : false}
-                                                outerRadius={120}
-                                                fill="#8884d8"
-                                                dataKey="value"
                                             >
-                                                {donut_data.map((entry, index) => (
-                                                    <Cell
-                                                        key={`cell-${ index }`}
-                                                        fill={entry.color}
-                                                    />
-                                                ))}
-                                            </Pie>
-                                            <Tooltip
-                                                formatter={
-                                                    (value, name) => [
-                                                        tooltip_content_type === `count`
-                                                        ? value
-                                                        : `${ (((value as number) / total) * HUNDRED).toFixed(DEFAULT_FRACTION_DIGITS) }%`,
-                                                        name,
-                                                    ]
-                                                }
-                                            />
-                                        </PieChart>
-                                    )
-                                }
-                            </ResponsiveContainer>
-                        </div>
-                        {should_show_legend && legend_position === `below-chart` && custom_legend}
-                        <div className="absolute top-1.25 right-4 h-5 pointer-events-none bg-transparent p-px rounded-xs">
-                            {/* Light theme image */}
-                            <picture className="block dark:hidden" data-light-theme>
-                                <img
-                                    src={logoBlack.src}
-                                    loading="lazy"
-                                    alt="CyberPath Quant Logo"
-                                    className="w-auto h-5"
-                                />
-                            </picture>
+                                                <CartesianGrid strokeDasharray="3 3" />
+                                                <XAxis
+                                                    dataKey="name"
+                                                    tick={
+                                                        should_show_x_axis_tick_labels
+                                                        ? {
+                                                            className: `dark:fill-foreground/80`,
+                                                        }
+                                                        : false
+                                                    }
+                                                    tickFormatter={
+                                                        should_show_x_axis_tick_labels
+                                                        ? undefined
+                                                        : (): string => ``
+                                                    }
+                                                    label={
+                                                        should_show_x_axis_label
+                                                        ? {
+                                                            value:    x_axis_label,
+                                                            position: `bottom`,
+                                                            offset:   should_show_x_axis_tick_labels
+                                                                    ? BAR_CHART_X_AXIS_DEFAULT_OFFSET
+                                                                    : BAR_CHART_X_AXIS_FALLBACK_OFFSET,
+                                                            className: `dark:fill-foreground/90`,
+                                                        }
+                                                        : undefined
+                                                    }
+                                                />
+                                                <YAxis
+                                                    type="number"
+                                                    domain={[
+                                                        ZERO,
+                                                        `dataMax`,
+                                                    ]}
+                                                    allowDecimals={false}
+                                                    ticks={y_ticks}
+                                                    width={
+                                                        should_show_y_axis_label && y_axis_label.trim()
+                                                        ? undefined
+                                                        : BAR_CHART_Y_AXIS_FALLBACK_WIDTH
+                                                    }
+                                                    tick={{
+                                                        className: `dark:fill-foreground/80`,
+                                                    }}
+                                                    label={
+                                                        should_show_y_axis_label
+                                                        ? {
+                                                            value:     y_axis_label,
+                                                            angle:     -90,
+                                                            position:  `insideLeft`,
+                                                            className: `dark:fill-foreground/90`,
+                                                        }
+                                                        : undefined
+                                                    }
+                                                />
+                                                <Tooltip
+                                                    formatter={
+                                                        (value) => [
+                                                            tooltip_content_type === `count`
+                                                            ? value
+                                                            : `${ (((value as number) / total) * HUNDRED).toFixed(DEFAULT_FRACTION_DIGITS) }%`,
+                                                            tooltip_label,
+                                                        ]
+                                                    }
+                                                />
+                                                <Bar dataKey="count" fill="#8884d8" radius={[
+                                                    bar_radius,
+                                                    bar_radius,
+                                                    ZERO,
+                                                    ZERO,
+                                                ]}>
+                                                    {bar_data.map((entry, index) => (
+                                                        <Cell
+                                                            key={`cell-${ index }`}
+                                                            fill={get_color_for_severity(entry.severity)}
+                                                        />
+                                                    ))}
+                                                </Bar>
+                                            </BarChart>
+                                        )
+                                        : (
+                                            <PieChart>
+                                                <Pie
+                                                    data={donut_data}
+                                                    cx="50%"
+                                                    cy="50%"
+                                                    innerRadius={inner_radius}
+                                                    labelLine={false}
+                                                    label={should_show_floating_labels ? get_floating_label : false}
+                                                    outerRadius={120}
+                                                    fill="#8884d8"
+                                                    dataKey="value"
+                                                >
+                                                    {donut_data.map((entry, index) => (
+                                                        <Cell
+                                                            key={`cell-${ index }`}
+                                                            fill={entry.color}
+                                                        />
+                                                    ))}
+                                                </Pie>
+                                                <Tooltip
+                                                    formatter={
+                                                        (value, name) => [
+                                                            tooltip_content_type === `count`
+                                                            ? value
+                                                            : `${ (((value as number) / total) * HUNDRED).toFixed(DEFAULT_FRACTION_DIGITS) }%`,
+                                                            name,
+                                                        ]
+                                                    }
+                                                />
+                                            </PieChart>
+                                        )
+                                        }
+                                    </ResponsiveContainer>
+                                </div>
+                                {should_show_legend && legend_position === `below-chart` && custom_legend}
+                                <div className="absolute top-1.25 right-4 h-5 pointer-events-none bg-transparent p-px rounded-xs">
+                                    {/* Light theme image */}
+                                    <picture className="block dark:hidden" data-light-theme>
+                                        <img
+                                            src={logoBlack.src}
+                                            loading="lazy"
+                                            alt="CyberPath Quant Logo"
+                                            className="w-auto h-5"
+                                        />
+                                    </picture>
 
-                            {/* Dark theme image */}
-                            <picture className="hidden dark:block" data-dark-theme>
-                                <img
-                                    src={logoWhite.src}
-                                    loading="lazy"
-                                    alt="CyberPath Quant Logo"
-                                    className="w-auto h-5"
+                                    {/* Dark theme image */}
+                                    <picture className="hidden dark:block" data-dark-theme>
+                                        <img
+                                            src={logoWhite.src}
+                                            loading="lazy"
+                                            alt="CyberPath Quant Logo"
+                                            className="w-auto h-5"
+                                        />
+                                    </picture>
+                                </div>
+                            </div>
+                            <Accordion type="multiple">
+                                <ChartSettings
+                                    chart_type={chart_type}
+                                    set_chart_type={(value) => setSettings((prev) => ({
+                                        ...prev,
+                                        chart_type: value,
+                                    }))}
+                                    title={title}
+                                    set_title={(value) => setSettings((prev) => ({
+                                        ...prev,
+                                        title: value,
+                                    }))}
+                                    show_legend={should_show_legend}
+                                    set_show_legend={(value) => setSettings((prev) => ({
+                                        ...prev,
+                                        should_show_legend: value,
+                                    }))}
+                                    legend_position={legend_position}
+                                    set_legend_position={(value) => setSettings((prev) => ({
+                                        ...prev,
+                                        legend_position: value,
+                                    }))}
+                                    tooltip_content_type={tooltip_content_type}
+                                    set_tooltip_content_type={(value) => setSettings((prev) => ({
+                                        ...prev,
+                                        tooltip_content_type: value,
+                                    }))}
+                                    transparency={transparency}
+                                    set_transparency={(value) => setSettings((prev) => ({
+                                        ...prev,
+                                        transparency: value,
+                                    }))}
                                 />
-                            </picture>
+                                <TypeSpecificSettings
+                                    chart_type={chart_type}
+                                    show_x_axis_label={should_show_x_axis_label}
+                                    set_show_x_axis_label={(value) => setSettings((prev) => ({
+                                        ...prev,
+                                        should_show_x_axis_label: value,
+                                    }))}
+                                    show_y_axis_label={should_show_y_axis_label}
+                                    set_show_y_axis_label={(value) => setSettings((prev) => ({
+                                        ...prev,
+                                        should_show_y_axis_label: value,
+                                    }))}
+                                    show_x_axis_tick_labels={should_show_x_axis_tick_labels}
+                                    set_show_x_axis_tick_labels={(value) => setSettings((prev) => ({
+                                        ...prev,
+                                        should_show_x_axis_tick_labels: value,
+                                    }))}
+                                    x_axis_label={x_axis_label}
+                                    set_x_axis_label={(value) => setSettings((prev) => ({
+                                        ...prev,
+                                        x_axis_label: value,
+                                    }))}
+                                    y_axis_label={y_axis_label}
+                                    set_y_axis_label={(value) => setSettings((prev) => ({
+                                        ...prev,
+                                        y_axis_label: value,
+                                    }))}
+                                    tooltip_label={tooltip_label}
+                                    set_tooltip_label={(value) => setSettings((prev) => ({
+                                        ...prev,
+                                        tooltip_label: value,
+                                    }))}
+                                    bar_radius={bar_radius}
+                                    set_bar_radius={(value) => setSettings((prev) => ({
+                                        ...prev,
+                                        bar_radius: value,
+                                    }))}
+                                    inner_radius={inner_radius}
+                                    set_inner_radius={(value) => setSettings((prev) => ({
+                                        ...prev,
+                                        inner_radius: value,
+                                    }))}
+                                    show_floating_labels={should_show_floating_labels}
+                                    set_show_floating_labels={(value) => setSettings((prev) => ({
+                                        ...prev,
+                                        should_show_floating_labels: value,
+                                    }))}
+                                    floating_label_type={floating_label_type}
+                                    set_floating_label_type={(value) => setSettings((prev) => ({
+                                        ...prev,
+                                        floating_label_type: value,
+                                    }))}
+                                />
+                                <Customization
+                                    custom_colors={custom_colors}
+                                    set_custom_colors={(updater) => setSettings((prev) => ({
+                                        ...prev,
+                                        custom_colors: updater(prev.custom_colors),
+                                    }))}
+                                    severity_labels={severity_labels}
+                                    set_severity_labels={(updater) => setSettings((prev) => ({
+                                        ...prev,
+                                        severity_labels: updater(prev.severity_labels),
+                                    }))}
+                                />
+                            </Accordion>
                         </div>
-                    </div>
-                    <Accordion type="multiple">
-                        <ChartSettings
-                            chart_type={chart_type}
-                            set_chart_type={set_chart_type}
-                            title={title}
-                            set_title={set_title}
-                            show_legend={should_show_legend}
-                            set_show_legend={set_show_legend}
-                            legend_position={legend_position}
-                            set_legend_position={set_legend_position}
-                            tooltip_content_type={tooltip_content_type}
-                            set_tooltip_content_type={set_tooltip_content_type}
-                            transparency={transparency}
-                            set_transparency={set_transparency}
-                        />
-                        <TypeSpecificSettings
-                            chart_type={chart_type}
-                            show_x_axis_label={should_show_x_axis_label}
-                            set_show_x_axis_label={set_show_x_axis_label}
-                            show_y_axis_label={should_show_y_axis_label}
-                            set_show_y_axis_label={set_show_y_axis_label}
-                            show_x_axis_tick_labels={should_show_x_axis_tick_labels}
-                            set_show_x_axis_tick_labels={set_show_x_axis_tick_labels}
-                            x_axis_label={x_axis_label}
-                            set_x_axis_label={set_x_axis_label}
-                            y_axis_label={y_axis_label}
-                            set_y_axis_label={set_y_axis_label}
-                            tooltip_label={tooltip_label}
-                            set_tooltip_label={set_tooltip_label}
-                            bar_radius={bar_radius}
-                            set_bar_radius={set_bar_radius}
-                            inner_radius={inner_radius}
-                            set_inner_radius={set_inner_radius}
-                            show_floating_labels={should_show_floating_labels}
-                            set_show_floating_labels={set_show_floating_labels}
-                            floating_label_type={floating_label_type}
-                            set_floating_label_type={set_floating_label_type}
-                        />
-                        <Customization
-                            custom_colors={custom_colors}
-                            set_custom_colors={set_custom_colors}
-                            severity_labels={severity_labels}
-                            set_severity_labels={set_severity_labels}
-                        />
-                    </Accordion>
-                </div>
+                    )
+                }
             </DialogContent>
         </Dialog>
     );
