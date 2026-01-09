@@ -62,13 +62,11 @@ import {
     CVSS_EMBED_PATH_40,
     CVSS_EMBED_PATH_2,
     CVSS_EMBED_PATH_3_PREFIX,
-    CVSS_EMBED_IFRAME_WIDTH,
-    CVSS_EMBED_IFRAME_HEIGHT,
-    CVSS_EMBED_IFRAME_STYLE,
     CVSS_QUERY_PARAM_VECTOR,
     ZERO,
     IMPACT_FRACTION_DIGITS
 } from "@/lib/constants";
+import { generateEmbeddableCode } from "@/lib/embed";
 import SettingsMenu from './cvss-calculator/SettingsMenu';
 import ScoreCard from './cvss-calculator/ScoreCard';
 import ExportMenu from './cvss-calculator/ExportMenu';
@@ -185,13 +183,27 @@ export const CVSSGenericCalculator: FC<CVSSGenericCalculatorProps> = ({
         toast.success(CVSS_SHAREABLE_LINK_MESSAGE);
     }, [ vectorString ]);
 
+
+    const severity = useMemo(() => getSeverityRating(score, version), [
+        score,
+        version,
+    ]);
+
     const shareEmbeddableCode = useCallback(() => {
-        const embeddableCode = `<iframe src="${ window.location.origin }/embed/${ config.embedPath }?${ CVSS_QUERY_PARAM_VECTOR }=${ encodeURIComponent(vectorString) }" width="${ CVSS_EMBED_IFRAME_WIDTH }" height="${ CVSS_EMBED_IFRAME_HEIGHT }" style="${ CVSS_EMBED_IFRAME_STYLE }"></iframe>`;
+        const embeddableCode = generateEmbeddableCode({
+            version,
+            score,
+            vectorString,
+            severity,
+            origin: window.location.origin,
+        });
         navigator.clipboard.writeText(embeddableCode);
         toast.success(CVSS_EMBEDDABLE_CODE_MESSAGE);
     }, [
+        version,
+        score,
         vectorString,
-        config.embedPath,
+        severity,
     ]);
 
     const handleSaveToHistory = useCallback(() => {
@@ -245,11 +257,6 @@ export const CVSSGenericCalculator: FC<CVSSGenericCalculatorProps> = ({
         }
     }, [
         metrics,
-        version,
-    ]);
-
-    const severity = useMemo(() => getSeverityRating(score, version), [
-        score,
         version,
     ]);
 
