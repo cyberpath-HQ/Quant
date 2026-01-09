@@ -34,6 +34,7 @@ import {
     YAxis
 } from "recharts";
 import logoBlack from "@/assets/logo.svg";
+import logoWhite from "@/assets/logo-white.svg";
 import {
     Accordion, AccordionContent, AccordionItem, AccordionTrigger
 } from "./ui/accordion";
@@ -917,15 +918,18 @@ export const ChartDialog: FC<ChartDialogProps> = ({
     const custom_legend = useMemo(
         () => (
             <ul
-                className={cn(`flex flex-wrap gap-4 justify-center`, {
-                    "mt-4":      legend_position === `below-chart` &&
+                className={cn(
+                    `flex flex-wrap gap-4 justify-center dark:text-foreground/90`,
+                    {
+                        "mt-4":      legend_position === `below-chart` &&
                                  should_show_x_axis_label &&
                                  should_show_x_axis_tick_labels,
-                    "mt-2 mb-4": legend_position === `below-title`,
-                    "-mt-2":     legend_position === `below-chart` &&
+                        "mt-2 mb-4": legend_position === `below-title`,
+                        "-mt-2":     legend_position === `below-chart` &&
                                  !should_show_x_axis_label &&
                                  !should_show_x_axis_tick_labels,
-                })}
+                    }
+                )}
             >
                 {
                     filtered_severities.map((sev) => (
@@ -1068,7 +1072,12 @@ export const ChartDialog: FC<ChartDialogProps> = ({
                         ref={chart_ref}
                         className="relative">
                         <div className="text-center">
-                            <h3 className="text-lg font-semibold">
+                            <h3 className={cn(
+                                `text-lg font-semibold dark:text-foreground/95`,
+                                {
+                                    "mb-4": legend_position !== `below-title`,
+                                }
+                            )}>
                                 {title}
                             </h3>
                             {should_show_legend && legend_position === `below-title` && custom_legend}
@@ -1092,7 +1101,13 @@ export const ChartDialog: FC<ChartDialogProps> = ({
                                             <CartesianGrid strokeDasharray="3 3" />
                                             <XAxis
                                                 dataKey="name"
-                                                tick={should_show_x_axis_tick_labels}
+                                                tick={
+                                                    should_show_x_axis_tick_labels
+                                                    ? {
+                                                        className: `dark:fill-foreground/80`,
+                                                    }
+                                                    : false
+                                                }
                                                 tickFormatter={
                                                     should_show_x_axis_tick_labels
                                                     ? undefined
@@ -1106,6 +1121,7 @@ export const ChartDialog: FC<ChartDialogProps> = ({
                                                         offset:   should_show_x_axis_tick_labels
                                                                   ? BAR_CHART_X_AXIS_DEFAULT_OFFSET
                                                                   : BAR_CHART_X_AXIS_FALLBACK_OFFSET,
+                                                        className: `dark:fill-foreground/90`,
                                                     }
                                                     : undefined
                                                 }
@@ -1123,12 +1139,16 @@ export const ChartDialog: FC<ChartDialogProps> = ({
                                                     ? undefined
                                                     : BAR_CHART_Y_AXIS_FALLBACK_WIDTH
                                                 }
+                                                tick={{
+                                                    className: `dark:fill-foreground/80`,
+                                                }}
                                                 label={
                                                     should_show_y_axis_label
                                                     ? {
-                                                        value:    y_axis_label,
-                                                        angle:    -90,
-                                                        position: `insideLeft`,
+                                                        value:     y_axis_label,
+                                                        angle:     -90,
+                                                        position:  `insideLeft`,
+                                                        className: `dark:fill-foreground/90`,
                                                     }
                                                     : undefined
                                                 }
@@ -1194,11 +1214,27 @@ export const ChartDialog: FC<ChartDialogProps> = ({
                             </ResponsiveContainer>
                         </div>
                         {should_show_legend && legend_position === `below-chart` && custom_legend}
-                        <img
-                            src={logoBlack.src}
-                            alt="CyberPath Quant Logo"
-                            className="absolute top-2 right-4 h-5 pointer-events-none bg-white p-px rounded-xs"
-                        />
+                        <div className="absolute top-1.25 right-4 h-5 pointer-events-none bg-transparent p-px rounded-xs">
+                            {/* Light theme image */}
+                            <picture className="block dark:hidden" data-light-theme>
+                                <img
+                                    src={logoBlack.src}
+                                    loading="lazy"
+                                    alt="CyberPath Quant Logo"
+                                    className="w-auto h-5"
+                                />
+                            </picture>
+
+                            {/* Dark theme image */}
+                            <picture className="hidden dark:block" data-dark-theme>
+                                <img
+                                    src={logoWhite.src}
+                                    loading="lazy"
+                                    alt="CyberPath Quant Logo"
+                                    className="w-auto h-5"
+                                />
+                            </picture>
+                        </div>
                     </div>
                     <Accordion type="multiple">
                         <ChartSettings
