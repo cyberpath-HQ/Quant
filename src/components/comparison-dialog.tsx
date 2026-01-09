@@ -106,6 +106,21 @@ export const ComparisonDialog: FC<ComparisonDialogProps> = ({
         return value;
     }, []);
 
+    const is_same_version = useMemo(() => {
+        if (selectedEntries.length !== 2) {
+            return false;
+        }
+
+        const [
+            a,
+            b,
+        ] = selectedEntries;
+
+        const [ a_major ] = a.version.split(`.`);
+        const [ b_major ] = b.version.split(`.`);
+        return a_major === b_major;
+    }, [ selectedEntries ]);
+
     const getMetricDifferences = useCallback(() => {
         if (selectedEntries.length !== 2) {
             return null;
@@ -115,7 +130,7 @@ export const ComparisonDialog: FC<ComparisonDialogProps> = ({
             first,
             second,
         ] = selectedEntries;
-        if (first.version !== second.version) {
+        if (!is_same_version) {
             return null;
         }
 
@@ -258,12 +273,12 @@ export const ComparisonDialog: FC<ComparisonDialogProps> = ({
                         )
                     }
 
-                    {selectedEntries.length === 2 && selectedEntries[0].version !== selectedEntries[1].version && (
+                    {selectedEntries.length === 2 && !is_same_version && (
                         <div className="rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 p-4">
                             <p className="text-sm text-amber-800 dark:text-amber-200">
                                 <strong>Note:</strong> These scores use different CVSS versions ({selectedEntries[0].version} vs{` `}
                                 {selectedEntries[1].version}). Metric-level comparison is only available for scores using the same
-                                version.
+                                major version (eg. version 3.0 vs 3.1).
                             </p>
                         </div>
                     )}
