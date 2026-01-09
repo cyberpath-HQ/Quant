@@ -73,13 +73,27 @@ export const CVSSCalculator: FC = () => {
             setRestoreVectorString(null);
 
             // Switch to the appropriate tab
-            setActiveTab(`v${ parsed.version }`);
+            setActiveTab(`v${parsed.version}`);
+        }
+    }, []);
+
+    // Load activeTab from URL on mount
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const version = urlParams.get(`version`);
+        if (version && [
+            `v4.0`,
+            `v3.1`,
+            `v3.0`,
+            `v2.0`,
+        ].includes(version)) {
+            setActiveTab(version);
         }
     }, []);
 
     // Listen for restore events from CVSSScoreManager component
     useEffect(() => {
-        const handleRestore = (event: CustomEvent) => {
+        const handleRestore = (event: CustomEvent): void => {
             const {
                 vectorString,
             } = event.detail;
@@ -89,7 +103,7 @@ export const CVSSCalculator: FC = () => {
             if (parsed) {
                 setParsedVector(parsed);
                 setRestoreVectorString(vectorString);
-                setActiveTab(`v${ parsed.version }`);
+                setActiveTab(`v${parsed.version}`);
             }
         };
 
@@ -114,6 +128,16 @@ export const CVSSCalculator: FC = () => {
         should_use_alternative_description,
         should_show_contributions,
     ]);
+
+    // Update URL when version changes
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set(`version`, activeTab);
+        const newSearch = urlParams.toString();
+        if (window.location.search !== `?${newSearch}`) {
+            window.history.replaceState(null, ``, `?${newSearch}`);
+        }
+    }, [activeTab]);
 
     // Load settings from local storage on mount
     useEffect(() => {
