@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
 /**
  * Main CVSS Calculator Component
  *
@@ -5,7 +6,8 @@
  */
 
 import {
-    useEffect, useState
+    useEffect, useState,
+    type FC
 } from "react";
 import {
     Tabs, TabsContent, TabsList, TabsTrigger
@@ -14,10 +16,10 @@ import { CVSS40Calculator } from "./CVSS40Calculator";
 import { CVSS3Calculator } from "./CVSS3Calculator";
 import { CVSS2Calculator } from "./CVSS2Calculator";
 import {
-    vectorParser, type CVSSv4Metrics
+    vectorParser, type CVSSv2Metrics, type CVSSv3Metrics, type CVSSv4Metrics
 } from "@/lib/cvss";
 
-export function CVSSCalculator() {
+export const CVSSCalculator: FC = () => {
     const [
         activeTab,
         setActiveTab,
@@ -129,10 +131,12 @@ export function CVSSCalculator() {
     return (
         <div className="w-full max-w-7xl mx-auto">
             <div className="mb-10 space-y-3">
-                <h1 className="text-5xl font-extrabold tracking-tight">CVSS Calculator</h1>
+                <h1 className="text-5xl font-extrabold tracking-tight dark:text-foreground">
+                    CVSS Calculator
+                </h1>
                 <p className="text-lg text-muted-foreground max-w-3xl">
-                    Calculate vulnerability severity scores using the Common Vulnerability Scoring System. Select a version below
-                    to begin your assessment.
+                    Calculate vulnerability severity scores using the Common Vulnerability Scoring System.
+                    Select a version below to begin your assessment.
                 </p>
             </div>
 
@@ -156,7 +160,9 @@ export function CVSSCalculator() {
                     <CVSS40Calculator
                         key={restoreVectorString ?? `v4.0`}
                         initialMetrics={
-              parsedVector?.version === `4.0` ? (parsedVector.metrics as Partial<CVSSv4Metrics>) : undefined
+                            parsedVector?.version === `4.0`
+                            ? (parsedVector.metrics as Partial<CVSSv4Metrics>)
+                            : undefined
                         }
                         shouldUseAlternativeDescription={should_use_alternative_description}
                         setShouldUseAlternativeDescription={setShouldUseAlternativeDescription}
@@ -169,7 +175,11 @@ export function CVSSCalculator() {
                     <CVSS3Calculator
                         key={restoreVectorString ?? `v3.1`}
                         version="3.1"
-                        initialMetrics={parsedVector?.version === `3.1` ? (parsedVector.metrics as any) : undefined}
+                        initialMetrics={
+                            parsedVector?.version === `3.1`
+                            ? (parsedVector.metrics as Partial<CVSSv3Metrics>)
+                            : undefined
+                        }
                     />
                 </TabsContent>
 
@@ -177,17 +187,25 @@ export function CVSSCalculator() {
                     <CVSS3Calculator
                         key={restoreVectorString ?? `v3.0`}
                         version="3.0"
-                        initialMetrics={parsedVector?.version === `3.0` ? (parsedVector.metrics as any) : undefined}
+                        initialMetrics={
+                            parsedVector?.version === `3.0`
+                            ? (parsedVector.metrics as Partial<CVSSv3Metrics>)
+                            : undefined
+                        }
                     />
                 </TabsContent>
 
                 <TabsContent value="v2.0" className="mt-6">
                     <CVSS2Calculator
                         key={restoreVectorString ?? `v2.0`}
-                        initialMetrics={parsedVector?.version === `2.0` ? (parsedVector.metrics as any) : undefined}
+                        initialMetrics={
+                            parsedVector?.version === `2.0`
+                            ? (parsedVector.metrics as Partial<CVSSv2Metrics>)
+                            : undefined
+                        }
                     />
                 </TabsContent>
             </Tabs>
         </div>
     );
-}
+};
