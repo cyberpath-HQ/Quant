@@ -8,7 +8,8 @@
 import {
     useState, useEffect,
     useCallback,
-    useMemo
+    useMemo,
+    type FC
 } from "react";
 import {
     Card, CardContent
@@ -53,6 +54,7 @@ import {
 import { Input } from "./ui/input";
 import { addToHistory } from "../lib/add-to-history";
 import { DEFAULT_METRICS } from "@/lib/cvss/v4/scoring";
+import { useTheme } from "@/hooks/use-theme";
 
 interface CVSS40CalculatorProps {
     initialMetrics?:                    Partial<CVSSv4Metrics>
@@ -62,13 +64,13 @@ interface CVSS40CalculatorProps {
     setShouldShowContributions:         (value: boolean) => void
 }
 
-export function CVSS40Calculator({
+export const CVSS40Calculator: FC<CVSS40CalculatorProps> = ({
     initialMetrics,
     shouldUseAlternativeDescription,
     setShouldUseAlternativeDescription,
     shouldShowContributions,
     setShouldShowContributions,
-}: CVSS40CalculatorProps) {
+}) => {
     const [
         metrics,
         setMetrics,
@@ -156,16 +158,22 @@ export function CVSS40Calculator({
         setVectorString(result.vector);
     }, [ metrics ]);
 
+    const theme = useTheme();
+
     return (
         <>
-            <Toaster position="top-right" richColors />
+            <Toaster position="top-right" richColors theme={theme.theme} />
             <div className="grid lg:grid-cols-[1fr_380px] gap-8">
                 {/* Left: Metrics */}
                 <div className="space-y-6">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h2 className="text-2xl font-bold text-foreground">Configure Metrics</h2>
-                            <p className="text-sm text-muted-foreground mt-1">Score updates in real-time</p>
+                            <h2 className="text-2xl font-bold text-foreground">
+                                Configure Metrics
+                            </h2>
+                            <p className="text-sm text-muted-foreground mt-1">
+                                Score updates in real-time
+                            </p>
                         </div>
                         <div className="space-y-3">
                             <DropdownMenu>
@@ -178,36 +186,42 @@ export function CVSS40Calculator({
                                 <DropdownMenuContent className="max-w-96">
                                     <DropdownMenuItem
                                         className="cursor-pointer p-3"
-                                        onClick={() => document.getElementById(`alternative-descriptions`)?.click()}>
+                                        onClick={() => document.getElementById(`alternative-descriptions`)?.click()}
+                                    >
                                         <Field orientation="horizontal">
                                             <Switch
                                                 onCheckedChange={setShouldUseAlternativeDescription}
                                                 checked={shouldUseAlternativeDescription}
-                                                id="alternative-descriptions" />
+                                                id="alternative-descriptions"
+                                            />
                                             <FieldContent>
                                                 <FieldLabel htmlFor="alternative-descriptions">
                                                     Use Alternative Descriptions
                                                 </FieldLabel>
                                                 <FieldDescription>
-                                                    Toggle to switch between official not-so-clear and alternative, more explanatory metric descriptions.
+                                                    Toggle to switch between official not-so-clear and alternative, more
+                                                    explanatory metric descriptions.
                                                 </FieldDescription>
                                             </FieldContent>
                                         </Field>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
                                         className="cursor-pointer p-3"
-                                        onClick={() => document.getElementById(`show-contributions`)?.click()}>
+                                        onClick={() => document.getElementById(`show-contributions`)?.click()}
+                                    >
                                         <Field orientation="horizontal">
                                             <Switch
                                                 onCheckedChange={setShouldShowContributions}
                                                 checked={shouldShowContributions}
-                                                id="show-contributions" />
+                                                id="show-contributions"
+                                            />
                                             <FieldContent>
                                                 <FieldLabel htmlFor="show-contributions">
                                                     Show Score Contributions
                                                 </FieldLabel>
                                                 <FieldDescription>
-                                                    Display how much each metric option contributes to the overall vulnerability score.
+                                                    Display how much each metric option contributes to the overall
+                                                    vulnerability score.
                                                 </FieldDescription>
                                             </FieldContent>
                                         </Field>
@@ -217,97 +231,104 @@ export function CVSS40Calculator({
                         </div>
                     </div>
 
-                    <Tabs value={activeGroup} onValueChange={setActiveGroup}>
+                    <Tabs
+                        value={activeGroup}
+                        onValueChange={setActiveGroup}>
                         <TabsList className="w-full grid grid-cols-4 h-10">
                             {
                                 cvss40Metrics.map((group) => (
-                                    <TabsTrigger key={group.name} value={dash(group.name)} className="text-xs">
+                                    <TabsTrigger
+                                        key={group.name}
+                                        value={dash(group.name)}
+                                        className="text-xs"
+                                    >
                                         {group.name.replace(`Metrics`, ``)}
                                     </TabsTrigger>
                                 ))
                             }
                         </TabsList>
 
-                        {cvss40Metrics.map((group) => (
-                            <TabsContent key={group.name} value={dash(group.name)} className="mt-6 space-y-4">
-                                <div className="text-sm text-muted-foreground">{group.description}</div>
+                        {
+                            cvss40Metrics.map((group) => (
+                                <TabsContent key={group.name} value={dash(group.name)} className="mt-6 space-y-4">
+                                    <div className="text-sm text-muted-foreground">{group.description}</div>
 
-                                <div className="grid gap-5">
-                                    {group.metrics.map((metric) => (
-                                        <div key={metric.key} className="space-y-2">
-                                            <FieldSet>
-                                                <FieldLabel>
-                                                    {metric.label}
-                                                </FieldLabel>
-                                                <FieldDescription>
-                                                    {metric.description}
-                                                </FieldDescription>
-                                                <RadioGroup
-                                                    value={metrics[metric.key as keyof CVSSv4Metrics] as string}
-                                                    onValueChange={(value) => {
-                                                        updateMetric(metric.key as keyof CVSSv4Metrics, value);
-                                                    }}
-                                                >
-                                                    {
-                                                        metric.options.map((option) => {
-                                                            const metricKey = metric.key as keyof CVSSv4Metrics;
-                                                            const isCurrentlySelected = metrics[metricKey] === option.value;
+                                    <div className="grid gap-5">
+                                        {group.metrics.map((metric) => (
+                                            <div key={metric.key} className="space-y-2">
+                                                <FieldSet>
+                                                    <FieldLabel>
+                                                        {metric.label}
+                                                    </FieldLabel>
+                                                    <FieldDescription>
+                                                        {metric.description}
+                                                    </FieldDescription>
+                                                    <RadioGroup
+                                                        value={metrics[metric.key as keyof CVSSv4Metrics] as string}
+                                                        onValueChange={(value) => {
+                                                            updateMetric(metric.key as keyof CVSSv4Metrics, value);
+                                                        }}
+                                                    >
+                                                        {
+                                                            metric.options.map((option) => {
+                                                                const metricKey = metric.key as keyof CVSSv4Metrics;
+                                                                const isCurrentlySelected = metrics[metricKey] === option.value;
 
-                                                            // Calculate what the score impact would be if this option is selected
-                                                            const impact = shouldShowContributions && !isCurrentlySelected
+                                                                // Calculate what the score impact would be if this option is selected
+                                                                const impact = shouldShowContributions && !isCurrentlySelected
                                                                 ? calculateOptionImpact(metrics, metricKey, option.value)
                                                                 : 0;
 
-                                                            const hasImpact = shouldShowContributions && !isCurrentlySelected;
+                                                                const hasImpact = shouldShowContributions && !isCurrentlySelected;
 
-                                                            let impactColor = `text-gray-500 dark:text-gray-400`;
-                                                            if (hasImpact) {
-                                                                if (impact > 0) {
-                                                                    impactColor = `text-red-600 dark:text-red-400 border-red-300 dark:border-red-700`;
+                                                                let impactColor = `text-gray-500 dark:text-gray-400`;
+                                                                if (hasImpact) {
+                                                                    if (impact > 0) {
+                                                                        impactColor = `text-red-600 dark:text-red-400 border-red-300 dark:border-red-700`;
+                                                                    }
+                                                                    else if (impact < 0) {
+                                                                        impactColor = `text-green-600 dark:text-green-400 border-green-300 dark:border-green-700`;
+                                                                    }
                                                                 }
-                                                                else if (impact < 0) {
-                                                                    impactColor = `text-green-600 dark:text-green-400 border-green-300 dark:border-green-700`;
-                                                                }
-                                                            }
 
-                                                            return (
-                                                                <Field
-                                                                    key={option.value}
-                                                                    orientation="horizontal"
-                                                                    className="items-start border rounded-md p-4 cursor-pointer
+                                                                return (
+                                                                    <Field
+                                                                        key={option.value}
+                                                                        orientation="horizontal"
+                                                                        className="items-start border rounded-md p-4 cursor-pointer
                                                                     [:has([role='radio'][data-state='checked'])]:border-sky-500
                                                                     [:has([role='radio'][data-state='checked'])]:bg-sky-500/10"
-                                                                    onClick={() => {
-                                                                        const element = document.getElementById(
-                                                                            `${ metricKey }-${ option.value }`
-                                                                        );
-                                                                        element?.click();
-                                                                    }}
-                                                                >
-                                                                    <RadioGroupItem
-                                                                        value={option.value}
-                                                                        id={`${ metricKey }-${ option.value }`}
-                                                                        className="mt-1 [[data-state='checked']]:border-sky-500"
-                                                                    />
-                                                                    <div className="flex flex-col flex-1">
-                                                                        <div className="flex items-center justify-between gap-2">
-                                                                            <FieldLabel
-                                                                                htmlFor={`${ metricKey }-${ option.value }`}
-                                                                                className="font-medium"
-                                                                            >
-                                                                                {option.label}
-                                                                            </FieldLabel>
-                                                                            {shouldShowContributions && (
-                                                                                <Badge
-                                                                                    variant="outline"
-                                                                                    className={cn(
-                                                                                        `text-xs font-mono tabular-nums`,
+                                                                        onClick={() => {
+                                                                            const element = document.getElementById(
+                                                                                `${ metricKey }-${ option.value }`
+                                                                            );
+                                                                            element?.click();
+                                                                        }}
+                                                                    >
+                                                                        <RadioGroupItem
+                                                                            value={option.value}
+                                                                            id={`${ metricKey }-${ option.value }`}
+                                                                            className="mt-1 [[data-state='checked']]:border-sky-500"
+                                                                        />
+                                                                        <div className="flex flex-col flex-1">
+                                                                            <div className="flex items-center justify-between gap-2">
+                                                                                <FieldLabel
+                                                                                    htmlFor={`${ metricKey }-${ option.value }`}
+                                                                                    className="font-medium"
+                                                                                >
+                                                                                    {option.label}
+                                                                                </FieldLabel>
+                                                                                {shouldShowContributions && (
+                                                                                    <Badge
+                                                                                        variant="outline"
+                                                                                        className={cn(
+                                                                                            `text-xs font-mono tabular-nums`,
                                                                                         isCurrentlySelected
                                                                                             ? `text-blue-600 dark:text-blue-400 border-blue-300 dark:border-blue-700`
                                                                                             : impactColor
-                                                                                    )}
-                                                                                >
-                                                                                    {isCurrentlySelected
+                                                                                        )}
+                                                                                    >
+                                                                                        {isCurrentlySelected
 ? (
                                                                                         `Current`
                                                                                     )
@@ -317,27 +338,29 @@ export function CVSS40Calculator({
                                                                                             {impact.toFixed(1)}
                                                                                         </>
                                                                                     )}
-                                                                                </Badge>
-                                                                            )}
+                                                                                    </Badge>
+                                                                                )}
+                                                                            </div>
+                                                                            <FieldDescription>
+                                                                                {
+                                                                                    shouldUseAlternativeDescription
+                                                                                    ? option.in_other_words
+                                                                                    : option.description
+                                                                                }
+                                                                            </FieldDescription>
                                                                         </div>
-                                                                        <FieldDescription>
-                                                                            {shouldUseAlternativeDescription
-                                                                                ? option.in_other_words
-                                                                                : option.description
-                                                                            }
-                                                                        </FieldDescription>
-                                                                    </div>
-                                                                </Field>
-                                                            );
-                                                        })
-                                                    }
-                                                </RadioGroup>
-                                            </FieldSet>
-                                        </div>
-                                    ))}
-                                </div>
-                            </TabsContent>
-                        ))}
+                                                                    </Field>
+                                                                );
+                                                            })
+                                                        }
+                                                    </RadioGroup>
+                                                </FieldSet>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </TabsContent>
+                            ))
+                        }
                     </Tabs>
                 </div>
 
@@ -347,7 +370,9 @@ export function CVSS40Calculator({
                         <CardContent className="px-6 space-y-6">
                             <div className="space-y-3">
                                 <div className="flex items-center justify-between">
-                                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">CVSS v4.0</p>
+                                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                        CVSS v4.0
+                                    </p>
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
                                             <Button variant={`outline`} size={`sm`}>
@@ -469,4 +494,4 @@ export function CVSS40Calculator({
             </Dialog>
         </>
     );
-}
+};
