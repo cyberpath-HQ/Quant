@@ -408,7 +408,7 @@ export const CVSS40Calculator: FC<CVSS40CalculatorProps> = ({
                                         </DropdownMenuContent>
                                     </DropdownMenu>
                                 </div>
-                                <div className="flex items-baseline gap-3">
+                                <div className="flex items-end gap-3">
                                     <div className={cn(`text-6xl font-bold tabular-nums`, severity.color)}>
                                         {score.toFixed(1)}
                                     </div>
@@ -419,7 +419,9 @@ export const CVSS40Calculator: FC<CVSS40CalculatorProps> = ({
                             </div>
 
                             <div className="space-y-2">
-                                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Vector</p>
+                                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                    Vector
+                                </p>
                                 <div className="rounded-lg bg-white dark:bg-slate-900 p-3 font-mono text-[10px] leading-relaxed break-all border border-sky-200 dark:border-sky-800 text-foreground">
                                     {vectorString}
                                 </div>
