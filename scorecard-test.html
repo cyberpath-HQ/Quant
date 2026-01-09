@@ -1,0 +1,344 @@
+<style>
+    .cvss-widget-container-1767974402 {
+        all: initial;
+        font-family: system-ui, -apple-system, sans-serif;
+        color: #1f2937;
+        border: 2px solid #0ea5e9;
+        border-radius: 8px;
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        padding: 24px;
+        background: white;
+        max-width: 400px;
+        height: auto;
+        margin: 0 auto;
+        display: block;
+    }
+    .cvss-widget-container-1767974402 * {
+        box-sizing: border-box;
+    }
+    @keyframes cvss-slideInRight-1767974402 {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    @keyframes cvss-slideDown-1767974402 {
+        from {
+            opacity: 0;
+            transform: scale(0.95) translateY(-4px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+    @keyframes cvss-slideUp-1767974402 {
+        from {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+        to {
+            opacity: 0;
+            transform: scale(0.95) translateY(-4px);
+        }
+    }
+    .cvss-widget-container-1767974402 .cvss-toast-1767974402 {
+        transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+    }
+    .cvss-widget-container-1767974402 .cvss-dropdown-1767974402 {
+        position: relative;
+        display: inline-block;
+    }
+    .cvss-widget-container-1767974402 .cvss-dropdown-content-1767974402 {
+        display: none;
+        position: absolute;
+        right: 0;
+        top: 100%;
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 4px;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        z-index: 20;
+        min-width: 160px;
+        transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+    }
+    .cvss-widget-container-1767974402 .cvss-dropdown-content-1767974402.cvss-show-1767974402 {
+        animation: cvss-slideDown 0.3s ease-out;
+    }
+    .cvss-widget-container-1767974402 .cvss-dropdown-content-1767974402.cvss-hide-1767974402 {
+        animation: cvss-slideUp 0.3s ease-out;
+    }
+    .cvss-widget-container-1767974402 .cvss-dropdown-content-1767974402 a {
+        display: block;
+        padding: 8px 16px;
+        text-decoration: none;
+        color: #1f2937;
+        font-size: 14px;
+    }
+    .cvss-widget-container-1767974402 .cvss-dropdown-content-1767974402 a:hover {
+        background: #f9fafb;
+    }
+    .cvss-widget-container-1767974402 .cvss-btn-link-1767974402 {
+        background: #0ea5e9;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px 0 0 4px;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 500;
+        display: inline-block;
+        cursor: pointer;
+        transition: background 0.2s;
+        border-right: 1px solid rgba(255,255,255,0.2);
+    }
+    .cvss-widget-container-1767974402 .cvss-btn-link-1767974402:hover {
+        background: #0284c7;
+    }
+    .cvss-widget-container-1767974402 .cvss-dropdown-1767974402 button {
+        background: #0ea5e9;
+        border: none;
+        cursor: pointer;
+        padding: 6px 8px;
+        border-radius: 0 4px 4px 0;
+        color: white;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        transition: background 0.2s;
+        border-left: 1px solid rgba(255,255,255,0.2);
+    }
+    .cvss-widget-container-1767974402 .cvss-dropdown-1767974402 button:hover {
+        background: #0284c7;
+    }
+</style>
+<div class="cvss-widget-container-1767974402">
+    <div style="
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    ">
+        <span style="
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        ">
+            CVSS v4.0
+        </span>
+        <div style="display: flex;">
+            <a href='http://localhost:4321?vector=CVSS%3A4.0%2FAV%3AN%2FAC%3AL%2FAT%3AN%2FPR%3AN%2FUI%3AN%2FVC%3AN%2FVI%3AN%2FVA%3AN%2FSC%3AN%2FSI%3AN%2FSA%3AN&utm_source=view_in_calculator&utm_medium=widget&utm_campaign=cvss_calculator' rel="noopener" target="_blank" class="cvss-btn-link-1767974402" aria-label="Open CVSS calculator with current vector">
+                Open in calculator
+            </a>
+            <div class="cvss-dropdown-1767974402">
+                <button onclick="cvssToggleDropdown_1767974402()" aria-expanded="false" aria-haspopup="menu" aria-label="More options">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <circle cx="12" cy="12" r="1"></circle>
+                        <circle cx="12" cy="5" r="1"></circle>
+                        <circle cx="12" cy="19" r="1"></circle>
+                    </svg>
+                </button>
+                <div id="cvss-dropdown-content-1767974402" class="cvss-dropdown-content-1767974402" role="menu" aria-hidden="true">
+                    <a href="#" onclick="cvssCopyLink_1767974402('http://localhost:4321?vector=CVSS%3A4.0%2FAV%3AN%2FAC%3AL%2FAT%3AN%2FPR%3AN%2FUI%3AN%2FVC%3AN%2FVI%3AN%2FVA%3AN%2FSC%3AN%2FSI%3AN%2FSA%3AN'); cvssToggleDropdown_1767974402(); return false;" role="menuitem" tabindex="-1">
+                        Copy share link
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="
+        display: flex;
+        align-items: flex-end;
+        gap: 12px;
+        margin-bottom: 24px;
+    ">
+        <span style="
+            font-size: 48px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            color: oklch(50% 0.134 242.749);
+        ">
+            0.00
+        </span>
+        <span style="
+            font-size: 14px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 4px;
+            color: oklch(50% 0.134 242.749);
+            background-color: oklch(95.1% 0.026 236.824);
+        ">
+            None
+        </span>
+    </div>
+
+    <div style="margin-bottom: 24px;">
+        <span style="
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        ">
+            Vector
+        </span>
+        <div style="
+            margin-top: 8px;
+            padding: 12px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-family: 'Courier New', 'Monaco', monospace;
+            font-size: 10px;
+            line-height: 1.5;
+            word-break: break-all;
+            color: #1f2937;
+            position: relative;
+        " onmouseover="cvssShowIcons_1767974402()" onmouseout="cvssHideIcons_1767974402()">
+            CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N
+            <div id="cvss-vector-icons-1767974402" style="
+                position: absolute;
+                top: 8px;
+                right: 8px;
+                display: none;
+                gap: 4px;
+            ">
+                <button onclick="cvssCopyVector_1767974402('CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N')" style="
+                    background: white;
+                    border: 1px solid #e5e7eb;
+                    cursor: pointer;
+                    padding: 4px;
+                    border-radius: 4px;
+                    color: #6b7280;
+                    z-index: 10;
+                    position: relative;
+                " title="Copy vector" aria-label="Copy CVSS vector to clipboard">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="cvss-toast-1767974402" class="cvss-toast-1767974402" style="
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #1f2937;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-size: 14px;
+        display: none;
+        z-index: 1000;
+        transform: translateX(100%);
+        opacity: 0;
+    " aria-live="polite" aria-atomic="true" role="status"></div>
+
+    <script>
+        (function() {
+            const container = document.querySelector('.cvss-widget-container-1767974402');
+            if (!container) return;
+
+            container.addEventListener('click', function(event) {
+                const dropdown = container.querySelector('.cvss-dropdown-1767974402');
+                const content = container.querySelector('#cvss-dropdown-content-1767974402');
+                if (!dropdown.contains(event.target)) {
+                    cvssCloseDropdown_1767974402();
+                }
+            });
+
+            window.cvssToggleDropdown_1767974402 = function() {
+                const content = container.querySelector('#cvss-dropdown-content-1767974402');
+                const button = content.previousElementSibling;
+                if (content.style.display === 'block') {
+                    cvssCloseDropdown_1767974402();
+                } else {
+                    cvssOpenDropdown_1767974402();
+                }
+            };
+
+            window.cvssOpenDropdown_1767974402 = function() {
+                const content = container.querySelector('#cvss-dropdown-content-1767974402');
+                const button = content.previousElementSibling;
+                content.style.display = 'block';
+                content.classList.add('cvss-show-1767974402');
+                content.classList.remove('cvss-hide-1767974402');
+                button.setAttribute('aria-expanded', 'true');
+                content.setAttribute('aria-hidden', 'false');
+            };
+
+            window.cvssCloseDropdown_1767974402 = function() {
+                const content = container.querySelector('#cvss-dropdown-content-1767974402');
+                const button = content.previousElementSibling;
+                content.classList.add('cvss-hide-1767974402');
+                content.classList.remove('cvss-show-1767974402');
+                setTimeout(() => {
+                    content.style.display = 'none';
+                }, 300);
+                button.setAttribute('aria-expanded', 'false');
+                content.setAttribute('aria-hidden', 'true');
+            };
+
+            window.cvssShowIcons_1767974402 = function() {
+                const icons = container.querySelector('#cvss-vector-icons-1767974402');
+                icons.style.display = 'flex';
+            };
+
+            window.cvssHideIcons_1767974402 = function() {
+                const icons = container.querySelector('#cvss-vector-icons-1767974402');
+                icons.style.display = 'none';
+            };
+
+            window.cvssCopyVector_1767974402 = function(text) {
+                navigator.clipboard.writeText(text).then(() => {
+                    cvssShowToast_1767974402('Vector copied!');
+                });
+            };
+
+            window.cvssCopyLink_1767974402 = function(url) {
+                navigator.clipboard.writeText(url).then(() => {
+                    cvssShowToast_1767974402('Share link copied!');
+                });
+            };
+
+            window.cvssShowToast_1767974402 = function(message) {
+                const toast = container.querySelector('#cvss-toast-1767974402');
+                toast.textContent = message;
+                toast.style.display = 'block';
+                // Trigger animation
+                setTimeout(() => {
+                    toast.style.transform = 'translateX(0)';
+                    toast.style.opacity = '1';
+                }, 10);
+                setTimeout(() => {
+                    toast.style.transform = 'translateX(100%)';
+                    toast.style.opacity = '0';
+                    setTimeout(() => {
+                        toast.style.display = 'none';
+                    }, 300);
+                }, 3300); // 3s + 300ms entrance
+            };
+        })();
+    </script>
+
+    <div style="text-align: center; margin-top: 32px;">
+        <a href='http://localhost:4321?utm_source=embedded_logo&utm_medium=widget&utm_campaign=cvss_calculator' rel="noopener" target="_blank">
+            <img src="http://localhost:4321/logo.svg" alt="CyberPath Quant Logo" style="
+                width: 100%;
+                height: auto;
+                max-width: 200px;
+            " />
+        </a>
+    </div>
+</div>
