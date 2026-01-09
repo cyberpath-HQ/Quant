@@ -10,20 +10,11 @@ import { Badge } from "../ui/badge";
 import logoWhite from "@/assets/logo-white.svg";
 import logoBlack from "@/assets/logo.svg";
 import {
-    CVSS_VECTOR_LABEL,
     CVSS_IMAGE_LOADING,
     CVSS_LOGO_ALT,
     DEFAULT_FRACTION_DIGITS
 } from "@/lib/constants";
 import { cn } from "@/lib/utils";
-
-const VECTOR_STYLING =
-    `rounded-lg bg-white dark:bg-slate-900 p-3 font-mono text-[10px]
-    leading-relaxed break-all border border-sky-200 dark:border-sky-800
-    text-foreground`;
-const LOGO_CONTAINER = `mt-8 px-12`;
-const SCORE_DISPLAY = `text-6xl font-bold tabular-nums`;
-const BADGE_STYLING = `text-sm px-3 py-1.5 font-semibold`;
 
 interface SeverityInfo {
     label:   string
@@ -59,10 +50,10 @@ export const ScoreCard: FC<ScoreCardProps> = ({
                         {exportMenu}
                     </div>
                     <div className="flex items-end gap-3">
-                        <div className={cn(SCORE_DISPLAY, severity.color)}>
+                        <div className={cn(`text-6xl font-bold tabular-nums`, severity.color)}>
                             {scoreDisplay}
                         </div>
-                        <Badge className={cn(BADGE_STYLING, severity.color, severity.bgColor)}>
+                        <Badge className={cn(`text-sm px-3 py-1.5 font-semibold`, severity.color, severity.bgColor)}>
                             {severity.label}
                         </Badge>
                     </div>
@@ -70,14 +61,16 @@ export const ScoreCard: FC<ScoreCardProps> = ({
 
                 <div className="space-y-2">
                     <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                        {CVSS_VECTOR_LABEL}
+                        Vector
                     </p>
-                    <div className={VECTOR_STYLING}>
+                    <div className={`rounded-lg bg-white dark:bg-slate-900 p-3 font-mono text-[10px]
+    leading-relaxed break-all border border-sky-200 dark:border-sky-800
+    text-foreground`}>
                         {vectorString}
                     </div>
                 </div>
 
-                <div className={LOGO_CONTAINER}>
+                <div className={`mt-8 px-12`}>
                     {/* Light theme image */}
                     <picture className="block dark:hidden" data-light-theme>
                         <img

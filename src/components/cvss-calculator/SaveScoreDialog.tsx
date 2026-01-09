@@ -16,22 +16,16 @@ import {
 } from "../ui/field";
 import { Input } from "../ui/input";
 import {
-    CVSS_SAVE_DIALOG_TITLE,
-    CVSS_SAVE_DIALOG_DESC,
-    CVSS_HISTORY_NAME_LABEL,
     CVSS_HISTORY_NAME_PLACEHOLDER,
-    CVSS_HISTORY_NAME_HELPER,
-    CVSS_CANCEL_BUTTON,
-    CVSS_SAVE_BUTTON,
     CVSS_ENTER_KEY
 } from "@/lib/constants";
 
 interface SaveScoreDialogProps {
-    open: boolean
+    open:         boolean
     onOpenChange: (open: boolean) => void
-    historyName: string
+    historyName:  string
     onNameChange: (value: string) => void
-    onSave: () => void
+    onSave:       () => void
 }
 
 export const SaveScoreDialog: FC<SaveScoreDialogProps> = ({
@@ -52,17 +46,17 @@ export const SaveScoreDialog: FC<SaveScoreDialogProps> = ({
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>
-                        {CVSS_SAVE_DIALOG_TITLE}
+                        Save Score to Score Manager
                     </DialogTitle>
                     <DialogDescription>
-                        {CVSS_SAVE_DIALOG_DESC}
+                        Enter a name for this CVSS score to save it in your Score Manager.
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                     <Field orientation="horizontal">
                         <FieldContent>
                             <FieldLabel htmlFor="show-contributions">
-                                {CVSS_HISTORY_NAME_LABEL}
+                                Score Name
                             </FieldLabel>
                             <Input
                                 id="name"
@@ -72,7 +66,7 @@ export const SaveScoreDialog: FC<SaveScoreDialogProps> = ({
                                 placeholder={CVSS_HISTORY_NAME_PLACEHOLDER}
                             />
                             <FieldDescription>
-                                {CVSS_HISTORY_NAME_HELPER}
+                                A descriptive name to help you identify this score in your Score Manager.
                             </FieldDescription>
                         </FieldContent>
                     </Field>
@@ -82,13 +76,13 @@ export const SaveScoreDialog: FC<SaveScoreDialogProps> = ({
                         variant="outline"
                         onClick={() => onOpenChange(false)}
                     >
-                        {CVSS_CANCEL_BUTTON}
+                        Cancel
                     </Button>
                     <Button
                         id="save-to-history"
                         onClick={onSave}
                     >
-                        {CVSS_SAVE_BUTTON}
+                        Save
                     </Button>
                 </DialogFooter>
             </DialogContent>

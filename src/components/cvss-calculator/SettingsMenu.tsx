@@ -18,18 +18,15 @@ import {
 } from "../ui/field";
 import { Switch } from "../ui/switch";
 import {
-    CVSS_SETTINGS_BUTTON_LABEL,
-    CVSS_ALTERNATIVE_DESCRIPTIONS_LABEL,
-    CVSS_ALTERNATIVE_DESCRIPTIONS_DESC,
-    CVSS_SHOW_CONTRIBUTIONS_LABEL,
-    CVSS_SHOW_CONTRIBUTIONS_DESC
+    CVSS_ALTERNATIVE_DESCRIPTIONS_ID,
+    CVSS_SHOW_CONTRIBUTIONS_ID
 } from "@/lib/constants";
 
 interface SettingsMenuProps {
-    shouldUseAlternativeDescription: boolean
+    shouldUseAlternativeDescription:    boolean
     setShouldUseAlternativeDescription: (value: boolean) => void
-    shouldShowContributions: boolean
-    setShouldShowContributions: (value: boolean) => void
+    shouldShowContributions:            boolean
+    setShouldShowContributions:         (value: boolean) => void
 }
 
 export const SettingsMenu: FC<SettingsMenuProps> = ({
@@ -39,12 +36,12 @@ export const SettingsMenu: FC<SettingsMenuProps> = ({
     setShouldShowContributions,
 }) => {
     const handleAlternativeDescriptionsClick = useCallback(() => {
-        const element = document.getElementById(`alternative-descriptions`);
+        const element = document.getElementById(CVSS_ALTERNATIVE_DESCRIPTIONS_ID);
         element?.click();
     }, []);
 
     const handleShowContributionsClick = useCallback(() => {
-        const element = document.getElementById(`show-contributions`);
+        const element = document.getElementById(CVSS_SHOW_CONTRIBUTIONS_ID);
         element?.click();
     }, []);
 
@@ -53,7 +50,7 @@ export const SettingsMenu: FC<SettingsMenuProps> = ({
             <DropdownMenuTrigger asChild>
                 <Button variant={`outline`} size={`sm`}>
                     <Settings className="size-3.5" />
-                    {CVSS_SETTINGS_BUTTON_LABEL}
+                    Settings
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="max-w-96">
@@ -65,14 +62,14 @@ export const SettingsMenu: FC<SettingsMenuProps> = ({
                         <Switch
                             onCheckedChange={setShouldUseAlternativeDescription}
                             checked={shouldUseAlternativeDescription}
-                            id="alternative-descriptions"
+                            id={CVSS_ALTERNATIVE_DESCRIPTIONS_ID}
                         />
                         <FieldContent>
-                            <FieldLabel htmlFor="alternative-descriptions">
-                                {CVSS_ALTERNATIVE_DESCRIPTIONS_LABEL}
+                            <FieldLabel htmlFor={CVSS_ALTERNATIVE_DESCRIPTIONS_ID}>
+                                Use Alternative Descriptions
                             </FieldLabel>
                             <FieldDescription>
-                                {CVSS_ALTERNATIVE_DESCRIPTIONS_DESC}
+                                Toggle to switch between official not-so-clear and alternative, more explanatory metric descriptions.
                             </FieldDescription>
                         </FieldContent>
                     </Field>
@@ -85,14 +82,14 @@ export const SettingsMenu: FC<SettingsMenuProps> = ({
                         <Switch
                             onCheckedChange={setShouldShowContributions}
                             checked={shouldShowContributions}
-                            id="show-contributions"
+                            id={CVSS_SHOW_CONTRIBUTIONS_ID}
                         />
                         <FieldContent>
-                            <FieldLabel htmlFor="show-contributions">
-                                {CVSS_SHOW_CONTRIBUTIONS_LABEL}
+                            <FieldLabel htmlFor={CVSS_SHOW_CONTRIBUTIONS_ID}>
+                                Show Score Contributions
                             </FieldLabel>
                             <FieldDescription>
-                                {CVSS_SHOW_CONTRIBUTIONS_DESC}
+                                Display how much each metric option contributes to the overall vulnerability score.
                             </FieldDescription>
                         </FieldContent>
                     </Field>

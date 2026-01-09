@@ -18,20 +18,12 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger
 } from "../ui/dropdown-menu";
-import {
-    CVSS_EXPORT_OPTIONS_LABEL,
-    CVSS_COPY_VECTOR_LABEL,
-    CVSS_SHARE_LINK_LABEL,
-    CVSS_EMBEDDABLE_CODE_LABEL,
-    CVSS_PERSISTENCE_LABEL,
-    CVSS_SAVE_TO_HISTORY_LABEL
-} from "@/lib/constants";
 
 interface ExportMenuProps {
     onCopyVector: () => void
     onShareScore: () => void
-    onShareCode: () => void
-    onSaveClick: () => void
+    onShareCode:  () => void
+    onSaveClick:  () => void
 }
 
 export const ExportMenu: FC<ExportMenuProps> = ({
@@ -42,7 +34,7 @@ export const ExportMenu: FC<ExportMenuProps> = ({
 }) => {
     const handleSaveClick = useCallback(() => {
         onSaveClick();
-    }, [onSaveClick]);
+    }, [ onSaveClick ]);
 
     return (
         <DropdownMenu>
@@ -54,28 +46,28 @@ export const ExportMenu: FC<ExportMenuProps> = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent>
                 <DropdownMenuLabel className="text-xs">
-                    {CVSS_EXPORT_OPTIONS_LABEL}
+                    Export options
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={onCopyVector}>
                     <Copy className="size-3.5 mr-2" />
-                    {CVSS_COPY_VECTOR_LABEL}
+                    Copy Vector
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={onShareScore}>
                     <Share2 className="size-3.5 mr-2" />
-                    {CVSS_SHARE_LINK_LABEL}
+                    Share Link
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={onShareCode}>
                     <CodeXml className="size-3.5 mr-2" />
-                    {CVSS_EMBEDDABLE_CODE_LABEL}
+                    Embeddable Code
                 </DropdownMenuItem>
                 <DropdownMenuLabel className="text-xs">
-                    {CVSS_PERSISTENCE_LABEL}
+                    Persistence
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSaveClick}>
                     <History className="size-3.5 mr-2" />
-                    {CVSS_SAVE_TO_HISTORY_LABEL}
+                    Save to Score Manager
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
