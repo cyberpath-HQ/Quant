@@ -3,6 +3,7 @@
  * @description Generates SEO-compliant, self-contained HTML for embedding CVSS score cards
  */
 
+import dayjs from "dayjs";
 import {
     DEFAULT_FRACTION_DIGITS, CVSS_LOGO_ALT
 } from "./constants";
@@ -84,9 +85,10 @@ export function generateEmbeddableCode(params: {
     }).toString() }`;
     const escapedShareLink = shareLink.replace(/'/g, `\\'`);
 
+    const date = dayjs().unix();
     const html = `
 <style>
-    .cvss-widget-container {
+    .cvss-widget-container-${ date } {
         all: initial;
         font-family: system-ui, -apple-system, sans-serif;
         color: #1f2937;
@@ -100,10 +102,10 @@ export function generateEmbeddableCode(params: {
         margin: 0 auto;
         display: block;
     }
-    .cvss-widget-container * {
+    .cvss-widget-container-${ date } * {
         box-sizing: border-box;
     }
-    @keyframes cvss-slideInRight {
+    @keyframes cvss-slideInRight-${ date } {
         from {
             transform: translateX(100%);
             opacity: 0;
@@ -113,7 +115,7 @@ export function generateEmbeddableCode(params: {
             opacity: 1;
         }
     }
-    @keyframes cvss-slideDown {
+    @keyframes cvss-slideDown-${ date } {
         from {
             opacity: 0;
             transform: scale(0.95) translateY(-4px);
@@ -123,7 +125,7 @@ export function generateEmbeddableCode(params: {
             transform: scale(1) translateY(0);
         }
     }
-    @keyframes cvss-slideUp {
+    @keyframes cvss-slideUp-${ date } {
         from {
             opacity: 1;
             transform: scale(1) translateY(0);
@@ -133,14 +135,14 @@ export function generateEmbeddableCode(params: {
             transform: scale(0.95) translateY(-4px);
         }
     }
-    .cvss-widget-container .cvss-toast {
+    .cvss-widget-container-${ date } .cvss-toast-${ date } {
         transition: opacity 0.3s ease-out, transform 0.3s ease-out;
     }
-    .cvss-widget-container .cvss-dropdown {
+    .cvss-widget-container-${ date } .cvss-dropdown-${ date } {
         position: relative;
         display: inline-block;
     }
-    .cvss-widget-container .cvss-dropdown-content {
+    .cvss-widget-container-${ date } .cvss-dropdown-content-${ date } {
         display: none;
         position: absolute;
         right: 0;
@@ -153,23 +155,23 @@ export function generateEmbeddableCode(params: {
         min-width: 160px;
         transition: opacity 0.3s ease-out, transform 0.3s ease-out;
     }
-    .cvss-widget-container .cvss-dropdown-content.cvss-show {
+    .cvss-widget-container-${ date } .cvss-dropdown-content-${ date }.cvss-show-${ date } {
         animation: cvss-slideDown 0.3s ease-out;
     }
-    .cvss-widget-container .cvss-dropdown-content.cvss-hide {
+    .cvss-widget-container-${ date } .cvss-dropdown-content-${ date }.cvss-hide-${ date } {
         animation: cvss-slideUp 0.3s ease-out;
     }
-    .cvss-widget-container .cvss-dropdown-content a {
+    .cvss-widget-container-${ date } .cvss-dropdown-content-${ date } a {
         display: block;
         padding: 8px 16px;
         text-decoration: none;
         color: #1f2937;
         font-size: 14px;
     }
-    .cvss-widget-container .cvss-dropdown-content a:hover {
+    .cvss-widget-container-${ date } .cvss-dropdown-content-${ date } a:hover {
         background: #f9fafb;
     }
-    .cvss-widget-container .cvss-btn-link {
+    .cvss-widget-container-${ date } .cvss-btn-link-${ date } {
         background: #0ea5e9;
         color: white;
         border: none;
@@ -183,10 +185,10 @@ export function generateEmbeddableCode(params: {
         transition: background 0.2s;
         border-right: 1px solid rgba(255,255,255,0.2);
     }
-    .cvss-widget-container .cvss-btn-link:hover {
+    .cvss-widget-container-${ date } .cvss-btn-link-${ date }:hover {
         background: #0284c7;
     }
-    .cvss-widget-container .cvss-dropdown button {
+    .cvss-widget-container-${ date } .cvss-dropdown-${ date } button {
         background: #0ea5e9;
         border: none;
         cursor: pointer;
@@ -200,11 +202,11 @@ export function generateEmbeddableCode(params: {
         transition: background 0.2s;
         border-left: 1px solid rgba(255,255,255,0.2);
     }
-    .cvss-widget-container .cvss-dropdown button:hover {
+    .cvss-widget-container-${ date } .cvss-dropdown-${ date } button:hover {
         background: #0284c7;
     }
 </style>
-<div class="cvss-widget-container">
+<div class="cvss-widget-container-${ date }">
     <div style="
         display: flex;
         justify-content: space-between;
@@ -226,19 +228,19 @@ export function generateEmbeddableCode(params: {
                 utm_source:   `view_in_calculator`,
                 utm_medium:   `widget`,
                 utm_campaign: `cvss_calculator`,
-            }).toString() }' rel="noopener" target="_blank" class="cvss-btn-link" aria-label="Open CVSS calculator with current vector">
+            }).toString() }' rel="noopener" target="_blank" class="cvss-btn-link-${ date }" aria-label="Open CVSS calculator with current vector">
                 Open in calculator
             </a>
-            <div class="cvss-dropdown">
-                <button onclick="cvssToggleDropdown()" aria-expanded="false" aria-haspopup="menu" aria-label="More options">
+            <div class="cvss-dropdown-${ date }">
+                <button onclick="cvssToggleDropdown_${ date }()" aria-expanded="false" aria-haspopup="menu" aria-label="More options">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                         <circle cx="12" cy="12" r="1"></circle>
                         <circle cx="12" cy="5" r="1"></circle>
                         <circle cx="12" cy="19" r="1"></circle>
                     </svg>
                 </button>
-                <div id="cvss-dropdown-content" class="cvss-dropdown-content" role="menu" aria-hidden="true">
-                    <a href="#" onclick="cvssCopyLink('${ escapedShareLink }'); cvssToggleDropdown(); return false;" role="menuitem" tabindex="-1">
+                <div id="cvss-dropdown-content-${ date }" class="cvss-dropdown-content-${ date }" role="menu" aria-hidden="true">
+                    <a href="#" onclick="cvssCopyLink_${ date }('${ escapedShareLink }'); cvssToggleDropdown_${ date }(); return false;" role="menuitem" tabindex="-1">
                         Copy share link
                     </a>
                 </div>
@@ -294,16 +296,16 @@ export function generateEmbeddableCode(params: {
             word-break: break-all;
             color: #1f2937;
             position: relative;
-        " onmouseover="cvssShowIcons()" onmouseout="cvssHideIcons()">
+        " onmouseover="cvssShowIcons_${ date }()" onmouseout="cvssHideIcons_${ date }()">
             ${ vectorString }
-            <div id="cvss-vector-icons" style="
+            <div id="cvss-vector-icons-${ date }" style="
                 position: absolute;
                 top: 8px;
                 right: 8px;
                 display: none;
                 gap: 4px;
             ">
-                <button onclick="cvssCopyVector('${ escapedVector }')" style="
+                <button onclick="cvssCopyVector_${ date }('${ escapedVector }')" style="
                     background: white;
                     border: 1px solid #e5e7eb;
                     cursor: pointer;
@@ -322,7 +324,7 @@ export function generateEmbeddableCode(params: {
         </div>
     </div>
 
-    <div id="cvss-toast" class="cvss-toast" style="
+    <div id="cvss-toast-${ date }" class="cvss-toast-${ date }" style="
         position: fixed;
         top: 20px;
         right: 20px;
@@ -339,42 +341,42 @@ export function generateEmbeddableCode(params: {
 
     <script>
         (function() {
-            const container = document.querySelector('.cvss-widget-container');
+            const container = document.querySelector('.cvss-widget-container-${ date }');
             if (!container) return;
 
             container.addEventListener('click', function(event) {
-                const dropdown = container.querySelector('.cvss-dropdown');
-                const content = container.querySelector('#cvss-dropdown-content');
+                const dropdown = container.querySelector('.cvss-dropdown-${ date }');
+                const content = container.querySelector('#cvss-dropdown-content-${ date }');
                 if (!dropdown.contains(event.target)) {
-                    cvssCloseDropdown();
+                    cvssCloseDropdown_${ date }();
                 }
             });
 
-            window.cvssToggleDropdown = function() {
-                const content = container.querySelector('#cvss-dropdown-content');
+            window.cvssToggleDropdown_${ date } = function() {
+                const content = container.querySelector('#cvss-dropdown-content-${ date }');
                 const button = content.previousElementSibling;
                 if (content.style.display === 'block') {
-                    cvssCloseDropdown();
+                    cvssCloseDropdown_${ date }();
                 } else {
-                    cvssOpenDropdown();
+                    cvssOpenDropdown_${ date }();
                 }
             };
 
-            window.cvssOpenDropdown = function() {
-                const content = container.querySelector('#cvss-dropdown-content');
+            window.cvssOpenDropdown_${ date } = function() {
+                const content = container.querySelector('#cvss-dropdown-content-${ date }');
                 const button = content.previousElementSibling;
                 content.style.display = 'block';
-                content.classList.add('cvss-show');
-                content.classList.remove('cvss-hide');
+                content.classList.add('cvss-show-${ date }');
+                content.classList.remove('cvss-hide-${ date }');
                 button.setAttribute('aria-expanded', 'true');
                 content.setAttribute('aria-hidden', 'false');
             };
 
-            window.cvssCloseDropdown = function() {
-                const content = container.querySelector('#cvss-dropdown-content');
+            window.cvssCloseDropdown_${ date } = function() {
+                const content = container.querySelector('#cvss-dropdown-content-${ date }');
                 const button = content.previousElementSibling;
-                content.classList.add('cvss-hide');
-                content.classList.remove('cvss-show');
+                content.classList.add('cvss-hide-${ date }');
+                content.classList.remove('cvss-show-${ date }');
                 setTimeout(() => {
                     content.style.display = 'none';
                 }, 300);
@@ -382,30 +384,30 @@ export function generateEmbeddableCode(params: {
                 content.setAttribute('aria-hidden', 'true');
             };
 
-            window.cvssShowIcons = function() {
-                const icons = container.querySelector('#cvss-vector-icons');
+            window.cvssShowIcons_${ date } = function() {
+                const icons = container.querySelector('#cvss-vector-icons-${ date }');
                 icons.style.display = 'flex';
             };
 
-            window.cvssHideIcons = function() {
-                const icons = container.querySelector('#cvss-vector-icons');
+            window.cvssHideIcons_${ date } = function() {
+                const icons = container.querySelector('#cvss-vector-icons-${ date }');
                 icons.style.display = 'none';
             };
 
-            window.cvssCopyVector = function(text) {
+            window.cvssCopyVector_${ date } = function(text) {
                 navigator.clipboard.writeText(text).then(() => {
-                    cvssShowToast('Vector copied!');
+                    cvssShowToast_${ date }('Vector copied!');
                 });
             };
 
-            window.cvssCopyLink = function(url) {
+            window.cvssCopyLink_${ date } = function(url) {
                 navigator.clipboard.writeText(url).then(() => {
-                    cvssShowToast('Share link copied!');
+                    cvssShowToast_${ date }('Share link copied!');
                 });
             };
 
-            window.cvssShowToast = function(message) {
-                const toast = container.querySelector('#cvss-toast');
+            window.cvssShowToast_${ date } = function(message) {
+                const toast = container.querySelector('#cvss-toast-${ date }');
                 toast.textContent = message;
                 toast.style.display = 'block';
                 // Trigger animation
