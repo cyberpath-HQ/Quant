@@ -85,6 +85,32 @@ const SEVERITY_COLOR_MAP: Record<string, string> = {
     critical: `#8A2BE2`,
 };
 
+const ZERO = 0;
+const UNIT = 1;
+const TRANSPARENCY_MIN = 0;
+const TRANSPARENCY_MAX = 100;
+const BAR_RADIUS_MIN = 0;
+const BAR_RADIUS_MAX = 20;
+const INNER_RADIUS_MIN = 0;
+const INNER_RADIUS_MAX = 80;
+const DEFAULT_INNER_RADIUS = 60;
+const DEFAULT_TRANSPARENCY = 70;
+const DEFAULT_BAR_RADIUS = 5;
+const RGB_RED_START = 0;
+const RGB_RED_END = 2;
+const RGB_GREEN_START = RGB_RED_END;
+const RGB_GREEN_END = 4;
+const RGB_BLUE_START = RGB_GREEN_END;
+const RGB_BLUE_END = 6;
+const HUNDRED = 100;
+const DEFAULT_FRACTION_DIGITS = 2;
+const BAR_CHART_DEFAULT_LEFT_MARGIN = 20;
+const BAR_CHART_DEFAULT_BOTTOM_MARGIN = 20;
+const BAR_CHART_FALLBACK_BOTTOM_MARGIN = 5;
+const BAR_CHART_X_AXIS_DEFAULT_OFFSET = 5;
+const BAR_CHART_X_AXIS_FALLBACK_OFFSET = -5;
+const BAR_CHART_Y_AXIS_FALLBACK_WIDTH = 25;
+
 interface ChartDialogProps {
     open:            boolean
     onOpenChange:    (open: boolean) => void
@@ -249,9 +275,9 @@ const ChartSettings: FC<ChartSettingsProps> = ({
                         <Slider
                             value={[ transparency ]}
                             onValueChange={(value: Array<number>) => set_transparency(value[0])}
-                            max={100}
-                            min={0}
-                            step={1}
+                            max={TRANSPARENCY_MAX}
+                            min={TRANSPARENCY_MIN}
+                            step={UNIT}
                             className="col-span-2"
                         />
                         <InputGroup className="w-40">
@@ -259,7 +285,7 @@ const ChartSettings: FC<ChartSettingsProps> = ({
                                 <InputGroupButton
                                     variant="secondary"
                                     size="icon-xs"
-                                    onClick={() => set_transparency(Math.max(0, transparency - 1))}
+                                    onClick={() => set_transparency(Math.max(TRANSPARENCY_MIN, transparency - UNIT))}
                                     aria-label="Decrease chart transparency by 1"
                                 >
                                     <Minus />
@@ -269,10 +295,10 @@ const ChartSettings: FC<ChartSettingsProps> = ({
                                 id="input-secure-19"
                                 type="number"
                                 value={transparency}
-                                onChange={(e) => set_transparency(Math.min(100, Math.max(0, Number(e.target.value))))}
-                                min={0}
-                                max={100}
-                                step={1}
+                                onChange={(e) => set_transparency(Math.min(TRANSPARENCY_MAX, Math.max(TRANSPARENCY_MIN, Number(e.target.value))))}
+                                min={TRANSPARENCY_MIN}
+                                max={TRANSPARENCY_MAX}
+                                step={UNIT}
                                 className="text-end"
                             />
                             <InputGroupAddon align={`inline-end`}>%</InputGroupAddon>
@@ -280,7 +306,7 @@ const ChartSettings: FC<ChartSettingsProps> = ({
                                 <InputGroupButton
                                     variant="secondary"
                                     size="icon-xs"
-                                    onClick={() => set_transparency(Math.min(100, transparency + 1))}
+                                    onClick={() => set_transparency(Math.min(TRANSPARENCY_MAX, transparency + UNIT))}
                                     aria-label="Increase chart transparency by 1"
                                 >
                                     <Plus />
@@ -452,16 +478,16 @@ const TypeSpecificSettings: FC<TypeSpecificSettingsProps> = ({
                                     <Slider
                                         value={[ bar_radius ]}
                                         onValueChange={(value: Array<number>) => set_bar_radius(value[0])}
-                                        max={20}
-                                        min={0}
-                                        step={1}
+                                        max={BAR_RADIUS_MAX}
+                                        min={BAR_RADIUS_MIN}
+                                        step={UNIT}
                                     />
                                     <InputGroup className="w-42">
                                         <InputGroupAddon>
                                             <InputGroupButton
                                                 variant="secondary"
                                                 size="icon-xs"
-                                                onClick={() => set_bar_radius(Math.max(0, bar_radius - 1))}
+                                                onClick={() => set_bar_radius(Math.max(BAR_RADIUS_MIN, bar_radius - UNIT))}
                                                 aria-label="Decrease chart border radius by 1"
                                             >
                                                 <Minus />
@@ -471,10 +497,10 @@ const TypeSpecificSettings: FC<TypeSpecificSettingsProps> = ({
                                             id="input-secure-19"
                                             type="number"
                                             value={bar_radius}
-                                            onChange={(e) => set_bar_radius(Math.min(20, Math.max(0, Number(e.target.value))))}
-                                            min={0}
-                                            max={20}
-                                            step={1}
+                                            onChange={(e) => set_bar_radius(Math.min(BAR_RADIUS_MAX, Math.max(BAR_RADIUS_MIN, Number(e.target.value))))}
+                                            min={BAR_RADIUS_MIN}
+                                            max={BAR_RADIUS_MAX}
+                                            step={UNIT}
                                             className="text-end"
                                         />
                                         <InputGroupAddon align={`inline-end`}>
@@ -484,7 +510,7 @@ const TypeSpecificSettings: FC<TypeSpecificSettingsProps> = ({
                                             <InputGroupButton
                                                 variant="secondary"
                                                 size="icon-xs"
-                                                onClick={() => set_bar_radius(Math.min(20, bar_radius + 1))}
+                                                onClick={() => set_bar_radius(Math.min(BAR_RADIUS_MAX, bar_radius + UNIT))}
                                                 aria-label="Increase chart border radius by 1"
                                             >
                                                 <Plus />
@@ -514,16 +540,16 @@ const TypeSpecificSettings: FC<TypeSpecificSettingsProps> = ({
                                 <Slider
                                     value={[ inner_radius ]}
                                     onValueChange={(value: Array<number>) => set_inner_radius(value[0])}
-                                    max={80}
-                                    min={0}
-                                    step={1}
+                                    max={INNER_RADIUS_MAX}
+                                    min={INNER_RADIUS_MIN}
+                                    step={UNIT}
                                 />
                                 <InputGroup className="w-42">
                                     <InputGroupAddon>
                                         <InputGroupButton
                                             variant="secondary"
                                             size="icon-xs"
-                                            onClick={() => set_inner_radius(Math.max(0, inner_radius - 1))}
+                                            onClick={() => set_inner_radius(Math.max(INNER_RADIUS_MIN, inner_radius - UNIT))}
                                             aria-label="Decrease chart inner radius by 1"
                                         >
                                             <Minus />
@@ -533,10 +559,10 @@ const TypeSpecificSettings: FC<TypeSpecificSettingsProps> = ({
                                         id="input-secure-19"
                                         type="number"
                                         value={inner_radius}
-                                        onChange={(e) => set_inner_radius(Math.min(80, Math.max(0, Number(e.target.value))))}
-                                        min={0}
-                                        max={80}
-                                        step={1}
+                                        onChange={(e) => set_inner_radius(Math.min(INNER_RADIUS_MAX, Math.max(INNER_RADIUS_MIN, Number(e.target.value))))}
+                                        min={INNER_RADIUS_MIN}
+                                        max={INNER_RADIUS_MAX}
+                                        step={UNIT}
                                         className="text-end"
                                     />
                                     <InputGroupAddon align={`inline-end`}>
@@ -546,7 +572,7 @@ const TypeSpecificSettings: FC<TypeSpecificSettingsProps> = ({
                                         <InputGroupButton
                                             variant="secondary"
                                             size="icon-xs"
-                                            onClick={() => set_inner_radius(Math.min(80, inner_radius + 1))}
+                                            onClick={() => set_inner_radius(Math.min(INNER_RADIUS_MAX, inner_radius + UNIT))}
                                             aria-label="Increase chart inner radius by 1"
                                         >
                                             <Plus />
@@ -711,7 +737,7 @@ const Customization: FC<CustomizationProps> = ({
                                             />
                                         </Field>
                                     </FieldSet>
-                                    {i < ALL_SEVERITIES.length - 1 && <FieldSeparator />}
+                                    {i < ALL_SEVERITIES.length - UNIT && <FieldSeparator />}
                                 </>
                             ))}
                     </div>
@@ -733,21 +759,21 @@ export const ChartDialog: FC<ChartDialogProps> = ({
         set_title,
     ] = useState(`CVSS Scores Chart`);
     const [
-        show_legend,
+        should_show_legend,
         set_show_legend,
     ] = useState(true);
     const [
-        show_x_axis_label,
+        should_show_x_axis_label,
         set_show_x_axis_label,
     ] = useState(true);
     const [
-        show_y_axis_label,
+        should_show_y_axis_label,
         set_show_y_axis_label,
     ] = useState(true);
     const [
         inner_radius,
         set_inner_radius,
-    ] = useState(60);
+    ] = useState(DEFAULT_INNER_RADIUS);
     const [
         custom_colors,
         set_custom_colors,
@@ -755,7 +781,7 @@ export const ChartDialog: FC<ChartDialogProps> = ({
     const [
         transparency,
         set_transparency,
-    ] = useState(70);
+    ] = useState(DEFAULT_TRANSPARENCY);
     const [
         x_axis_label,
         set_x_axis_label,
@@ -771,13 +797,13 @@ export const ChartDialog: FC<ChartDialogProps> = ({
     const [
         bar_radius,
         set_bar_radius,
-    ] = useState(5);
+    ] = useState(DEFAULT_BAR_RADIUS);
     const [
         severity_labels,
         set_severity_labels,
     ] = useState<Record<string, string>>({});
     const [
-        show_floating_labels,
+        should_show_floating_labels,
         set_show_floating_labels,
     ] = useState(true);
     const [
@@ -789,7 +815,7 @@ export const ChartDialog: FC<ChartDialogProps> = ({
         set_floating_label_type,
     ] = useState<`count` | `percentage`>(`percentage`);
     const [
-        show_x_axis_tick_labels,
+        should_show_x_axis_tick_labels,
         set_show_x_axis_tick_labels,
     ] = useState(true);
     const [
@@ -805,7 +831,8 @@ export const ChartDialog: FC<ChartDialogProps> = ({
         }, {} as Record<string, number>);
         selectedEntries.forEach((entry) => {
             const sev = entry.severity.toLowerCase();
-            if (ALL_SEVERITIES.includes(sev)) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+            if (ALL_SEVERITIES.includes(sev as typeof ALL_SEVERITIES[number])) {
                 counts[sev]++;
             }
         });
@@ -815,7 +842,7 @@ export const ChartDialog: FC<ChartDialogProps> = ({
     const total = selectedEntries.length;
 
     const filtered_severities = useMemo(
-        () => ALL_SEVERITIES.filter((sev) => severity_counts[sev] > 0),
+        () => ALL_SEVERITIES.filter((sev) => severity_counts[sev] > ZERO),
         [ severity_counts ]
     );
 
@@ -823,10 +850,10 @@ export const ChartDialog: FC<ChartDialogProps> = ({
         (severity: string): string => {
             const base_color = custom_colors[severity] || SEVERITY_COLOR_MAP[severity.toLowerCase()] || `#8884d8`;
             const hex = base_color.replace(`#`, ``);
-            const r = parseInt(hex.substring(0, 2), 16);
-            const g = parseInt(hex.substring(2, 4), 16);
-            const b = parseInt(hex.substring(4, 6), 16);
-            const alpha = transparency / 100;
+            const r = parseInt(hex.substring(RGB_RED_START, RGB_RED_END), 16);
+            const g = parseInt(hex.substring(RGB_GREEN_START, RGB_GREEN_END), 16);
+            const b = parseInt(hex.substring(RGB_BLUE_START, RGB_BLUE_END), 16);
+            const alpha = transparency / HUNDRED;
             return `rgba(${ r }, ${ g }, ${ b }, ${ alpha })`;
         },
         [
@@ -864,20 +891,22 @@ export const ChartDialog: FC<ChartDialogProps> = ({
 
     const max_count = useMemo(() => Math.max(...Object.values(severity_counts)), [ severity_counts ]);
     const y_ticks = useMemo(() => Array.from({
-        length: max_count + 1,
+        length: max_count + UNIT,
     }, (_, i) => i), [ max_count ]);
 
     const get_floating_label = useCallback(
         ({
             name, value, percent,
-        }: { name?:   string
+        }: {
+            name?:    string
             value?:   number
-            percent?: number }) => {
+            percent?: number
+        }) => {
             const label = severity_labels[name ?? ``] ?? titleCase(name ?? ``);
             if (floating_label_type === `count`) {
-                return `${ label } ${ value ?? 0 }`;
+                return `${ label } ${ value ?? ZERO }`;
             }
-            return `${ label } ${ ((percent ?? 0) * 100).toFixed(2) }%`;
+            return `${ label } ${ ((percent ?? ZERO) * HUNDRED).toFixed(DEFAULT_FRACTION_DIGITS) }%`;
         },
         [
             severity_labels,
@@ -889,9 +918,13 @@ export const ChartDialog: FC<ChartDialogProps> = ({
         () => (
             <ul
                 className={cn(`flex flex-wrap gap-4 justify-center`, {
-                    "mt-4":      legend_position === `below-chart` && show_x_axis_label && show_x_axis_tick_labels,
+                    "mt-4":      legend_position === `below-chart` &&
+                                 should_show_x_axis_label &&
+                                 should_show_x_axis_tick_labels,
                     "mt-2 mb-4": legend_position === `below-title`,
-                    "-mt-2":     legend_position === `below-chart` && !show_x_axis_label && !show_x_axis_tick_labels,
+                    "-mt-2":     legend_position === `below-chart` &&
+                                 !should_show_x_axis_label &&
+                                 !should_show_x_axis_tick_labels,
                 })}
             >
                 {
@@ -915,7 +948,7 @@ export const ChartDialog: FC<ChartDialogProps> = ({
             filtered_severities,
             get_color_for_severity,
             legend_position,
-            show_x_axis_label,
+            should_show_x_axis_label,
             severity_labels,
         ]
     );
@@ -954,9 +987,9 @@ export const ChartDialog: FC<ChartDialogProps> = ({
         const embeddable_code = `<iframe src="${ window.location.origin }/embed/chart?${ new URLSearchParams({
             chart_type:              chart_type,
             title,
-            show_legend:             JSON.stringify(show_legend),
-            show_x_axis_label:       JSON.stringify(show_x_axis_label),
-            show_y_axis_label:       JSON.stringify(show_y_axis_label),
+            show_legend:             JSON.stringify(should_show_legend),
+            show_x_axis_label:       JSON.stringify(should_show_x_axis_label),
+            show_y_axis_label:       JSON.stringify(should_show_y_axis_label),
             inner_radius:            JSON.stringify(inner_radius),
             custom_colors:           JSON.stringify(custom_colors),
             transparency:            JSON.stringify(transparency),
@@ -965,10 +998,10 @@ export const ChartDialog: FC<ChartDialogProps> = ({
             tooltip_label:           tooltip_label,
             bar_radius:              JSON.stringify(bar_radius),
             severity_labels:         JSON.stringify(severity_labels),
-            show_floating_labels:    JSON.stringify(show_floating_labels),
+            show_floating_labels:    JSON.stringify(should_show_floating_labels),
             tooltip_content_type:    tooltip_content_type,
             floating_label_type:     floating_label_type,
-            show_x_axis_tick_labels: JSON.stringify(show_x_axis_tick_labels),
+            show_x_axis_tick_labels: JSON.stringify(should_show_x_axis_tick_labels),
             legend_position:         legend_position,
         }).toString() }" width="400" height="600" style="border:none;"></iframe>`;
         navigator.clipboard.writeText(embeddable_code);
@@ -976,9 +1009,9 @@ export const ChartDialog: FC<ChartDialogProps> = ({
     }, [
         chart_type,
         title,
-        show_legend,
-        show_x_axis_label,
-        show_y_axis_label,
+        should_show_legend,
+        should_show_x_axis_label,
+        should_show_y_axis_label,
         inner_radius,
         custom_colors,
         transparency,
@@ -987,10 +1020,10 @@ export const ChartDialog: FC<ChartDialogProps> = ({
         tooltip_label,
         bar_radius,
         severity_labels,
-        show_floating_labels,
+        should_show_floating_labels,
         tooltip_content_type,
         floating_label_type,
-        show_x_axis_tick_labels,
+        should_show_x_axis_tick_labels,
         legend_position,
     ]);
 
@@ -1038,7 +1071,7 @@ export const ChartDialog: FC<ChartDialogProps> = ({
                             <h3 className="text-lg font-semibold">
                                 {title}
                             </h3>
-                            {show_legend && legend_position === `below-title` && custom_legend}
+                            {should_show_legend && legend_position === `below-title` && custom_legend}
                         </div>
                         <div className="h-96">
                             <ResponsiveContainer width="100%" height="100%">
@@ -1048,21 +1081,31 @@ export const ChartDialog: FC<ChartDialogProps> = ({
                                         <BarChart
                                             data={bar_data}
                                             margin={{
-                                                left:   show_y_axis_label && y_axis_label.trim() ? 20 : 0,
-                                                bottom: show_x_axis_label && x_axis_label.trim() ? 20 : 5,
+                                                left:   should_show_y_axis_label && y_axis_label.trim()
+                                                        ? BAR_CHART_DEFAULT_LEFT_MARGIN
+                                                        : ZERO,
+                                                bottom: should_show_x_axis_label && x_axis_label.trim()
+                                                        ? BAR_CHART_DEFAULT_BOTTOM_MARGIN
+                                                        : BAR_CHART_FALLBACK_BOTTOM_MARGIN,
                                             }}
                                         >
                                             <CartesianGrid strokeDasharray="3 3" />
                                             <XAxis
                                                 dataKey="name"
-                                                tick={show_x_axis_tick_labels}
-                                                tickFormatter={show_x_axis_tick_labels ? undefined : () => ``}
+                                                tick={should_show_x_axis_tick_labels}
+                                                tickFormatter={
+                                                    should_show_x_axis_tick_labels
+                                                    ? undefined
+                                                    : (): string => ``
+                                                }
                                                 label={
-                                                    show_x_axis_label
+                                                    should_show_x_axis_label
                                                     ? {
                                                         value:    x_axis_label,
                                                         position: `bottom`,
-                                                        offset:   show_x_axis_tick_labels ? 5 : -5,
+                                                        offset:   should_show_x_axis_tick_labels
+                                                                  ? BAR_CHART_X_AXIS_DEFAULT_OFFSET
+                                                                  : BAR_CHART_X_AXIS_FALLBACK_OFFSET,
                                                     }
                                                     : undefined
                                                 }
@@ -1070,14 +1113,18 @@ export const ChartDialog: FC<ChartDialogProps> = ({
                                             <YAxis
                                                 type="number"
                                                 domain={[
-                                                    0,
+                                                    ZERO,
                                                     `dataMax`,
                                                 ]}
                                                 allowDecimals={false}
                                                 ticks={y_ticks}
-                                                width={show_y_axis_label && y_axis_label.trim() ? undefined : 25}
+                                                width={
+                                                    should_show_y_axis_label && y_axis_label.trim()
+                                                    ? undefined
+                                                    : BAR_CHART_Y_AXIS_FALLBACK_WIDTH
+                                                }
                                                 label={
-                                                    show_y_axis_label
+                                                    should_show_y_axis_label
                                                     ? {
                                                         value:    y_axis_label,
                                                         angle:    -90,
@@ -1091,7 +1138,7 @@ export const ChartDialog: FC<ChartDialogProps> = ({
                                                     (value) => [
                                                         tooltip_content_type === `count`
                                                         ? value
-                                                        : `${ (((value as number) / total) * 100).toFixed(2) }%`,
+                                                        : `${ (((value as number) / total) * HUNDRED).toFixed(DEFAULT_FRACTION_DIGITS) }%`,
                                                         tooltip_label,
                                                     ]
                                                 }
@@ -1099,8 +1146,8 @@ export const ChartDialog: FC<ChartDialogProps> = ({
                                             <Bar dataKey="count" fill="#8884d8" radius={[
                                                 bar_radius,
                                                 bar_radius,
-                                                0,
-                                                0,
+                                                ZERO,
+                                                ZERO,
                                             ]}>
                                                 {bar_data.map((entry, index) => (
                                                     <Cell
@@ -1119,7 +1166,7 @@ export const ChartDialog: FC<ChartDialogProps> = ({
                                                 cy="50%"
                                                 innerRadius={inner_radius}
                                                 labelLine={false}
-                                                label={show_floating_labels ? get_floating_label : false}
+                                                label={should_show_floating_labels ? get_floating_label : false}
                                                 outerRadius={120}
                                                 fill="#8884d8"
                                                 dataKey="value"
@@ -1136,7 +1183,7 @@ export const ChartDialog: FC<ChartDialogProps> = ({
                                                     (value, name) => [
                                                         tooltip_content_type === `count`
                                                         ? value
-                                                        : `${ (((value as number) / total) * 100).toFixed(2) }%`,
+                                                        : `${ (((value as number) / total) * HUNDRED).toFixed(DEFAULT_FRACTION_DIGITS) }%`,
                                                         name,
                                                     ]
                                                 }
@@ -1146,7 +1193,7 @@ export const ChartDialog: FC<ChartDialogProps> = ({
                                 }
                             </ResponsiveContainer>
                         </div>
-                        {show_legend && legend_position === `below-chart` && custom_legend}
+                        {should_show_legend && legend_position === `below-chart` && custom_legend}
                         <img
                             src={logoBlack.src}
                             alt="CyberPath Quant Logo"
@@ -1159,7 +1206,7 @@ export const ChartDialog: FC<ChartDialogProps> = ({
                             set_chart_type={set_chart_type}
                             title={title}
                             set_title={set_title}
-                            show_legend={show_legend}
+                            show_legend={should_show_legend}
                             set_show_legend={set_show_legend}
                             legend_position={legend_position}
                             set_legend_position={set_legend_position}
@@ -1170,11 +1217,11 @@ export const ChartDialog: FC<ChartDialogProps> = ({
                         />
                         <TypeSpecificSettings
                             chart_type={chart_type}
-                            show_x_axis_label={show_x_axis_label}
+                            show_x_axis_label={should_show_x_axis_label}
                             set_show_x_axis_label={set_show_x_axis_label}
-                            show_y_axis_label={show_y_axis_label}
+                            show_y_axis_label={should_show_y_axis_label}
                             set_show_y_axis_label={set_show_y_axis_label}
-                            show_x_axis_tick_labels={show_x_axis_tick_labels}
+                            show_x_axis_tick_labels={should_show_x_axis_tick_labels}
                             set_show_x_axis_tick_labels={set_show_x_axis_tick_labels}
                             x_axis_label={x_axis_label}
                             set_x_axis_label={set_x_axis_label}
@@ -1186,7 +1233,7 @@ export const ChartDialog: FC<ChartDialogProps> = ({
                             set_bar_radius={set_bar_radius}
                             inner_radius={inner_radius}
                             set_inner_radius={set_inner_radius}
-                            show_floating_labels={show_floating_labels}
+                            show_floating_labels={should_show_floating_labels}
                             set_show_floating_labels={set_show_floating_labels}
                             floating_label_type={floating_label_type}
                             set_floating_label_type={set_floating_label_type}
