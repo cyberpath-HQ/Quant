@@ -8,7 +8,8 @@ import {
 import dayjs from "dayjs";
 import { GitCompare } from "lucide-react";
 import {
-    useCallback, useMemo
+    useCallback, useMemo,
+    type FC
 } from "react";
 import {
     Card, CardContent
@@ -33,9 +34,9 @@ interface ComparisonDialogProps {
     getSeverityColor: (severity: string) => string
 }
 
-export function ComparisonDialog({
+export const ComparisonDialog: FC<ComparisonDialogProps> = ({
     open, onOpenChange, selectedEntries, getSeverityColor,
-}: ComparisonDialogProps) {
+}) => {
     if (selectedEntries.length < 2) {
         return null;
     }
@@ -203,44 +204,56 @@ export function ComparisonDialog({
                                     ))}
                                 </div>
 
-                                {metricDifferences && metricDifferences.length > 0 && (
-                                    <div className="space-y-3">
-                                        <div className="flex items-center gap-2">
-                                            <h4 className="font-semibold">Metric Differences</h4>
-                                            <Badge variant="outline">{metricDifferences.length} changed</Badge>
-                                        </div>
-                                        <div className="rounded-lg border overflow-hidden">
-                                            <Table>
-                                                <TableHeader className="bg-muted">
-                                                    <TableRow>
-                                                        <TableHead>Metric</TableHead>
-                                                        <TableHead>Score 1</TableHead>
-                                                        <TableHead>Score 2</TableHead>
-                                                    </TableRow>
-                                                </TableHeader>
-                                                <TableBody>
-                                                    {metricDifferences.map((diff) => (
-                                                        <TableRow key={diff.key}>
-                                                            <TableCell className="font-semibold">
-                                                                {getMetricLabel(diff.key, selectedEntries[0].version)}
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <span className="font-mono text-sm bg-red-100 dark:bg-red-950 px-2 py-1 rounded">
-                                                                    {getMetricValueLabel(diff.key, diff.first, selectedEntries[0].version)}
-                                                                </span>
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <span className="font-mono text-sm bg-green-100 dark:bg-green-950 px-2 py-1 rounded">
-                                                                    {getMetricValueLabel(diff.key, diff.second, selectedEntries[0].version)}
-                                                                </span>
-                                                            </TableCell>
+                                {
+                                    metricDifferences && metricDifferences.length > 0 && (
+                                        <div className="space-y-3">
+                                            <div className="flex items-center gap-2">
+                                                <h4 className="font-semibold dark:text-foreground/95">
+                                                    Metric Differences
+                                                </h4>
+                                                <Badge variant="outline">
+                                                    {metricDifferences.length} changed
+                                                </Badge>
+                                            </div>
+                                            <div className="rounded-lg border overflow-hidden">
+                                                <Table>
+                                                    <TableHeader className="bg-muted">
+                                                        <TableRow>
+                                                            <TableHead>
+                                                                Metric
+                                                            </TableHead>
+                                                            <TableHead>
+                                                                Score 1
+                                                            </TableHead>
+                                                            <TableHead>
+                                                                Score 2
+                                                            </TableHead>
                                                         </TableRow>
-                                                    ))}
-                                                </TableBody>
-                                            </Table>
+                                                    </TableHeader>
+                                                    <TableBody>
+                                                        {metricDifferences.map((diff) => (
+                                                            <TableRow key={diff.key}>
+                                                                <TableCell className="font-semibold dark:text-foreground/85">
+                                                                    {getMetricLabel(diff.key, selectedEntries[0].version)}
+                                                                </TableCell>
+                                                                <TableCell>
+                                                                    <span className="font-mono text-sm bg-red-100 dark:bg-red-950 dark:text-red-300 px-2 py-1 rounded">
+                                                                        {getMetricValueLabel(diff.key, diff.first, selectedEntries[0].version)}
+                                                                    </span>
+                                                                </TableCell>
+                                                                <TableCell>
+                                                                    <span className="font-mono text-sm bg-green-100 dark:bg-green-950 dark:text-green-300 px-2 py-1 rounded">
+                                                                        {getMetricValueLabel(diff.key, diff.second, selectedEntries[0].version)}
+                                                                    </span>
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        ))}
+                                                    </TableBody>
+                                                </Table>
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
+                                    )
+                                }
                             </>
                         )
                     }
@@ -267,4 +280,4 @@ export function ComparisonDialog({
             </DialogContent>
         </Dialog>
     );
-}
+};
