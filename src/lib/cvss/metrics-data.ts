@@ -1526,35 +1526,35 @@ export function getSeverityRating(score: number, version: string): {
     if (score === 0) {
         return {
             label:   `None`,
-            color:   `text-sky-700`,
-            bgColor: `bg-sky-100`,
+            color:   `text-sky-700 dark:text-sky-300`,
+            bgColor: `bg-sky-100 dark:bg-sky-900`,
         };
     }
     if (score < 4.0) {
         return {
             label:   `Low`,
-            color:   `text-green-700`,
-            bgColor: `bg-green-100`,
+            color:   `text-green-700 dark:text-green-300`,
+            bgColor: `bg-green-100 dark:bg-green-900`,
         };
     }
     if (score < 7.0) {
         return {
             label:   `Medium`,
-            color:   `text-yellow-700`,
-            bgColor: `bg-yellow-100`,
+            color:   `text-yellow-700 dark:text-yellow-300`,
+            bgColor: `bg-yellow-100 dark:bg-yellow-900`,
         };
     }
     if (score < 9.0) {
         return {
             label:   `High`,
-            color:   `text-red-700`,
-            bgColor: `bg-red-100`,
+            color:   `text-red-700 dark:text-red-300`,
+            bgColor: `bg-red-100 dark:bg-red-900`,
         };
     }
     return {
         label:   `Critical`,
-        color:   `text-purple-700`,
-        bgColor: `bg-purple-100`,
+        color:   `text-purple-700 dark:text-purple-300`,
+        bgColor: `bg-purple-100 dark:bg-purple-900`,
     };
 
 }
