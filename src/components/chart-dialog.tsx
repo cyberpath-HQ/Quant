@@ -53,7 +53,28 @@ import {
     EMBED_IFRAME_HEIGHT,
     EMBED_IFRAME_STYLE,
     SHOULD_COPY_DEFAULT_STYLES,
-    DEFAULT_SETTINGS
+    DEFAULT_SETTINGS,
+    CHART_TYPE_BAR,
+    CHART_TYPE_DONUT,
+    LEGEND_POSITION_BELOW_TITLE,
+    LEGEND_POSITION_BELOW_CHART,
+    TOOLTIP_CONTENT_TYPE_COUNT,
+    TOOLTIP_CONTENT_TYPE_PERCENTAGE,
+    ACCORDION_VALUE_CHART_SETTINGS,
+    ACCORDION_VALUE_TYPE_SPECIFIC_SETTINGS,
+    ACCORDION_TYPE,
+    DONUT_CHART_OUTER_RADIUS,
+    DONUT_CHART_DEFAULT_COLOR,
+    BAR_CHART_DEFAULT_COLOR,
+    CARTESIAN_GRID_STROKE_DASHARRAY,
+    CHART_AXIS_POSITION_BOTTOM,
+    CHART_AXIS_POSITION_INSIDE_LEFT,
+    CHART_AXIS_POSITION_ANGLE,
+    PIE_CHART_POSITION_PERCENT,
+    LOGO_ALT_TEXT,
+    IMAGE_LOADING_LAZY,
+    BAR_CHART_SETTINGS_TITLE,
+    DONUT_CHART_SETTINGS_TITLE
 } from "@/lib/constants";
 import {
     Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle
@@ -160,7 +181,7 @@ const ChartSettings = React.memo<ChartSettingsProps>(({
     localTransparency,
     setLocalTransparency,
 }) => (
-    <AccordionItem value="chart-settings">
+    <AccordionItem value={ACCORDION_VALUE_CHART_SETTINGS}>
         <AccordionTrigger>Chart Settings</AccordionTrigger>
         <AccordionContent className="px-3">
             <FieldSet>
@@ -195,10 +216,10 @@ const ChartSettings = React.memo<ChartSettingsProps>(({
                                         <SelectLabel>
                                             Chart Type
                                         </SelectLabel>
-                                        <SelectItem value="bar">
+                                        <SelectItem value={CHART_TYPE_BAR}>
                                             Bar Chart
                                         </SelectItem>
-                                        <SelectItem value="donut">
+                                        <SelectItem value={CHART_TYPE_DONUT}>
                                             Donut Chart
                                         </SelectItem>
                                     </SelectGroup>
@@ -223,10 +244,10 @@ const ChartSettings = React.memo<ChartSettingsProps>(({
                                         <SelectLabel>
                                             Tooltip Content
                                         </SelectLabel>
-                                        <SelectItem value="count">
+                                        <SelectItem value={TOOLTIP_CONTENT_TYPE_COUNT}>
                                             Count
                                         </SelectItem>
-                                        <SelectItem value="percentage">
+                                        <SelectItem value={TOOLTIP_CONTENT_TYPE_PERCENTAGE}>
                                             Percentage
                                         </SelectItem>
                                     </SelectGroup>
@@ -269,10 +290,10 @@ const ChartSettings = React.memo<ChartSettingsProps>(({
                                         <SelectLabel>
                                             Legend Position
                                         </SelectLabel>
-                                        <SelectItem value="below-title">
+                                        <SelectItem value={LEGEND_POSITION_BELOW_TITLE}>
                                             Below Title
                                         </SelectItem>
-                                        <SelectItem value="below-chart">
+                                        <SelectItem value={LEGEND_POSITION_BELOW_CHART}>
                                             Below Chart
                                         </SelectItem>
                                     </SelectGroup>
@@ -403,17 +424,17 @@ const TypeSpecificSettings = React.memo<TypeSpecificSettingsProps>(({
     floating_label_type,
     set_floating_label_type,
 }) => (
-    <AccordionItem value="type-specific-settings">
+    <AccordionItem value={ACCORDION_VALUE_TYPE_SPECIFIC_SETTINGS}>
         <AccordionTrigger>
             {
-                chart_type === `bar`
-                ? `Bar Chart Settings`
-                : `Donut Chart Settings`
+                chart_type === CHART_TYPE_BAR
+                ? BAR_CHART_SETTINGS_TITLE
+                : DONUT_CHART_SETTINGS_TITLE
             }
         </AccordionTrigger>
         <AccordionContent className="px-3">
             {
-                chart_type === `bar` && (
+                chart_type === CHART_TYPE_BAR && (
                     <FieldSet>
                         <FieldDescription>
                             Customize the appearance of the bar chart.
@@ -478,7 +499,7 @@ const TypeSpecificSettings = React.memo<TypeSpecificSettingsProps>(({
                                     <Switch
                                         checked={show_y_axis_label}
                                         onCheckedChange={set_show_y_axis_label}
-className="cursor-pointer"
+                                        className="cursor-pointer"
                                         onClick={(e) => e.stopPropagation()} />
                                     <FieldContent>
                                         <FieldLabel className="flex items-center gap-2 cursor-pointer">
@@ -590,7 +611,7 @@ className="cursor-pointer"
                 )
             }
             {
-                chart_type === `donut` && (
+                chart_type === CHART_TYPE_DONUT && (
                     <FieldSet>
                         <FieldDescription>
                             Customize the appearance of the donut chart.
@@ -728,7 +749,7 @@ const Customization = React.memo<CustomizationProps>(({
     const severity_colors = useMemo(
         () => ALL_SEVERITIES.reduce(
             (acc, severity) => {
-                acc[severity] = custom_colors[severity] || SEVERITY_COLOR_MAP[severity.toLowerCase()] || `#8884d8`;
+                acc[severity] = custom_colors[severity] || SEVERITY_COLOR_MAP[severity.toLowerCase()] || BAR_CHART_DEFAULT_COLOR;
                 return acc;
             },
             // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
@@ -963,7 +984,7 @@ export const ChartDialog: FC<ChartDialogProps> = ({
 
     const get_color_for_severity = useCallback(
         (severity: string): string => {
-            const base_color = custom_colors[severity] || SEVERITY_COLOR_MAP[severity.toLowerCase()] || `#8884d8`;
+            const base_color = custom_colors[severity] || SEVERITY_COLOR_MAP[severity.toLowerCase()] || BAR_CHART_DEFAULT_COLOR;
             const hex = base_color.replace(`#`, ``);
             const r = parseInt(hex.substring(RGB_RED_START, RGB_RED_END), 16);
             const g = parseInt(hex.substring(RGB_GREEN_START, RGB_GREEN_END), 16);
@@ -1035,11 +1056,11 @@ export const ChartDialog: FC<ChartDialogProps> = ({
                 className={cn(
                     `flex flex-wrap gap-4 justify-center dark:text-foreground/90`,
                     {
-                        "mt-4":      legend_position === `below-chart` &&
+                        "mt-4":      legend_position === LEGEND_POSITION_BELOW_CHART &&
                                  should_show_x_axis_label &&
                                  should_show_x_axis_tick_labels,
-                        "mt-2 mb-4": legend_position === `below-title`,
-                        "-mt-2":     legend_position === `below-chart` &&
+                        "mt-2 mb-4": legend_position === LEGEND_POSITION_BELOW_TITLE,
+                        "-mt-2":     legend_position === LEGEND_POSITION_BELOW_CHART &&
                                  !should_show_x_axis_label &&
                                  !should_show_x_axis_tick_labels,
                     }
@@ -1211,7 +1232,7 @@ export const ChartDialog: FC<ChartDialogProps> = ({
                                 <div className="h-96">
                                     <ResponsiveContainer width="100%" height="100%">
                                         {
-                                        chart_type === `bar`
+                                        chart_type === CHART_TYPE_BAR
                                         ? (
                                             <BarChart
                                                 data={bar_data}
@@ -1224,7 +1245,7 @@ export const ChartDialog: FC<ChartDialogProps> = ({
                                                             : BAR_CHART_FALLBACK_BOTTOM_MARGIN,
                                                 }}
                                             >
-                                                <CartesianGrid strokeDasharray="3 3" />
+                                                <CartesianGrid strokeDasharray={CARTESIAN_GRID_STROKE_DASHARRAY} />
                                                 <XAxis
                                                     dataKey="name"
                                                     tick={
@@ -1243,7 +1264,7 @@ export const ChartDialog: FC<ChartDialogProps> = ({
                                                         should_show_x_axis_label
                                                         ? {
                                                             value:    x_axis_label,
-                                                            position: `bottom`,
+                                                            position: CHART_AXIS_POSITION_BOTTOM,
                                                             offset:   should_show_x_axis_tick_labels
                                                                     ? BAR_CHART_X_AXIS_DEFAULT_OFFSET
                                                                     : BAR_CHART_X_AXIS_FALLBACK_OFFSET,
@@ -1272,8 +1293,8 @@ export const ChartDialog: FC<ChartDialogProps> = ({
                                                         should_show_y_axis_label
                                                         ? {
                                                             value:     y_axis_label,
-                                                            angle:     -90,
-                                                            position:  `insideLeft`,
+                                                            angle:     CHART_AXIS_POSITION_ANGLE,
+                                                            position:  CHART_AXIS_POSITION_INSIDE_LEFT,
                                                             className: `dark:fill-foreground/90`,
                                                         }
                                                         : undefined
@@ -1282,14 +1303,14 @@ export const ChartDialog: FC<ChartDialogProps> = ({
                                                 <Tooltip
                                                     formatter={
                                                         (value) => [
-                                                            tooltip_content_type === `count`
+                                                            tooltip_content_type === TOOLTIP_CONTENT_TYPE_COUNT
                                                             ? value
                                                             : `${ (((value as number) / total) * HUNDRED).toFixed(DEFAULT_FRACTION_DIGITS) }%`,
                                                             tooltip_label,
                                                         ]
                                                     }
                                                 />
-                                                <Bar dataKey="count" fill="#8884d8" radius={[
+                                                <Bar dataKey="count" fill={BAR_CHART_DEFAULT_COLOR} radius={[
                                                     bar_radius,
                                                     bar_radius,
                                                     ZERO,
@@ -1308,13 +1329,13 @@ export const ChartDialog: FC<ChartDialogProps> = ({
                                             <PieChart>
                                                 <Pie
                                                     data={donut_data}
-                                                    cx="50%"
-                                                    cy="50%"
+                                                    cx={PIE_CHART_POSITION_PERCENT}
+                                                    cy={PIE_CHART_POSITION_PERCENT}
                                                     innerRadius={inner_radius}
                                                     labelLine={false}
                                                     label={should_show_floating_labels ? get_floating_label : false}
-                                                    outerRadius={120}
-                                                    fill="#8884d8"
+                                                    outerRadius={DONUT_CHART_OUTER_RADIUS}
+                                                    fill={DONUT_CHART_DEFAULT_COLOR}
                                                     dataKey="value"
                                                 >
                                                     {donut_data.map((entry, index) => (
@@ -1327,7 +1348,7 @@ export const ChartDialog: FC<ChartDialogProps> = ({
                                                 <Tooltip
                                                     formatter={
                                                         (value, name) => [
-                                                            tooltip_content_type === `count`
+                                                            tooltip_content_type === TOOLTIP_CONTENT_TYPE_COUNT
                                                             ? value
                                                             : `${ (((value as number) / total) * HUNDRED).toFixed(DEFAULT_FRACTION_DIGITS) }%`,
                                                             name,
@@ -1345,8 +1366,8 @@ export const ChartDialog: FC<ChartDialogProps> = ({
                                     <picture className="block dark:hidden" data-light-theme>
                                         <img
                                             src={logoBlack.src}
-                                            loading="lazy"
-                                            alt="CyberPath Quant Logo"
+                                            loading={IMAGE_LOADING_LAZY}
+                                            alt={LOGO_ALT_TEXT}
                                             className="w-auto h-5"
                                         />
                                     </picture>
@@ -1355,14 +1376,14 @@ export const ChartDialog: FC<ChartDialogProps> = ({
                                     <picture className="hidden dark:block" data-dark-theme>
                                         <img
                                             src={logoWhite.src}
-                                            loading="lazy"
-                                            alt="CyberPath Quant Logo"
+                                            loading={IMAGE_LOADING_LAZY}
+                                            alt={LOGO_ALT_TEXT}
                                             className="w-auto h-5"
                                         />
                                     </picture>
                                 </div>
                             </div>
-                            <Accordion type="multiple">
+                            <Accordion type={`multiple`}>
                                 <ChartSettings
                                     chart_type={chart_type}
                                     set_chart_type={(value) => setSettings((prev) => ({

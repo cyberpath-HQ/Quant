@@ -58,23 +58,80 @@ export const EMBED_IFRAME_HEIGHT = `600`;
 export const EMBED_IFRAME_STYLE = `border:none;`;
 export const SHOULD_COPY_DEFAULT_STYLES = false;
 
+// Chart Dialog Constants
+export const CHART_TYPE_BAR = `bar` as const;
+export const CHART_TYPE_DONUT = `donut` as const;
+export const LEGEND_POSITION_BELOW_TITLE = `below-title` as const;
+export const LEGEND_POSITION_BELOW_CHART = `below-chart` as const;
+export const TOOLTIP_CONTENT_TYPE_COUNT = `count` as const;
+export const TOOLTIP_CONTENT_TYPE_PERCENTAGE = `percentage` as const;
+
+// Chart Dialog UI Constants
+export const ACCORDION_VALUE_CHART_SETTINGS = `chart-settings`;
+export const ACCORDION_VALUE_TYPE_SPECIFIC_SETTINGS = `type-specific-settings`;
+export const ACCORDION_VALUE_CUSTOMIZATION = `customization`;
+
+// Chart Settings Default Labels
+export const CHART_SETTINGS_TITLE_DEFAULT = `CVSS Scores Chart`;
+export const CHART_SETTINGS_X_AXIS_LABEL_DEFAULT = `Severity`;
+export const CHART_SETTINGS_Y_AXIS_LABEL_DEFAULT = `Count`;
+export const CHART_SETTINGS_TOOLTIP_LABEL_DEFAULT = `Count`;
+
+// UI Text and Messages
+export const CHART_CONFIGURATION_TITLE = `Chart Configuration`;
+export const CHART_CONFIGURATION_DESCRIPTION = `Customize and view charts for selected CVSS score entries.`;
+export const CHART_SETTINGS_DESCRIPTION = `Configure the appearance and data of the chart.`;
+export const BAR_CHART_SETTINGS_DESCRIPTION = `Customize the appearance of the bar chart.`;
+export const BAR_CHART_SETTINGS_TITLE = `Bar Chart Settings`;
+export const DONUT_CHART_SETTINGS_DESCRIPTION = `Customize the appearance of the donut chart.`;
+export const DONUT_CHART_SETTINGS_TITLE = `Donut Chart Settings`;
+export const CUSTOMIZATION_DESCRIPTION = `Personalize chart colors and severity labels.`;
+
+// Chart Rendering Constants
+export const CHART_HEIGHT = `h-96`;
+export const DONUT_CHART_OUTER_RADIUS = 120;
+export const DONUT_CHART_DEFAULT_COLOR = `#8884d8`;
+export const BAR_CHART_DEFAULT_COLOR = `#8884d8`;
+export const CARTESIAN_GRID_STROKE_DASHARRAY = `3 3`;
+export const CHART_AXIS_POSITION_BOTTOM = `bottom`;
+export const CHART_AXIS_POSITION_INSIDE_LEFT = `insideLeft`;
+export const CHART_AXIS_POSITION_ANGLE = -90;
+export const PIE_CHART_POSITION_PERCENT = `50%`;
+export const LOGO_ALT_TEXT = `CyberPath Quant Logo`;
+
+// DOM Constants
+export const DOM_ERROR_LOG_MESSAGE = `Export failed:`;
+export const PARSE_ERROR_LOG_MESSAGE = `Failed to parse chart settings`;
+export const IMAGE_LOADING_LAZY = `lazy`;
+
+// Logo Styling
+export const LOGO_POSITION_TOP = `top-1.25`;
+export const LOGO_POSITION_RIGHT = `right-4`;
+export const LOGO_HEIGHT = `h-5`;
+export const LOGO_WIDTH = `w-auto`;
+
+// Responsive Container Dimensions
+export const RESPONSIVE_CONTAINER_WIDTH = `100%`;
+export const RESPONSIVE_CONTAINER_HEIGHT = `100%`;
+
+// Default Settings
 export const DEFAULT_SETTINGS = {
-    chart_type:                     `bar` as `bar` | `donut`,
-    title:                          `CVSS Scores Chart`,
+    chart_type:                     CHART_TYPE_BAR,
+    title:                          CHART_SETTINGS_TITLE_DEFAULT,
     should_show_legend:             true,
     should_show_x_axis_label:       true,
     should_show_y_axis_label:       true,
     inner_radius:                   DEFAULT_INNER_RADIUS,
     custom_colors:                  {} as Record<string, string>,
     transparency:                   DEFAULT_TRANSPARENCY,
-    x_axis_label:                   `Severity`,
-    y_axis_label:                   `Count`,
-    tooltip_label:                  `Count`,
+    x_axis_label:                   CHART_SETTINGS_X_AXIS_LABEL_DEFAULT,
+    y_axis_label:                   CHART_SETTINGS_Y_AXIS_LABEL_DEFAULT,
+    tooltip_label:                  CHART_SETTINGS_TOOLTIP_LABEL_DEFAULT,
     bar_radius:                     DEFAULT_BAR_RADIUS,
     severity_labels:                {} as Record<string, string>,
     should_show_floating_labels:    true,
-    tooltip_content_type:           `count` as `count` | `percentage`,
-    floating_label_type:            `percentage` as `count` | `percentage`,
+    tooltip_content_type:           TOOLTIP_CONTENT_TYPE_COUNT,
+    floating_label_type:            TOOLTIP_CONTENT_TYPE_PERCENTAGE,
     should_show_x_axis_tick_labels: true,
-    legend_position:                `below-chart` as `below-title` | `below-chart`,
+    legend_position:                LEGEND_POSITION_BELOW_CHART,
 };
