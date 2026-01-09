@@ -36,7 +36,7 @@ export * as v4 from "./v4";
 export * as v3 from "./v3";
 export * as v2 from "./v2";
 
-export * from "./types";
+export type * from "./types";
 export * as vectorParser from "./vector-parser";
 
 /**
@@ -44,10 +44,20 @@ export * as vectorParser from "./vector-parser";
  * Applies to all CVSS versions
  */
 export function getSeverityRating(score: number): string {
-  if (score === 0.0) return "None";
-  if (score >= 0.1 && score <= 3.9) return "Low";
-  if (score >= 4.0 && score <= 6.9) return "Medium";
-  if (score >= 7.0 && score <= 8.9) return "High";
-  if (score >= 9.0 && score <= 10.0) return "Critical";
-  return "None";
+    if (score === 0.0) {
+        return `None`;
+    }
+    if (score >= 0.1 && score <= 3.9) {
+        return `Low`;
+    }
+    if (score >= 4.0 && score <= 6.9) {
+        return `Medium`;
+    }
+    if (score >= 7.0 && score <= 8.9) {
+        return `High`;
+    }
+    if (score >= 9.0 && score <= 10.0) {
+        return `Critical`;
+    }
+    return `None`;
 }

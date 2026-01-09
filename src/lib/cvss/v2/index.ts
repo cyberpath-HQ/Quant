@@ -10,5 +10,5 @@ export {
     generateVector,
     parseVector,
     createDefaultMetrics,
-    DEFAULT_METRICS,
+    DEFAULT_METRICS
 } from "./scoring";
