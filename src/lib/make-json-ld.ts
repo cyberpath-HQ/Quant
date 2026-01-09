@@ -1,6 +1,6 @@
 import type {
     Thing,
-    WithContext,
+    WithContext
 } from "schema-dts";
 
 /**
