@@ -12,9 +12,7 @@ import {
 import {
     Tabs, TabsContent, TabsList, TabsTrigger
 } from "@/components/ui/tabs";
-import { CVSS40Calculator } from "./CVSS40Calculator";
-import { CVSS3Calculator } from "./CVSS3Calculator";
-import { CVSS2Calculator } from "./CVSS2Calculator";
+import { CVSSGenericCalculator } from "./CVSSGenericCalculator";
 import {
     vectorParser, type CVSSv2Metrics, type CVSSv3Metrics, type CVSSv4Metrics
 } from "@/lib/cvss";
@@ -75,7 +73,7 @@ export const CVSSCalculator: FC = () => {
             setRestoreVectorString(null);
 
             // Switch to the appropriate tab
-            setActiveTab(`v${ parsed.version }`);
+            setActiveTab(`v${parsed.version}`);
         }
     }, []);
 
@@ -91,7 +89,7 @@ export const CVSSCalculator: FC = () => {
             if (parsed) {
                 setParsedVector(parsed);
                 setRestoreVectorString(vectorString);
-                setActiveTab(`v${ parsed.version }`);
+                setActiveTab(`v${parsed.version}`);
             }
         };
 
@@ -104,7 +102,7 @@ export const CVSSCalculator: FC = () => {
 
     // Handle side effects when settings change
     useEffect(() => {
-    // Save settings to local storage
+        // Save settings to local storage
         localStorage.setItem(
             `cvss_calculator_settings`,
             JSON.stringify({
@@ -119,7 +117,7 @@ export const CVSSCalculator: FC = () => {
 
     // Load settings from local storage on mount
     useEffect(() => {
-    // Load settings from local storage
+        // Load settings from local storage
         const savedSettings = localStorage.getItem(`cvss_calculator_settings`);
         if (savedSettings) {
             const settings = JSON.parse(savedSettings);
@@ -157,12 +155,13 @@ export const CVSSCalculator: FC = () => {
                 </TabsList>
 
                 <TabsContent value="v4.0" className="mt-8">
-                    <CVSS40Calculator
+                    <CVSSGenericCalculator
                         key={restoreVectorString ?? `v4.0`}
+                        version="4.0"
                         initialMetrics={
                             parsedVector?.version === `4.0`
-                            ? (parsedVector.metrics as Partial<CVSSv4Metrics>)
-                            : undefined
+                                ? (parsedVector.metrics as Partial<CVSSv4Metrics>)
+                                : undefined
                         }
                         shouldUseAlternativeDescription={should_use_alternative_description}
                         setShouldUseAlternativeDescription={setShouldUseAlternativeDescription}
@@ -172,37 +171,50 @@ export const CVSSCalculator: FC = () => {
                 </TabsContent>
 
                 <TabsContent value="v3.1" className="mt-6">
-                    <CVSS3Calculator
+                    <CVSSGenericCalculator
                         key={restoreVectorString ?? `v3.1`}
                         version="3.1"
                         initialMetrics={
                             parsedVector?.version === `3.1`
-                            ? (parsedVector.metrics as Partial<CVSSv3Metrics>)
-                            : undefined
+                                ? (parsedVector.metrics as Partial<CVSSv3Metrics>)
+                                : undefined
                         }
+                        shouldUseAlternativeDescription={should_use_alternative_description}
+                        setShouldUseAlternativeDescription={setShouldUseAlternativeDescription}
+                        shouldShowContributions={should_show_contributions}
+                        setShouldShowContributions={setShouldShowContributions}
                     />
                 </TabsContent>
 
                 <TabsContent value="v3.0" className="mt-6">
-                    <CVSS3Calculator
+                    <CVSSGenericCalculator
                         key={restoreVectorString ?? `v3.0`}
                         version="3.0"
                         initialMetrics={
                             parsedVector?.version === `3.0`
-                            ? (parsedVector.metrics as Partial<CVSSv3Metrics>)
-                            : undefined
+                                ? (parsedVector.metrics as Partial<CVSSv3Metrics>)
+                                : undefined
                         }
+                        shouldUseAlternativeDescription={should_use_alternative_description}
+                        setShouldUseAlternativeDescription={setShouldUseAlternativeDescription}
+                        shouldShowContributions={should_show_contributions}
+                        setShouldShowContributions={setShouldShowContributions}
                     />
                 </TabsContent>
 
                 <TabsContent value="v2.0" className="mt-6">
-                    <CVSS2Calculator
+                    <CVSSGenericCalculator
                         key={restoreVectorString ?? `v2.0`}
+                        version="2.0"
                         initialMetrics={
                             parsedVector?.version === `2.0`
-                            ? (parsedVector.metrics as Partial<CVSSv2Metrics>)
-                            : undefined
+                                ? (parsedVector.metrics as Partial<CVSSv2Metrics>)
+                                : undefined
                         }
+                        shouldUseAlternativeDescription={should_use_alternative_description}
+                        setShouldUseAlternativeDescription={setShouldUseAlternativeDescription}
+                        shouldShowContributions={should_show_contributions}
+                        setShouldShowContributions={setShouldShowContributions}
                     />
                 </TabsContent>
             </Tabs>
