@@ -992,7 +992,7 @@ export const ChartDialog: FC<ChartDialogProps> = ({
             console.error(`Export failed:`, error);
             toast.error(`Failed to export chart`);
         }
-    }, [theme]);
+    }, [ theme ]);
 
     const share_embeddable_code = useCallback(() => {
         const embeddable_code = `<iframe src="${ window.location.origin }/embed/chart?${ new URLSearchParams({
@@ -1090,7 +1090,7 @@ export const ChartDialog: FC<ChartDialogProps> = ({
                                     <h3 className={cn(
                                         `text-lg font-semibold dark:text-foreground/95`,
                                         {
-                                            "mb-4": legend_position !== `below-title`,
+                                            "mb-4": legend_position !== `below-title` || !should_show_legend,
                                         }
                                     )}>
                                         {title}
