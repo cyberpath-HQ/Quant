@@ -86,7 +86,24 @@ export function generateEmbeddableCode(params: {
 
     const html = `
 <style>
-    @keyframes slideInRight {
+    .cvss-widget-container {
+        all: initial;
+        font-family: system-ui, -apple-system, sans-serif;
+        color: #1f2937;
+        border: 2px solid #0ea5e9;
+        border-radius: 8px;
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        padding: 24px;
+        background: white;
+        max-width: 400px;
+        height: auto;
+        margin: 0 auto;
+        display: block;
+    }
+    .cvss-widget-container * {
+        box-sizing: border-box;
+    }
+    @keyframes cvss-slideInRight {
         from {
             transform: translateX(100%);
             opacity: 0;
@@ -96,7 +113,7 @@ export function generateEmbeddableCode(params: {
             opacity: 1;
         }
     }
-    @keyframes slideDown {
+    @keyframes cvss-slideDown {
         from {
             opacity: 0;
             transform: scale(0.95) translateY(-4px);
@@ -106,7 +123,7 @@ export function generateEmbeddableCode(params: {
             transform: scale(1) translateY(0);
         }
     }
-    @keyframes slideUp {
+    @keyframes cvss-slideUp {
         from {
             opacity: 1;
             transform: scale(1) translateY(0);
@@ -116,17 +133,14 @@ export function generateEmbeddableCode(params: {
             transform: scale(0.95) translateY(-4px);
         }
     }
-    #toast {
+    .cvss-widget-container .cvss-toast {
         transition: opacity 0.3s ease-out, transform 0.3s ease-out;
     }
-    #toast.show {
-        animation: slideInRight 0.3s ease-out;
-    }
-    .dropdown {
+    .cvss-widget-container .cvss-dropdown {
         position: relative;
         display: inline-block;
     }
-    .dropdown-content {
+    .cvss-widget-container .cvss-dropdown-content {
         display: none;
         position: absolute;
         right: 0;
@@ -139,23 +153,23 @@ export function generateEmbeddableCode(params: {
         min-width: 160px;
         transition: opacity 0.3s ease-out, transform 0.3s ease-out;
     }
-    .dropdown-content.show {
-        animation: slideDown 0.3s ease-out;
+    .cvss-widget-container .cvss-dropdown-content.cvss-show {
+        animation: cvss-slideDown 0.3s ease-out;
     }
-    .dropdown-content.hide {
-        animation: slideUp 0.3s ease-out;
+    .cvss-widget-container .cvss-dropdown-content.cvss-hide {
+        animation: cvss-slideUp 0.3s ease-out;
     }
-    .dropdown-content a {
+    .cvss-widget-container .cvss-dropdown-content a {
         display: block;
         padding: 8px 16px;
         text-decoration: none;
         color: #1f2937;
         font-size: 14px;
     }
-    .dropdown-content a:hover {
+    .cvss-widget-container .cvss-dropdown-content a:hover {
         background: #f9fafb;
     }
-    .btn-link {
+    .cvss-widget-container .cvss-btn-link {
         background: #0ea5e9;
         color: white;
         border: none;
@@ -169,10 +183,10 @@ export function generateEmbeddableCode(params: {
         transition: background 0.2s;
         border-right: 1px solid rgba(255,255,255,0.2);
     }
-    .btn-link:hover {
+    .cvss-widget-container .cvss-btn-link:hover {
         background: #0284c7;
     }
-    .dropdown button {
+    .cvss-widget-container .cvss-dropdown button {
         background: #0ea5e9;
         border: none;
         cursor: pointer;
@@ -186,22 +200,11 @@ export function generateEmbeddableCode(params: {
         transition: background 0.2s;
         border-left: 1px solid rgba(255,255,255,0.2);
     }
-    .dropdown button:hover {
+    .cvss-widget-container .cvss-dropdown button:hover {
         background: #0284c7;
     }
 </style>
-<div style="
-    border: 2px solid #0ea5e9;
-    border-radius: 8px;
-    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-    padding: 24px;
-    font-family: system-ui, -apple-system, sans-serif;
-    background: white;
-    color: #1f2937;
-    max-width: 400px;
-    height: auto;
-    margin: 0 auto;
-">
+<div class="cvss-widget-container">
     <div style="
         display: flex;
         justify-content: space-between;
@@ -223,19 +226,19 @@ export function generateEmbeddableCode(params: {
                 utm_source:   `view_in_calculator`,
                 utm_medium:   `widget`,
                 utm_campaign: `cvss_calculator`,
-            }).toString() }' rel="noopener" target="_blank" class="btn-link" aria-label="Open CVSS calculator with current vector">
+            }).toString() }' rel="noopener" target="_blank" class="cvss-btn-link" aria-label="Open CVSS calculator with current vector">
                 Open in calculator
             </a>
-            <div class="dropdown">
-                <button onclick="toggleDropdown()" aria-expanded="false" aria-haspopup="menu" aria-label="More options">
+            <div class="cvss-dropdown">
+                <button onclick="cvssToggleDropdown()" aria-expanded="false" aria-haspopup="menu" aria-label="More options">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                         <circle cx="12" cy="12" r="1"></circle>
                         <circle cx="12" cy="5" r="1"></circle>
                         <circle cx="12" cy="19" r="1"></circle>
                     </svg>
                 </button>
-                <div id="dropdown-content" class="dropdown-content" role="menu" aria-hidden="true">
-                    <a href="#" onclick="copyLink('${ escapedShareLink }'); toggleDropdown(); return false;" role="menuitem" tabindex="-1">
+                <div id="cvss-dropdown-content" class="cvss-dropdown-content" role="menu" aria-hidden="true">
+                    <a href="#" onclick="cvssCopyLink('${ escapedShareLink }'); cvssToggleDropdown(); return false;" role="menuitem" tabindex="-1">
                         Copy share link
                     </a>
                 </div>
@@ -291,16 +294,16 @@ export function generateEmbeddableCode(params: {
             word-break: break-all;
             color: #1f2937;
             position: relative;
-        " onmouseover="showIcons()" onmouseout="hideIcons()">
+        " onmouseover="cvssShowIcons()" onmouseout="cvssHideIcons()">
             ${ vectorString }
-            <div id="vector-icons" style="
+            <div id="cvss-vector-icons" style="
                 position: absolute;
                 top: 8px;
                 right: 8px;
                 display: none;
                 gap: 4px;
             ">
-                <button onclick="copyVector('${ escapedVector }')" style="
+                <button onclick="cvssCopyVector('${ escapedVector }')" style="
                     background: white;
                     border: 1px solid #e5e7eb;
                     cursor: pointer;
@@ -319,7 +322,7 @@ export function generateEmbeddableCode(params: {
         </div>
     </div>
 
-    <div id="toast" style="
+    <div id="cvss-toast" class="cvss-toast" style="
         position: fixed;
         top: 20px;
         right: 20px;
@@ -335,75 +338,90 @@ export function generateEmbeddableCode(params: {
     " aria-live="polite" aria-atomic="true" role="status"></div>
 
     <script>
-        document.addEventListener('click', function(event) {
-            const dropdown = document.querySelector('.dropdown');
-            const content = document.getElementById('dropdown-content');
-            if (!dropdown.contains(event.target)) {
-                closeDropdown();
-            }
-        });
-        function toggleDropdown() {
-            const content = document.getElementById('dropdown-content');
-            const button = content.previousElementSibling;
-            if (content.style.display === 'block') {
-                closeDropdown();
-            } else {
-                openDropdown();
-            }
-        }
-        function openDropdown() {
-            const content = document.getElementById('dropdown-content');
-            const button = content.previousElementSibling;
-            content.style.display = 'block';
-            content.classList.add('show');
-            content.classList.remove('hide');
-            button.setAttribute('aria-expanded', 'true');
-            content.setAttribute('aria-hidden', 'false');
-        }
-        function closeDropdown() {
-            const content = document.getElementById('dropdown-content');
-            const button = content.previousElementSibling;
-            content.classList.add('hide');
-            content.classList.remove('show');
-            setTimeout(() => {
-                content.style.display = 'none';
-            }, 300);
-            button.setAttribute('aria-expanded', 'false');
-            content.setAttribute('aria-hidden', 'true');
-        }
-        function showIcons() {
-            document.getElementById('vector-icons').style.display = 'flex';
-        }
-        function hideIcons() {
-            document.getElementById('vector-icons').style.display = 'none';
-        }
-        function copyVector(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                showToast('Vector copied!');
+        (function() {
+            const container = document.querySelector('.cvss-widget-container');
+            if (!container) return;
+
+            container.addEventListener('click', function(event) {
+                const dropdown = container.querySelector('.cvss-dropdown');
+                const content = container.querySelector('#cvss-dropdown-content');
+                if (!dropdown.contains(event.target)) {
+                    cvssCloseDropdown();
+                }
             });
-        }
-        function copyLink(url) {
-            navigator.clipboard.writeText(url).then(() => {
-                showToast('Share link copied!');
-            });
-        }
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.style.display = 'block';
-            // Trigger animation
-            setTimeout(() => {
-                toast.style.transform = 'translateX(0)';
-                toast.style.opacity = '1';
-            }, 10);
-            setTimeout(() => {
-                toast.style.transform = 'translateX(100%)';
-                toast.style.opacity = '0';
+
+            window.cvssToggleDropdown = function() {
+                const content = container.querySelector('#cvss-dropdown-content');
+                const button = content.previousElementSibling;
+                if (content.style.display === 'block') {
+                    cvssCloseDropdown();
+                } else {
+                    cvssOpenDropdown();
+                }
+            };
+
+            window.cvssOpenDropdown = function() {
+                const content = container.querySelector('#cvss-dropdown-content');
+                const button = content.previousElementSibling;
+                content.style.display = 'block';
+                content.classList.add('cvss-show');
+                content.classList.remove('cvss-hide');
+                button.setAttribute('aria-expanded', 'true');
+                content.setAttribute('aria-hidden', 'false');
+            };
+
+            window.cvssCloseDropdown = function() {
+                const content = container.querySelector('#cvss-dropdown-content');
+                const button = content.previousElementSibling;
+                content.classList.add('cvss-hide');
+                content.classList.remove('cvss-show');
                 setTimeout(() => {
-                    toast.style.display = 'none';
+                    content.style.display = 'none';
                 }, 300);
-            }, 3300); // 3s + 300ms entrance
-        }
+                button.setAttribute('aria-expanded', 'false');
+                content.setAttribute('aria-hidden', 'true');
+            };
+
+            window.cvssShowIcons = function() {
+                const icons = container.querySelector('#cvss-vector-icons');
+                icons.style.display = 'flex';
+            };
+
+            window.cvssHideIcons = function() {
+                const icons = container.querySelector('#cvss-vector-icons');
+                icons.style.display = 'none';
+            };
+
+            window.cvssCopyVector = function(text) {
+                navigator.clipboard.writeText(text).then(() => {
+                    cvssShowToast('Vector copied!');
+                });
+            };
+
+            window.cvssCopyLink = function(url) {
+                navigator.clipboard.writeText(url).then(() => {
+                    cvssShowToast('Share link copied!');
+                });
+            };
+
+            window.cvssShowToast = function(message) {
+                const toast = container.querySelector('#cvss-toast');
+                toast.textContent = message;
+                toast.style.display = 'block';
+                // Trigger animation
+                setTimeout(() => {
+                    toast.style.transform = 'translateX(0)';
+                    toast.style.opacity = '1';
+                }, 10);
+                setTimeout(() => {
+                    toast.style.transform = 'translateX(100%)';
+                    toast.style.opacity = '0';
+                    setTimeout(() => {
+                        toast.style.display = 'none';
+                    }, 300);
+                }, 3300); // 3s + 300ms entrance
+            };
+        })();
     </script>
 
     <div style="text-align: center; margin-top: 32px;">
