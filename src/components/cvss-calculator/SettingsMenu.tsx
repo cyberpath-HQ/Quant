@@ -56,16 +56,18 @@ export const SettingsMenu: FC<SettingsMenuProps> = ({
             <DropdownMenuContent className="max-w-96">
                 <DropdownMenuItem
                     className="cursor-pointer p-3"
-                    onClick={handleAlternativeDescriptionsClick}
+                    onClick={() => setShouldUseAlternativeDescription(!shouldUseAlternativeDescription)}
                 >
-                    <Field orientation="horizontal">
+                    <Field orientation="horizontal" className="cursor-pointer">
                         <Switch
                             onCheckedChange={setShouldUseAlternativeDescription}
                             checked={shouldUseAlternativeDescription}
-                            id={CVSS_ALTERNATIVE_DESCRIPTIONS_ID}
+                            className="cursor-pointer"
+                            onClick={(e) => e.stopPropagation()}
                         />
                         <FieldContent>
-                            <FieldLabel htmlFor={CVSS_ALTERNATIVE_DESCRIPTIONS_ID}>
+                            <FieldLabel
+                                className="flex items-center gap-2 cursor-pointer">
                                 Use Alternative Descriptions
                             </FieldLabel>
                             <FieldDescription>
@@ -76,16 +78,18 @@ export const SettingsMenu: FC<SettingsMenuProps> = ({
                 </DropdownMenuItem>
                 <DropdownMenuItem
                     className="cursor-pointer p-3"
-                    onClick={handleShowContributionsClick}
+                    onClick={() => setShouldShowContributions(!shouldShowContributions)}
                 >
                     <Field orientation="horizontal">
                         <Switch
                             onCheckedChange={setShouldShowContributions}
                             checked={shouldShowContributions}
-                            id={CVSS_SHOW_CONTRIBUTIONS_ID}
+                            className="cursor-pointer"
+                            onClick={(e) => e.stopPropagation()}
                         />
                         <FieldContent>
-                            <FieldLabel htmlFor={CVSS_SHOW_CONTRIBUTIONS_ID}>
+                            <FieldLabel
+                                className="flex items-center gap-2 cursor-pointer">
                                 Show Score Contributions
                             </FieldLabel>
                             <FieldDescription>
