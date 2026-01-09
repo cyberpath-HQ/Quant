@@ -28,14 +28,14 @@ export type CVSSv3Version = `3.0` | `3.1`;
 /** Named constants to avoid magic numbers */
 enum Constants {
     MAX_SCORE = 10,
-    MIN_SCORE = 0,
+    MIN_SCORE = 0
 }
 
 /** Score thresholds for severity ratings */
 enum SeverityThreshold {
     LOW = 4.0,
     MEDIUM = 7.0,
-    HIGH = 9.0,
+    HIGH = 9.0
 }
 
 /** Exploitability coefficient */
@@ -43,8 +43,8 @@ const EXPLOITABILITY_COEFFICIENT = 8.22;
 
 /** Impact coefficients for Scope Changed */
 const IMPACT_COEFFICIENTS = {
-    SCOPE_CHANGED_MULTIPLIER: 7.52,
-    SCOPE_CHANGED_SUBTRACTOR: 0.029,
+    SCOPE_CHANGED_MULTIPLIER:   7.52,
+    SCOPE_CHANGED_SUBTRACTOR:   0.029,
     SCOPE_UNCHANGED_MULTIPLIER: 6.42,
 } as const;
 
@@ -55,27 +55,93 @@ const ISS_COEFFICIENT = 1 - (1 - 0.56) * (1 - 0.56) * (1 - 0.56);
  * Metric weight values for CVSS v3.x
  */
 const WEIGHTS = {
-    AV: { N: 0.85, A: 0.62, L: 0.55, P: 0.2 },
-    AC: { L: 0.77, H: 0.44 },
-    UI: { N: 0.85, R: 0.62 },
-    S:  { U: 0, C: 1 },
-    C:  { H: 0.56, L: 0.22, N: 0 },
-    I:  { H: 0.56, L: 0.22, N: 0 },
-    A:  { H: 0.56, L: 0.22, N: 0 },
-    E:  { X: 1, H: 1, F: 0.97, P: 0.94, U: 0.91 },
-    RL: { X: 1, U: 1, W: 0.97, T: 0.96, O: 0.95 },
-    RC: { X: 1, C: 1, R: 0.96, U: 0.92 },
-    CR: { X: 1, H: 1.5, M: 1, L: 0.5 },
-    IR: { X: 1, H: 1.5, M: 1, L: 0.5 },
-    AR: { X: 1, H: 1.5, M: 1, L: 0.5 },
+    AV: {
+        N: 0.85,
+        A: 0.62,
+        L: 0.55,
+        P: 0.2,
+    },
+    AC: {
+        L: 0.77,
+        H: 0.44,
+    },
+    UI: {
+        N: 0.85,
+        R: 0.62,
+    },
+    S:  {
+        U: 0,
+        C: 1,
+    },
+    C:  {
+        H: 0.56,
+        L: 0.22,
+        N: 0,
+    },
+    I:  {
+        H: 0.56,
+        L: 0.22,
+        N: 0,
+    },
+    A:  {
+        H: 0.56,
+        L: 0.22,
+        N: 0,
+    },
+    E:  {
+        X: 1,
+        H: 1,
+        F: 0.97,
+        P: 0.94,
+        U: 0.91,
+    },
+    RL: {
+        X: 1,
+        U: 1,
+        W: 0.97,
+        T: 0.96,
+        O: 0.95,
+    },
+    RC: {
+        X: 1,
+        C: 1,
+        R: 0.96,
+        U: 0.92,
+    },
+    CR: {
+        X: 1,
+        H: 1.5,
+        M: 1,
+        L: 0.5,
+    },
+    IR: {
+        X: 1,
+        H: 1.5,
+        M: 1,
+        L: 0.5,
+    },
+    AR: {
+        X: 1,
+        H: 1.5,
+        M: 1,
+        L: 0.5,
+    },
 } as const;
 
 /**
  * Privileges Required weights depend on Scope
  */
 const PR_WEIGHTS = {
-    unchanged: { N: 0.85, L: 0.62, H: 0.27 },
-    changed:   { N: 0.85, L: 0.68, H: 0.5 },
+    unchanged: {
+        N: 0.85,
+        L: 0.62,
+        H: 0.27,
+    },
+    changed:   {
+        N: 0.85,
+        L: 0.68,
+        H: 0.5,
+    },
 } as const;
 
 /**
@@ -158,11 +224,11 @@ function calculateImpact(iss: number, scopeChanged: boolean, version: CVSSv3Vers
 
     if (version === `3.1`) {
         return IMPACT_COEFFICIENTS.SCOPE_CHANGED_MULTIPLIER * (iss - offsetValue) -
-            powerMultiplier * Math.pow(iss - offsetPower, exponent);
+            powerMultiplier * (iss - offsetPower) ** exponent;
     }
 
     return IMPACT_COEFFICIENTS.SCOPE_CHANGED_MULTIPLIER * (iss - offsetValue) -
-        powerMultiplier * Math.pow(iss * 0.9731 - offsetPower, exponent);
+        powerMultiplier * (iss * 0.9731 - offsetPower) ** exponent;
 }
 
 /**
@@ -214,7 +280,8 @@ function calculateBaseScore(
 
     if (scopeChanged) {
         baseScore = scopeMultiplier * (impact + exploitability);
-    } else {
+    }
+    else {
         baseScore = impact + exploitability;
     }
 
@@ -271,7 +338,8 @@ function calculateEnvironmentalScore(
 
     if (!scopeChanged) {
         modifiedImpact = IMPACT_COEFFICIENTS.SCOPE_UNCHANGED_MULTIPLIER * miss;
-    } else {
+    }
+    else {
         const offsetValue = 0.029;
         const offsetPower = 0.02;
         const powerMultiplier = 3.25;
@@ -279,10 +347,11 @@ function calculateEnvironmentalScore(
 
         if (version === `3.1`) {
             modifiedImpact = IMPACT_COEFFICIENTS.SCOPE_CHANGED_MULTIPLIER * (miss - offsetValue) -
-                powerMultiplier * Math.pow(miss - offsetPower, exponent);
-        } else {
+                powerMultiplier * (miss - offsetPower) ** exponent;
+        }
+        else {
             modifiedImpact = IMPACT_COEFFICIENTS.SCOPE_CHANGED_MULTIPLIER * (miss - offsetValue) -
-                powerMultiplier * Math.pow(miss * 0.9731 - offsetPower, exponent);
+                powerMultiplier * (miss * 0.9731 - offsetPower) ** exponent;
         }
     }
 
@@ -306,7 +375,8 @@ function calculateEnvironmentalScore(
 
     if (scopeChanged) {
         envScore = scopeMultiplier * (modifiedImpact + modifiedExploitability);
-    } else {
+    }
+    else {
         envScore = modifiedImpact + modifiedExploitability;
     }
 
@@ -317,59 +387,59 @@ function calculateEnvironmentalScore(
  * Generate CVSS v3.x vector string from metrics
  */
 export function generateVector(metrics: CVSSv3Metrics, version: CVSSv3Version): string {
-    const parts: string[] = [`CVSS:${version}`];
+    const parts: Array<string> = [ `CVSS:${ version }` ];
 
-    parts.push(`AV:${metrics.AV}`);
-    parts.push(`AC:${metrics.AC}`);
-    parts.push(`PR:${metrics.PR}`);
-    parts.push(`UI:${metrics.UI}`);
-    parts.push(`S:${metrics.S}`);
-    parts.push(`C:${metrics.C}`);
-    parts.push(`I:${metrics.I}`);
-    parts.push(`A:${metrics.A}`);
+    parts.push(`AV:${ metrics.AV }`);
+    parts.push(`AC:${ metrics.AC }`);
+    parts.push(`PR:${ metrics.PR }`);
+    parts.push(`UI:${ metrics.UI }`);
+    parts.push(`S:${ metrics.S }`);
+    parts.push(`C:${ metrics.C }`);
+    parts.push(`I:${ metrics.I }`);
+    parts.push(`A:${ metrics.A }`);
 
     if (metrics.E !== `X`) {
-        parts.push(`E:${metrics.E}`);
+        parts.push(`E:${ metrics.E }`);
     }
     if (metrics.RL !== `X`) {
-        parts.push(`RL:${metrics.RL}`);
+        parts.push(`RL:${ metrics.RL }`);
     }
     if (metrics.RC !== `X`) {
-        parts.push(`RC:${metrics.RC}`);
+        parts.push(`RC:${ metrics.RC }`);
     }
 
     if (metrics.CR !== `X`) {
-        parts.push(`CR:${metrics.CR}`);
+        parts.push(`CR:${ metrics.CR }`);
     }
     if (metrics.IR !== `X`) {
-        parts.push(`IR:${metrics.IR}`);
+        parts.push(`IR:${ metrics.IR }`);
     }
     if (metrics.AR !== `X`) {
-        parts.push(`AR:${metrics.AR}`);
+        parts.push(`AR:${ metrics.AR }`);
     }
     if (metrics.MAV !== `X`) {
-        parts.push(`MAV:${metrics.MAV}`);
+        parts.push(`MAV:${ metrics.MAV }`);
     }
     if (metrics.MAC !== `X`) {
-        parts.push(`MAC:${metrics.MAC}`);
+        parts.push(`MAC:${ metrics.MAC }`);
     }
     if (metrics.MPR !== `X`) {
-        parts.push(`MPR:${metrics.MPR}`);
+        parts.push(`MPR:${ metrics.MPR }`);
     }
     if (metrics.MUI !== `X`) {
-        parts.push(`MUI:${metrics.MUI}`);
+        parts.push(`MUI:${ metrics.MUI }`);
     }
     if (metrics.MS !== `X`) {
-        parts.push(`MS:${metrics.MS}`);
+        parts.push(`MS:${ metrics.MS }`);
     }
     if (metrics.MC !== `X`) {
-        parts.push(`MC:${metrics.MC}`);
+        parts.push(`MC:${ metrics.MC }`);
     }
     if (metrics.MI !== `X`) {
-        parts.push(`MI:${metrics.MI}`);
+        parts.push(`MI:${ metrics.MI }`);
     }
     if (metrics.MA !== `X`) {
-        parts.push(`MA:${metrics.MA}`);
+        parts.push(`MA:${ metrics.MA }`);
     }
 
     return parts.join(`/`);
@@ -378,7 +448,8 @@ export function generateVector(metrics: CVSSv3Metrics, version: CVSSv3Version): 
 /**
  * Parse a CVSS v3.x vector string into metrics object
  */
-export function parseVector(vector: string): { metrics: CVSSv3Metrics; version: CVSSv3Version } {
+export function parseVector(vector: string): { metrics: CVSSv3Metrics
+    version:                                            CVSSv3Version } {
     const metrics: CVSSv3Metrics = {
         AV:  `N`,
         AC:  `L`,
@@ -410,38 +481,51 @@ export function parseVector(vector: string): { metrics: CVSSv3Metrics; version: 
     let version: CVSSv3Version;
     if (versionPart === `CVSS:3.1`) {
         version = `3.1`;
-    } else if (versionPart === `CVSS:3.0`) {
+    }
+    else if (versionPart === `CVSS:3.0`) {
         version = `3.0`;
-    } else {
+    }
+    else {
         throw new Error(`Invalid CVSS v3.x vector: must start with CVSS:3.0 or CVSS:3.1`);
     }
 
     for (let i = 1; i < parts.length; i++) {
-        const [key, value] = parts[i].split(`:`);
+        const [
+            key,
+            value,
+        ] = parts[i].split(`:`);
         if (key && value && key in metrics) {
             (metrics as unknown as Record<string, string>)[key] = value;
         }
     }
 
-    return { metrics, version };
+    return {
+        metrics,
+        version,
+    };
 }
 
 /**
- * Create default CVSS v3.x metrics object
+ * Create default CVSS v3.x metrics object with least impact values
  */
 export function createDefaultMetrics(): CVSSv3Metrics {
     return {
-        AV:  `N`,
-        AC:  `L`,
-        PR:  `N`,
-        UI:  `N`,
-        S:   `U`,
-        C:   `H`,
-        I:   `H`,
-        A:   `H`,
-        E:   `X`,
-        RL:  `X`,
-        RC:  `X`,
+        // Base Metrics - least impact values
+        AV: `L`, // Local (hardest to exploit)
+        AC: `H`, // High (most complex)
+        PR: `H`, // High (most privileges required)
+        UI: `R`, // Required (user interaction needed)
+        S:  `U`, // Unchanged (no scope change)
+        C:  `N`, // None (no confidentiality impact)
+        I:  `N`, // None (no integrity impact)
+        A:  `N`, // None (no availability impact)
+
+        // Temporal Metrics - not defined
+        E:  `X`,
+        RL: `X`,
+        RC: `X`,
+
+        // Environmental Metrics - not defined
         CR:  `X`,
         IR:  `X`,
         AR:  `X`,
@@ -511,3 +595,64 @@ export function calculateCVSSv3Score(metrics: CVSSv3Metrics, version: CVSSv3Vers
         version,
     };
 }
+
+/**
+ * Calculate the score impact of selecting a specific metric option
+ * This enables showing users how each option affects the final score
+ *
+ * @param metrics Current metrics configuration
+ * @param metricKey The metric to analyze
+ * @param optionValue The option value to test
+ * @param version CVSS version to use
+ * @returns The impact on score (positive means increases score, negative means decreases)
+ */
+export function calculateOptionImpact(
+    metrics: CVSSv3Metrics,
+    metricKey: keyof CVSSv3Metrics,
+    optionValue: string,
+    version: CVSSv3Version
+): number {
+    const currentScore = calculateCVSSv3Score(metrics, version).score;
+
+    // Create a copy with this specific option selected
+    const testMetrics = {
+        ...metrics,
+        [metricKey]: optionValue,
+    };
+
+    const testScore = calculateCVSSv3Score(testMetrics, version).score;
+
+    // Return the delta: positive means selecting this option increases score
+    return testScore - currentScore;
+}
+
+// Default metrics for initialization with least impact on score
+export const DEFAULT_METRICS: CVSSv3Metrics = {
+    // Base Metrics - least impact values
+    AV: `N`,
+    AC: `L`,
+    PR: `N`,
+    UI: `N`,
+    S:  `U`,
+    C:  `N`,
+    I:  `N`,
+    A:  `N`,
+
+    // Temporal Metrics - not defined
+    E:  `X`,
+    RL: `X`,
+    RC: `X`,
+
+    // Environmental Metrics - not defined
+    CR:  `X`,
+    IR:  `X`,
+    AR:  `X`,
+    MAV: `X`,
+    MAC: `X`,
+    MPR: `X`,
+    MUI: `X`,
+    MS:  `X`,
+    MC:  `X`,
+    MI:  `X`,
+    MA:  `X`,
+};

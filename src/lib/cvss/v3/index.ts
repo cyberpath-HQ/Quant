@@ -5,10 +5,12 @@
 
 export {
     calculateCVSSv3Score,
+    calculateOptionImpact,
     getSeverityRating,
     generateVector,
     parseVector,
     createDefaultMetrics,
+    DEFAULT_METRICS,
 } from "./scoring";
 
 export type { CVSSv3Version } from "./scoring";

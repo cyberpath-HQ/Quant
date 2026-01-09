@@ -20,13 +20,13 @@ import type {
 /** Named constants */
 enum Constants {
     MAX_SCORE = 10,
-    MIN_SCORE = 0,
+    MIN_SCORE = 0
 }
 
 /** Severity thresholds for v2.0 (different from v3.x) */
 enum SeverityThreshold {
     LOW = 4.0,
-    MEDIUM = 7.0,
+    MEDIUM = 7.0
 }
 
 /** Impact coefficient */
@@ -49,20 +49,89 @@ const BASE_COEFFICIENTS = {
  * Metric weight values for CVSS v2.0
  */
 const WEIGHTS = {
-    AV:  { L: 0.395, A: 0.646, N: 1.0 },
-    AC:  { H: 0.35, M: 0.61, L: 0.71 },
-    Au:  { M: 0.45, S: 0.56, N: 0.704 },
-    C:   { N: 0, P: 0.275, C: 0.66 },
-    I:   { N: 0, P: 0.275, C: 0.66 },
-    A:   { N: 0, P: 0.275, C: 0.66 },
-    E:   { ND: 1.0, U: 0.85, POC: 0.9, F: 0.95, H: 1.0 },
-    RL:  { ND: 1.0, OF: 0.87, TF: 0.9, W: 0.95, U: 1.0 },
-    RC:  { ND: 1.0, UC: 0.9, UR: 0.95, C: 1.0 },
-    CDP: { ND: 0, N: 0, L: 0.1, LM: 0.3, MH: 0.4, H: 0.5 },
-    TD:  { ND: 1, N: 0, L: 0.25, M: 0.75, H: 1.0 },
-    CR:  { ND: 1, L: 0.5, M: 1.0, H: 1.51 },
-    IR:  { ND: 1, L: 0.5, M: 1.0, H: 1.51 },
-    AR:  { ND: 1, L: 0.5, M: 1.0, H: 1.51 },
+    AV:  {
+        L: 0.395,
+        A: 0.646,
+        N: 1.0,
+    },
+    AC:  {
+        H: 0.35,
+        M: 0.61,
+        L: 0.71,
+    },
+    Au:  {
+        M: 0.45,
+        S: 0.56,
+        N: 0.704,
+    },
+    C:   {
+        N: 0,
+        P: 0.275,
+        C: 0.66,
+    },
+    I:   {
+        N: 0,
+        P: 0.275,
+        C: 0.66,
+    },
+    A:   {
+        N: 0,
+        P: 0.275,
+        C: 0.66,
+    },
+    E:   {
+        ND:  1.0,
+        U:   0.85,
+        POC: 0.9,
+        F:   0.95,
+        H:   1.0,
+    },
+    RL:  {
+        ND: 1.0,
+        OF: 0.87,
+        TF: 0.9,
+        W:  0.95,
+        U:  1.0,
+    },
+    RC:  {
+        ND: 1.0,
+        UC: 0.9,
+        UR: 0.95,
+        C:  1.0,
+    },
+    CDP: {
+        ND: 0,
+        N:  0,
+        L:  0.1,
+        LM: 0.3,
+        MH: 0.4,
+        H:  0.5,
+    },
+    TD:  {
+        ND: 1,
+        N:  0,
+        L:  0.25,
+        M:  0.75,
+        H:  1.0,
+    },
+    CR:  {
+        ND: 1,
+        L:  0.5,
+        M:  1.0,
+        H:  1.51,
+    },
+    IR:  {
+        ND: 1,
+        L:  0.5,
+        M:  1.0,
+        H:  1.51,
+    },
+    AR:  {
+        ND: 1,
+        L:  0.5,
+        M:  1.0,
+        H:  1.51,
+    },
 } as const;
 
 /**
@@ -200,39 +269,39 @@ export function getSeverityRating(score: number): SeverityRating {
  * Generate CVSS v2.0 vector string from metrics
  */
 export function generateVector(metrics: CVSSv2Metrics): string {
-    const parts: string[] = [];
+    const parts: Array<string> = [ `CVSS:2.0` ];
 
-    parts.push(`AV:${metrics.AV}`);
-    parts.push(`AC:${metrics.AC}`);
-    parts.push(`Au:${metrics.Au}`);
-    parts.push(`C:${metrics.C}`);
-    parts.push(`I:${metrics.I}`);
-    parts.push(`A:${metrics.A}`);
+    parts.push(`AV:${ metrics.AV }`);
+    parts.push(`AC:${ metrics.AC }`);
+    parts.push(`Au:${ metrics.Au }`);
+    parts.push(`C:${ metrics.C }`);
+    parts.push(`I:${ metrics.I }`);
+    parts.push(`A:${ metrics.A }`);
 
     if (metrics.E !== `ND`) {
-        parts.push(`E:${metrics.E}`);
+        parts.push(`E:${ metrics.E }`);
     }
     if (metrics.RL !== `ND`) {
-        parts.push(`RL:${metrics.RL}`);
+        parts.push(`RL:${ metrics.RL }`);
     }
     if (metrics.RC !== `ND`) {
-        parts.push(`RC:${metrics.RC}`);
+        parts.push(`RC:${ metrics.RC }`);
     }
 
     if (metrics.CDP !== `ND`) {
-        parts.push(`CDP:${metrics.CDP}`);
+        parts.push(`CDP:${ metrics.CDP }`);
     }
     if (metrics.TD !== `ND`) {
-        parts.push(`TD:${metrics.TD}`);
+        parts.push(`TD:${ metrics.TD }`);
     }
     if (metrics.CR !== `ND`) {
-        parts.push(`CR:${metrics.CR}`);
+        parts.push(`CR:${ metrics.CR }`);
     }
     if (metrics.IR !== `ND`) {
-        parts.push(`IR:${metrics.IR}`);
+        parts.push(`IR:${ metrics.IR }`);
     }
     if (metrics.AR !== `ND`) {
-        parts.push(`AR:${metrics.AR}`);
+        parts.push(`AR:${ metrics.AR }`);
     }
 
     return parts.join(`/`);
@@ -263,7 +332,10 @@ export function parseVector(vector: string): CVSSv2Metrics {
     const parts = cleanVector.split(`/`);
 
     for (const part of parts) {
-        const [key, value] = part.split(`:`);
+        const [
+            key,
+            value,
+        ] = part.split(`:`);
         if (key && value && key in metrics) {
             (metrics as unknown as Record<string, string>)[key] = value;
         }
@@ -273,19 +345,24 @@ export function parseVector(vector: string): CVSSv2Metrics {
 }
 
 /**
- * Create default CVSS v2.0 metrics object
+ * Create default CVSS v2.0 metrics object with least impact values
  */
 export function createDefaultMetrics(): CVSSv2Metrics {
     return {
-        AV:  `N`,
-        AC:  `L`,
-        Au:  `N`,
-        C:   `C`,
-        I:   `C`,
-        A:   `C`,
-        E:   `ND`,
-        RL:  `ND`,
-        RC:  `ND`,
+        // Base Metrics - least impact values
+        AV: `L`, // Local (hardest to exploit)
+        AC: `H`, // High (most complex)
+        Au: `M`, // Multiple (most authentication required)
+        C:  `N`, // None (no confidentiality impact)
+        I:  `N`, // None (no integrity impact)
+        A:  `N`, // None (no availability impact)
+
+        // Temporal Metrics - not defined
+        E:  `ND`,
+        RL: `ND`,
+        RC: `ND`,
+
+        // Environmental Metrics - not defined
         CDP: `ND`,
         TD:  `ND`,
         CR:  `ND`,
@@ -342,3 +419,54 @@ export function calculateCVSSv2Score(metrics: CVSSv2Metrics): CVSSv2Score {
         version:             `2.0`,
     };
 }
+
+/**
+ * Calculate the score impact of selecting a specific metric option
+ * This enables showing users how each option affects the final score
+ *
+ * @param metrics Current metrics configuration
+ * @param metricKey The metric to analyze
+ * @param optionValue The option value to test
+ * @returns The impact on score (positive means increases score, negative means decreases)
+ */
+export function calculateOptionImpact(
+    metrics: CVSSv2Metrics,
+    metricKey: keyof CVSSv2Metrics,
+    optionValue: string
+): number {
+    const currentScore = calculateCVSSv2Score(metrics).score;
+
+    // Create a copy with this specific option selected
+    const testMetrics = {
+        ...metrics,
+        [metricKey]: optionValue,
+    };
+
+    const testScore = calculateCVSSv2Score(testMetrics).score;
+
+    // Return the delta: positive means selecting this option increases score
+    return testScore - currentScore;
+}
+
+// Default metrics for initialization with least impact on score
+export const DEFAULT_METRICS: CVSSv2Metrics = {
+    // Base Metrics - least impact values
+    AV: `L`,
+    AC: `H`,
+    Au: `M`,
+    C:  `N`,
+    I:  `N`,
+    A:  `N`,
+
+    // Temporal Metrics - not defined
+    E:  `ND`,
+    RL: `ND`,
+    RC: `ND`,
+
+    // Environmental Metrics - not defined
+    CDP: `ND`,
+    TD:  `ND`,
+    CR:  `ND`,
+    IR:  `ND`,
+    AR:  `ND`,
+};

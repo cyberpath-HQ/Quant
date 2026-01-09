@@ -5,8 +5,10 @@
 
 export {
     calculateCVSSv2Score,
+    calculateOptionImpact,
     getSeverityRating,
     generateVector,
     parseVector,
     createDefaultMetrics,
+    DEFAULT_METRICS,
 } from "./scoring";
