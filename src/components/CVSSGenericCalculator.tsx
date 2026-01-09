@@ -18,11 +18,6 @@ import { Badge } from "@/components/ui/badge";
 import {
     Tabs, TabsContent, TabsList, TabsTrigger
 } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import {
-    CodeXml,
-    Copy, EllipsisVertical, History, Settings, Share2
-} from "lucide-react";
 import {
     toast, Toaster
 } from "sonner";
@@ -39,37 +34,60 @@ import {
     cvss2Metrics,
     cvss3Metrics,
     cvss40Metrics,
-    getSeverityRating
+    getSeverityRating,
+    type MetricGroup
 } from "@/lib/cvss/metrics-data";
 import type {
     CVSSv2Metrics,
     CVSSv3Metrics,
-    CVSSv4Metrics,
-    MetricGroup
+    CVSSv4Metrics
 } from "@/lib/cvss/types";
 import {
-    Field, FieldContent, FieldDescription, FieldLabel, FieldSet
+    Field, FieldDescription, FieldLabel, FieldSet
 } from "./ui/field";
 import {
     RadioGroup, RadioGroupItem
 } from "./ui/radio-group";
 import { cn } from "@/lib/utils";
-import { Switch } from "./ui/switch";
-import logoWhite from "@/assets/logo-white.svg";
-import logoBlack from "@/assets/logo.svg";
-import {
-    Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle
-} from "./ui/dialog";
-import {
-    DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger
-} from "./ui/dropdown-menu";
-import { Input } from "./ui/input";
-import { addToHistory } from "../lib/add-to-history";
 import { useTheme } from "@/hooks/use-theme";
+import {
+    CVSS_VERSION_2_0,
+    CVSS_VERSION_3_0,
+    CVSS_VERSION_3_1,
+    CVSS_VERSION_4_0,
+    CVSS_DEFAULT_ACTIVE_GROUP,
+    CVSS_VECTOR_COPIED_MESSAGE,
+    CVSS_SHAREABLE_LINK_MESSAGE,
+    CVSS_EMBEDDABLE_CODE_MESSAGE,
+    CVSS_SCORE_SAVED_MESSAGE,
+    CVSS_GRID_COLS_4,
+    CVSS_GRID_COLS_3,
+    CVSS_EMBED_PATH_40,
+    CVSS_EMBED_PATH_2,
+    CVSS_EMBED_PATH_3_PREFIX,
+    CVSS_EMBED_IFRAME_WIDTH,
+    CVSS_EMBED_IFRAME_HEIGHT,
+    CVSS_EMBED_IFRAME_STYLE,
+    CVSS_QUERY_PARAM_VECTOR,
+    ZERO,
+    IMPACT_FRACTION_DIGITS
+} from "@/lib/constants";
+import SettingsMenu from './cvss-calculator/SettingsMenu';
+import ScoreCard from './cvss-calculator/ScoreCard';
+import ExportMenu from './cvss-calculator/ExportMenu';
+import SaveScoreDialog from './cvss-calculator/SaveScoreDialog';
+import { addToHistory } from "@/lib/add-to-history";
 
-type CVSSVersion = `2.0` | `3.0` | `3.1` | `4.0`;
+type CVSSVersion = typeof CVSS_VERSION_2_0 | typeof CVSS_VERSION_3_0 | typeof CVSS_VERSION_3_1 | typeof CVSS_VERSION_4_0;
 
 type CVSSMetrics = CVSSv2Metrics | CVSSv3Metrics | CVSSv4Metrics;
+
+interface VersionConfig {
+    metricsData:    Array<MetricGroup>
+    gridCols:       number
+    embedPath:      string
+    defaultMetrics: CVSSMetrics
+}
 
 interface CVSSGenericCalculatorProps {
     version:                            CVSSVersion
@@ -89,28 +107,28 @@ export const CVSSGenericCalculator: FC<CVSSGenericCalculatorProps> = ({
     setShouldShowContributions,
 }) => {
     // Get version-specific configuration
-    const config = useMemo(() => {
+    const config = useMemo((): VersionConfig => {
         switch (version) {
-            case `4.0`:
+            case CVSS_VERSION_4_0:
                 return {
                     metricsData:    cvss40Metrics,
-                    gridCols:       4,
-                    embedPath:      `cvss40`,
+                    gridCols:       CVSS_GRID_COLS_4,
+                    embedPath:      CVSS_EMBED_PATH_40,
                     defaultMetrics: V4_DEFAULT_METRICS,
                 };
-            case `3.1`:
-            case `3.0`:
+            case CVSS_VERSION_3_1:
+            case CVSS_VERSION_3_0:
                 return {
                     metricsData:    cvss3Metrics,
-                    gridCols:       3,
-                    embedPath:      `cvss3${ version.replace(`.`, ``) }`,
+                    gridCols:       CVSS_GRID_COLS_3,
+                    embedPath:      `${ CVSS_EMBED_PATH_3_PREFIX }${ version.replace(`.`, ``) }`,
                     defaultMetrics: V3_DEFAULT_METRICS,
                 };
-            case `2.0`:
+            case CVSS_VERSION_2_0:
                 return {
                     metricsData:    cvss2Metrics,
-                    gridCols:       3,
-                    embedPath:      `cvss2`,
+                    gridCols:       CVSS_GRID_COLS_3,
+                    embedPath:      CVSS_EMBED_PATH_2,
                     defaultMetrics: V2_DEFAULT_METRICS,
                 };
         }
@@ -119,12 +137,12 @@ export const CVSSGenericCalculator: FC<CVSSGenericCalculatorProps> = ({
     const [
         metrics,
         setMetrics,
-    ] = useState<CVSSMetrics>(() => {
+    ] = useState<CVSSMetrics>((): CVSSMetrics => {
         if (initialMetrics && Object.keys(initialMetrics).length > 0) {
             return {
                 ...config.defaultMetrics,
                 ...initialMetrics,
-            };
+            } as CVSSMetrics;
         }
         return config.defaultMetrics;
     });
@@ -140,7 +158,7 @@ export const CVSSGenericCalculator: FC<CVSSGenericCalculatorProps> = ({
     const [
         activeGroup,
         setActiveGroup,
-    ] = useState(`base-metrics`);
+    ] = useState(CVSS_DEFAULT_ACTIVE_GROUP);
 
     const [
         should_save_dialog_be_open,
@@ -160,21 +178,19 @@ export const CVSSGenericCalculator: FC<CVSSGenericCalculatorProps> = ({
 
     const copyVector = useCallback(() => {
         navigator.clipboard.writeText(vectorString);
-        toast.success(`Vector string copied`);
+        toast.success(CVSS_VECTOR_COPIED_MESSAGE);
     }, [ vectorString ]);
 
     const shareScore = useCallback(() => {
-        const url = `${ window.location.origin }?vector=${ encodeURIComponent(vectorString) }`;
+        const url = `${ window.location.origin }?${ CVSS_QUERY_PARAM_VECTOR }=${ encodeURIComponent(vectorString) }`;
         navigator.clipboard.writeText(url);
-        toast.success(`Shareable link copied`);
+        toast.success(CVSS_SHAREABLE_LINK_MESSAGE);
     }, [ vectorString ]);
 
     const shareEmbeddableCode = useCallback(() => {
-        const embeddableCode = `<iframe src="${ window.location.origin
-        }/embed/${ config.embedPath }?vector=${ encodeURIComponent(vectorString)
-        }" width="400" height="600" style="border:none;"></iframe>`;
+        const embeddableCode = `<iframe src="${ window.location.origin }/embed/${ config.embedPath }?${ CVSS_QUERY_PARAM_VECTOR }=${ encodeURIComponent(vectorString) }" width="${ CVSS_EMBED_IFRAME_WIDTH }" height="${ CVSS_EMBED_IFRAME_HEIGHT }" style="${ CVSS_EMBED_IFRAME_STYLE }"></iframe>`;
         navigator.clipboard.writeText(embeddableCode);
-        toast.success(`Embeddable code copied`);
+        toast.success(CVSS_EMBEDDABLE_CODE_MESSAGE);
     }, [
         vectorString,
         config.embedPath,
@@ -190,7 +206,7 @@ export const CVSSGenericCalculator: FC<CVSSGenericCalculatorProps> = ({
                 vectorString,
                 name:     historyName.trim(),
             });
-            toast.success(`Score saved to history`);
+            toast.success(CVSS_SCORE_SAVED_MESSAGE);
             set_should_save_dialog_be_open(false);
             setHistoryName(``);
         }
@@ -206,21 +222,21 @@ export const CVSSGenericCalculator: FC<CVSSGenericCalculatorProps> = ({
         optionValue: string
     ): number => {
         switch (version) {
-            case `4.0`:
+            case CVSS_VERSION_4_0:
                 return calculateV4OptionImpact(
                     metrics as CVSSv4Metrics,
                     metricKey as keyof CVSSv4Metrics,
                     optionValue
                 );
-            case `3.1`:
-            case `3.0`:
+            case CVSS_VERSION_3_1:
+            case CVSS_VERSION_3_0:
                 return calculateV3OptionImpact(
                     metrics as CVSSv3Metrics,
                     metricKey as keyof CVSSv3Metrics,
                     optionValue,
                     version
                 );
-            case `2.0`:
+            case CVSS_VERSION_2_0:
                 return calculateV2OptionImpact(
                     metrics as CVSSv2Metrics,
                     metricKey as keyof CVSSv2Metrics,
@@ -273,12 +289,18 @@ export const CVSSGenericCalculator: FC<CVSSGenericCalculatorProps> = ({
     const theme = useTheme();
 
     // Helper to transform group names for tabs
-    const getTabValue = (groupName: string) => groupName.toLowerCase().replace(/\s+/g, `-`);
+    const getTabValue = useCallback(
+        (groupName: string): string => groupName.toLowerCase().replace(/\s+/g, `-`),
+        []
+    );
 
     // Helper to transform group names for display
-    const getTabLabel = (groupName: string) => groupName
-        .replace(`Metrics`, ``)
-        .replace(`Temporal`, `Threat`);
+    const getTabLabel = useCallback(
+        (groupName: string): string => groupName
+            .replace(`Metrics`, ``)
+            .replace(`Temporal`, `Threat`),
+        []
+    );
 
     return (
         <>
@@ -295,64 +317,12 @@ export const CVSSGenericCalculator: FC<CVSSGenericCalculatorProps> = ({
                                 Score updates in real-time
                             </p>
                         </div>
-                        <div className="space-y-3">
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant={`outline`} size={`sm`}>
-                                        <Settings className="size-3.5" />
-                                        Settings
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="max-w-96">
-                                    <DropdownMenuItem
-                                        className="cursor-pointer p-3"
-                                        onClick={() => document.getElementById(
-                                            `alternative-descriptions`
-                                        )?.click()}
-                                    >
-                                        <Field orientation="horizontal">
-                                            <Switch
-                                                onCheckedChange={setShouldUseAlternativeDescription}
-                                                checked={shouldUseAlternativeDescription}
-                                                id="alternative-descriptions"
-                                            />
-                                            <FieldContent>
-                                                <FieldLabel htmlFor="alternative-descriptions">
-                                                    Use Alternative Descriptions
-                                                </FieldLabel>
-                                                <FieldDescription>
-                                                    Toggle to switch between official not-so-clear
-                                                    and alternative, more explanatory metric descriptions.
-                                                </FieldDescription>
-                                            </FieldContent>
-                                        </Field>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                        className="cursor-pointer p-3"
-                                        onClick={() => document.getElementById(
-                                            `show-contributions`
-                                        )?.click()}
-                                    >
-                                        <Field orientation="horizontal">
-                                            <Switch
-                                                onCheckedChange={setShouldShowContributions}
-                                                checked={shouldShowContributions}
-                                                id="show-contributions"
-                                            />
-                                            <FieldContent>
-                                                <FieldLabel htmlFor="show-contributions">
-                                                    Show Score Contributions
-                                                </FieldLabel>
-                                                <FieldDescription>
-                                                    Display how much each metric option contributes
-                                                    to the overall vulnerability score.
-                                                </FieldDescription>
-                                            </FieldContent>
-                                        </Field>
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </div>
+                        <SettingsMenu
+                            shouldUseAlternativeDescription={shouldUseAlternativeDescription}
+                            setShouldUseAlternativeDescription={setShouldUseAlternativeDescription}
+                            shouldShowContributions={shouldShowContributions}
+                            setShouldShowContributions={setShouldShowContributions}
+                        />
                     </div>
 
                     <Tabs
@@ -364,7 +334,7 @@ export const CVSSGenericCalculator: FC<CVSSGenericCalculatorProps> = ({
                             config.gridCols === 3 && `grid-cols-3`
                         )}>
                             {
-                                config.metricsData.map((group: MetricGroup) => (
+                                config.metricsData.map((group) => (
                                     <TabsTrigger
                                         key={group.name}
                                         value={getTabValue(group.name)}
@@ -377,7 +347,7 @@ export const CVSSGenericCalculator: FC<CVSSGenericCalculatorProps> = ({
                         </TabsList>
 
                         {
-                            config.metricsData.map((group: MetricGroup) => (
+                            config.metricsData.map((group) => (
                                 <TabsContent
                                     key={group.name}
                                     value={getTabValue(group.name)}
@@ -419,7 +389,7 @@ export const CVSSGenericCalculator: FC<CVSSGenericCalculatorProps> = ({
                                                                             metric.key,
                                                                             option.value
                                                                         )
-                                                                        : 0;
+                                                                        : ZERO;
 
                                                                 const has_impact =
                                                                     shouldShowContributions &&
@@ -428,13 +398,13 @@ export const CVSSGenericCalculator: FC<CVSSGenericCalculatorProps> = ({
                                                                 let impactColor =
                                                                     `text-gray-500 dark:text-gray-400`;
                                                                 if (has_impact) {
-                                                                    if (impact > 0) {
+                                                                    if (impact > ZERO) {
                                                                         impactColor = `text-red-600
                                                                         dark:text-red-400
                                                                         border-red-300
                                                                         dark:border-red-700`;
                                                                     }
-                                                                    else if (impact < 0) {
+                                                                    else if (impact < ZERO) {
                                                                         impactColor = `text-green-600
                                                                         dark:text-green-400
                                                                         border-green-300
@@ -466,11 +436,8 @@ export const CVSSGenericCalculator: FC<CVSSGenericCalculatorProps> = ({
                                                                             className="mt-1
                                                                             data-[state='checked']:border-sky-500"
                                                                         />
-                                                                        <div className="flex flex-col
-                                                                        flex-1">
-                                                                            <div className="flex
-                                                                            items-center
-                                                                            justify-between gap-2">
+                                                                        <div className="flex flex-col flex-1">
+                                                                            <div className="flex items-center justify-between gap-2">
                                                                                 <FieldLabel
                                                                                     htmlFor={`${ metric.key
                                                                                     }-${ option.value }`}
@@ -498,8 +465,8 @@ export const CVSSGenericCalculator: FC<CVSSGenericCalculatorProps> = ({
                                                                                             )
                                                                                             : (
                                                                                                 <>
-                                                                                                    {impact > 0 ? `+` : ``}
-                                                                                                    {impact.toFixed(1)}
+                                                                                                    {impact > ZERO ? `+` : ``}
+                                                                                                    {impact.toFixed(IMPACT_FRACTION_DIGITS)}
                                                                                                 </>
                                                                                             )}
                                                                                     </Badge>
@@ -530,155 +497,30 @@ export const CVSSGenericCalculator: FC<CVSSGenericCalculatorProps> = ({
 
                 {/* Right: Sticky Score */}
                 <div className="lg:sticky lg:top-20 h-fit">
-                    <Card className="border-2 border-sky-500/30 shadow-lg">
-                        <CardContent className="px-6 space-y-6">
-                            <div className="space-y-3">
-                                <div className="flex items-center justify-between">
-                                    <p className="text-xs font-semibold text-muted-foreground
-                                    uppercase tracking-wider">
-                                        CVSS v{version}
-                                    </p>
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button variant={`outline`} size={`sm`}>
-                                                <EllipsisVertical className="size-3.5" />
-                                                Export
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent>
-                                            <DropdownMenuLabel className="text-xs">
-                                                Export options
-                                            </DropdownMenuLabel>
-                                            <DropdownMenuSeparator />
-                                            <DropdownMenuItem onClick={copyVector}>
-                                                <Copy className="size-3.5 mr-2" />
-                                                Copy Vector
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem onClick={shareScore}>
-                                                <Share2 className="size-3.5 mr-2" />
-                                                Share Link
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem onClick={shareEmbeddableCode}>
-                                                <CodeXml className="size-3.5 mr-2" />
-                                                Embeddable code
-                                            </DropdownMenuItem>
-                                            <DropdownMenuLabel className="text-xs">
-                                                Persistence
-                                            </DropdownMenuLabel>
-                                            <DropdownMenuSeparator />
-                                            <DropdownMenuItem onClick={() => set_should_save_dialog_be_open(true)
-                                            }>
-                                                <History className="size-3.5 mr-2" />
-                                                Save to Score Manager
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </div>
-                                <div className="flex items-end gap-3">
-                                    <div className={cn(
-                                        `text-6xl font-bold tabular-nums`,
-                                        severity.color
-                                    )}>
-                                        {score.toFixed(1)}
-                                    </div>
-                                    <Badge className={cn(
-                                        `text-sm px-3 py-1.5 font-semibold`,
-                                        severity.color,
-                                        severity.bgColor
-                                    )}>
-                                        {severity.label}
-                                    </Badge>
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <p className="text-xs font-semibold text-muted-foreground
-                                uppercase tracking-wider">
-                                    Vector
-                                </p>
-                                <div className="rounded-lg bg-white dark:bg-slate-900 p-3
-                                font-mono text-[10px] leading-relaxed break-all border
-                                border-sky-200 dark:border-sky-800 text-foreground">
-                                    {vectorString}
-                                </div>
-                            </div>
-
-                            <div className="mt-8 px-12">
-                                {/* Light theme image */}
-                                <picture className="block dark:hidden" data-light-theme>
-                                    <img
-                                        src={logoBlack.src}
-                                        loading="lazy"
-                                        alt="CyberPath Quant Logo"
-                                        className="w-full h-auto"
-                                    />
-                                </picture>
-
-                                {/* Dark theme image */}
-                                <picture className="hidden dark:block" data-dark-theme>
-                                    <img
-                                        src={logoWhite.src}
-                                        loading="lazy"
-                                        alt="CyberPath Quant Logo"
-                                        className="w-full h-auto"
-                                    />
-                                </picture>
-                            </div>
-                        </CardContent>
-                    </Card>
+                    <ScoreCard
+                        version={version}
+                        score={score}
+                        vectorString={vectorString}
+                        severity={severity}
+                        exportMenu={
+                            <ExportMenu
+                                onCopyVector={copyVector}
+                                onShareScore={shareScore}
+                                onShareCode={shareEmbeddableCode}
+                                onSaveClick={() => set_should_save_dialog_be_open(true)}
+                            />
+                        }
+                    />
                 </div>
             </div>
 
-            <Dialog
+            <SaveScoreDialog
                 open={should_save_dialog_be_open}
-                onOpenChange={set_should_save_dialog_be_open}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>
-                            Save Score to History
-                        </DialogTitle>
-                        <DialogDescription>
-                            Enter a name for this CVSS score to save it in your history.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                        <Field orientation="horizontal">
-                            <FieldContent>
-                                <FieldLabel htmlFor="show-contributions">
-                                    History Name
-                                </FieldLabel>
-                                <Input
-                                    id="name"
-                                    value={historyName}
-                                    onChange={(e) => setHistoryName(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === `Enter`) {
-                                            handleSaveToHistory();
-                                        }
-                                    }}
-                                    placeholder="Enter a name for this score"
-                                />
-                                <FieldDescription>
-                                    A descriptive name to help you identify this score
-                                    in your history.
-                                </FieldDescription>
-                            </FieldContent>
-                        </Field>
-                    </div>
-                    <DialogFooter>
-                        <Button
-                            variant="outline"
-                            onClick={() => set_should_save_dialog_be_open(false)}>
-                            Cancel
-                        </Button>
-                        <Button
-                            id="save-to-history"
-                            onClick={handleSaveToHistory}>
-                            Save
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+                onOpenChange={set_should_save_dialog_be_open}
+                historyName={historyName}
+                onNameChange={setHistoryName}
+                onSave={handleSaveToHistory}
+            />
         </>
     );
 };
