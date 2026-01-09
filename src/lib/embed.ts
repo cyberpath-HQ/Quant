@@ -98,26 +98,22 @@ export function generateEmbeddableCode(params: {
     }
     @keyframes slideDown {
         from {
-            transform: scaleY(0) translateY(-5px);
-            transform-origin: top right;
             opacity: 0;
+            transform: scale(0.95) translateY(-4px);
         }
         to {
-            transform: scaleY(1) translateY(0);
-            transform-origin: top right;
             opacity: 1;
+            transform: scale(1) translateY(0);
         }
     }
     @keyframes slideUp {
         from {
-            transform: scaleY(1) translateY(0);
-            transform-origin: top right;
             opacity: 1;
+            transform: scale(1) translateY(0);
         }
         to {
-            transform: scaleY(0) translateY(-5px);
-            transform-origin: top right;
             opacity: 0;
+            transform: scale(0.95) translateY(-4px);
         }
     }
     #toast {
