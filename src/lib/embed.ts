@@ -96,6 +96,30 @@ export function generateEmbeddableCode(params: {
             opacity: 1;
         }
     }
+    @keyframes slideDown {
+        from {
+            transform: scaleY(0) translateY(-5px);
+            transform-origin: top right;
+            opacity: 0;
+        }
+        to {
+            transform: scaleY(1) translateY(0);
+            transform-origin: top right;
+            opacity: 1;
+        }
+    }
+    @keyframes slideUp {
+        from {
+            transform: scaleY(1) translateY(0);
+            transform-origin: top right;
+            opacity: 1;
+        }
+        to {
+            transform: scaleY(0) translateY(-5px);
+            transform-origin: top right;
+            opacity: 0;
+        }
+    }
     #toast {
         transition: opacity 0.3s ease-out, transform 0.3s ease-out;
     }
@@ -117,6 +141,13 @@ export function generateEmbeddableCode(params: {
         box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
         z-index: 20;
         min-width: 160px;
+        transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+    }
+    .dropdown-content.show {
+        animation: slideDown 0.3s ease-out;
+    }
+    .dropdown-content.hide {
+        animation: slideUp 0.3s ease-out;
     }
     .dropdown-content a {
         display: block;
@@ -127,6 +158,40 @@ export function generateEmbeddableCode(params: {
     }
     .dropdown-content a:hover {
         background: #f9fafb;
+    }
+    .btn-link {
+        background: #0ea5e9;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px 0 0 4px;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 500;
+        display: inline-block;
+        cursor: pointer;
+        transition: background 0.2s;
+        border-right: 1px solid rgba(255,255,255,0.2);
+    }
+    .btn-link:hover {
+        background: #0284c7;
+    }
+    .dropdown button {
+        background: #0ea5e9;
+        border: none;
+        cursor: pointer;
+        padding: 6px 8px;
+        border-radius: 0 4px 4px 0;
+        color: white;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        transition: background 0.2s;
+        border-left: 1px solid rgba(255,255,255,0.2);
+    }
+    .dropdown button:hover {
+        background: #0284c7;
     }
 </style>
 <div style="
@@ -156,41 +221,25 @@ export function generateEmbeddableCode(params: {
         ">
             CVSS v${ version }
         </span>
-        <div style="display: flex; gap: 8px; align-items: center;">
+        <div style="display: flex;">
             <a href='${ origin }?${ new URLSearchParams({
                 vector:       vectorString,
                 utm_source:   `view_in_calculator`,
                 utm_medium:   `widget`,
                 utm_campaign: `cvss_calculator`,
-            }).toString() }' rel="noopener" target="_blank" style="
-                font-size: 12px;
-                color: #0ea5e9;
-                text-decoration: none;
-                font-weight: 500;
-            ">
+            }).toString() }' rel="noopener" target="_blank" class="btn-link" aria-label="Open CVSS calculator with current vector">
                 Open in calculator
             </a>
             <div class="dropdown">
-                <button onclick="toggleDropdown()" style="
-                    background: none;
-                    border: 1px solid #e5e7eb;
-                    cursor: pointer;
-                    padding: 4px 8px;
-                    border-radius: 4px;
-                    color: #6b7280;
-                    font-size: 12px;
-                    display: flex;
-                    align-items: center;
-                    gap: 4px;
-                " title="More options">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <button onclick="toggleDropdown()" aria-expanded="false" aria-haspopup="menu" aria-label="More options">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                         <circle cx="12" cy="12" r="1"></circle>
                         <circle cx="12" cy="5" r="1"></circle>
                         <circle cx="12" cy="19" r="1"></circle>
                     </svg>
                 </button>
-                <div id="dropdown-content" class="dropdown-content">
-                    <a href="#" onclick="copyLink('${ escapedShareLink }'); toggleDropdown(); return false;">
+                <div id="dropdown-content" class="dropdown-content" role="menu" aria-hidden="true">
+                    <a href="#" onclick="copyLink('${ escapedShareLink }'); toggleDropdown(); return false;" role="menuitem" tabindex="-1">
                         Copy share link
                     </a>
                 </div>
@@ -264,8 +313,8 @@ export function generateEmbeddableCode(params: {
                     color: #6b7280;
                     z-index: 10;
                     position: relative;
-                " title="Copy vector">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                " title="Copy vector" aria-label="Copy CVSS vector to clipboard">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                         <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                     </svg>
@@ -287,19 +336,44 @@ export function generateEmbeddableCode(params: {
         z-index: 1000;
         transform: translateX(100%);
         opacity: 0;
-    "></div>
+    " aria-live="polite" aria-atomic="true" role="status"></div>
 
     <script>
         document.addEventListener('click', function(event) {
             const dropdown = document.querySelector('.dropdown');
             const content = document.getElementById('dropdown-content');
             if (!dropdown.contains(event.target)) {
-                content.style.display = 'none';
+                closeDropdown();
             }
         });
         function toggleDropdown() {
             const content = document.getElementById('dropdown-content');
-            content.style.display = content.style.display === 'block' ? 'none' : 'block';
+            const button = content.previousElementSibling;
+            if (content.style.display === 'block') {
+                closeDropdown();
+            } else {
+                openDropdown();
+            }
+        }
+        function openDropdown() {
+            const content = document.getElementById('dropdown-content');
+            const button = content.previousElementSibling;
+            content.style.display = 'block';
+            content.classList.add('show');
+            content.classList.remove('hide');
+            button.setAttribute('aria-expanded', 'true');
+            content.setAttribute('aria-hidden', 'false');
+        }
+        function closeDropdown() {
+            const content = document.getElementById('dropdown-content');
+            const button = content.previousElementSibling;
+            content.classList.add('hide');
+            content.classList.remove('show');
+            setTimeout(() => {
+                content.style.display = 'none';
+            }, 300);
+            button.setAttribute('aria-expanded', 'false');
+            content.setAttribute('aria-hidden', 'true');
         }
         function showIcons() {
             document.getElementById('vector-icons').style.display = 'flex';
