@@ -25,6 +25,7 @@ import { Input } from "@/components/ui/input";
 import {
     Field, FieldContent, FieldDescription, FieldLabel
 } from "@/components/ui/field";
+import { Spinner } from "@/components/ui/spinner";
 import {
     History,
     Trash2,
@@ -65,6 +66,10 @@ export function CVSSScoreManager() {
         isChartDialogOpen,
         setIsChartDialogOpen,
     ] = useState(false);
+    const [
+        isLoading,
+        setIsLoading,
+    ] = useState(true);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [
         search,
@@ -89,6 +94,7 @@ export function CVSSScoreManager() {
 
     // Load history from localStorage
     useEffect(() => {
+        setIsLoading(true);
         const loadHistory = () => {
             try {
                 const stored = localStorage.getItem(STORAGE_KEY);
@@ -104,6 +110,7 @@ export function CVSSScoreManager() {
             catch (error) {
                 console.error(`Failed to load history:`, error);
             }
+            setIsLoading(false);
         };
 
         loadHistory();
@@ -148,11 +155,11 @@ export function CVSSScoreManager() {
             return;
         }
         const updated = history.map((entry) => entry.id === editingId
-        ? {
-            ...entry,
-            name: editName,
-        }
-        : entry
+            ? {
+                ...entry,
+                name: editName,
+            }
+            : entry
         );
         setHistory(updated);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
@@ -172,7 +179,7 @@ export function CVSSScoreManager() {
     }, []);
 
     const restoreEntry = useCallback((entry: ScoreHistoryEntry) => {
-    // Parse the vector string to get version and metrics
+        // Parse the vector string to get version and metrics
         const parsed = vectorParser.parseVector(entry.vectorString);
         if (!parsed) {
             toast.error(`Failed to parse vector string`);
@@ -236,7 +243,7 @@ export function CVSSScoreManager() {
                             return !existingVectors.has(entry.vectorString);
                         })
                         .map((entry) => ({
-                            id:           `${ Date.now() }-${ Math.random().toString(36)
+                            id: `${ Date.now() }-${ Math.random().toString(36)
                                 .substring(2, 9) }`,
                             version:      entry.version,
                             score:        entry.score,
@@ -397,40 +404,15 @@ export function CVSSScoreManager() {
         return sortDirection === `asc` ? aValue - bValue : bValue - aValue;
     });
 
-    if (history.length === 0) {
-        return (
-            <Card>
-                <CardHeader>
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <CardTitle className="flex items-center gap-2">
-                                <History className="h-5 w-5" />
-                                CVSS Score Manager
-                            </CardTitle>
-                            <CardDescription>Manage your saved CVSS scores</CardDescription>
-                        </div>
-                        <div className="flex gap-2">
-                            <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
-                                <Upload className="h-4 w-4 mr-1" />
-                                Import
-                            </Button>
-                        </div>
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept=".json,application/json"
-                            onChange={importHistory}
-                            className="hidden"
-                        />
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-center text-sm text-muted-foreground py-8">
-                        No scores yet. Start calculating CVSS scores to build your collection.
-                    </p>
-                </CardContent>
-            </Card>
-        );
+    let description: string;
+    if (isLoading) {
+        description = `Loading scores...`;
+    }
+    else if (history.length > 0) {
+        description = `Manage ${ history.length } saved CVSS score(s)`;
+    }
+    else {
+        description = `Manage your saved CVSS scores`;
     }
 
     return (
@@ -442,42 +424,58 @@ export function CVSSScoreManager() {
                             <History className="h-5 w-5" />
                             CVSS Score Manager
                         </CardTitle>
-                        <CardDescription>Manage {history.length} saved CVSS score(s)</CardDescription>
+                        <CardDescription>
+                            {description}
+                        </CardDescription>
                     </div>
                     <div className="flex gap-2">
-                        {selectedIds.size > 0
-? (
-              <>
-                  <Button variant="outline" size="sm" onClick={clearSelection}>
-                      <X className="h-4 w-4 mr-1" />
-                      Clear ({selectedIds.size})
-                  </Button>
-                  <Button variant="default" size="sm" onClick={openCompareDialog} disabled={selectedIds.size < 2}>
-                      <GitCompare className="h-4 w-4 mr-1" />
-                      Compare ({selectedIds.size})
-                  </Button>
-                  <Button variant="secondary" size="sm" onClick={() => setIsChartDialogOpen(true)}>
-                      <BarChart3 className="h-4 w-4 mr-1" />
-                      Chart ({selectedIds.size})
-                  </Button>
-              </>
-            )
-: (
-              <>
-                  <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
-                      <Upload className="h-4 w-4 mr-1" />
-                      Import
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={exportHistory}>
-                      <Download className="h-4 w-4 mr-1" />
-                      Export
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={clearHistory}>
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      Clear All
-                  </Button>
-              </>
-            )}
+                        {
+                            isLoading && (
+                                <Button variant="outline" size="sm" disabled>
+                                    <Upload className="h-4 w-4 mr-1" />
+                                    Import
+                                </Button>
+                            )
+                        }
+                        {
+                            !isLoading && selectedIds.size > 0 && (
+                                <>
+                                    <Button variant="secondary" size="sm" onClick={openCompareDialog} disabled={selectedIds.size < 2}>
+                                        <GitCompare className="h-4 w-4 mr-1" />
+                                        Compare ({selectedIds.size})
+                                    </Button>
+                                    <Button variant="default" size="sm" onClick={() => setIsChartDialogOpen(true)}>
+                                        <BarChart3 className="h-4 w-4 mr-1" />
+                                        Chart ({selectedIds.size})
+                                    </Button>
+                                </>
+                            )
+                        }
+                        { !isLoading && selectedIds.size === 0 && history.length > 0 && (
+                            <>
+                                <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                                    <Upload className="h-4 w-4 mr-1" />
+                                    Import
+                                </Button>
+                                <Button variant="outline" size="sm" onClick={exportHistory}>
+                                    <Download className="h-4 w-4 mr-1" />
+                                    Export
+                                </Button>
+                                <Button variant="destructive" size="sm" onClick={clearHistory}>
+                                    <Trash2 className="h-4 w-4 mr-1" />
+                                    Clear All
+                                </Button>
+                            </>
+                        )
+                        }
+                        {
+                            !isLoading && selectedIds.size === 0 && history.length === 0 && (
+                                <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                                    <Upload className="h-4 w-4 mr-1" />
+                                    Import
+                                </Button>
+                            )
+                        }
                     </div>
                     <input
                         ref={fileInputRef}
@@ -489,110 +487,129 @@ export function CVSSScoreManager() {
                 </div>
             </CardHeader>
             <CardContent>
-                <div className="mb-4 flex items-center">
-                    <Field className="max-w-96">
-                        <FieldContent>
-                            <FieldLabel htmlFor="search-history">Search History</FieldLabel>
-                            <Input
-                                placeholder="Search by name or score"
-                                value={search}
-                                id="search-history"
-                                onChange={(e) => setSearch(e.target.value)}
-                            />
-                            <FieldDescription className="text-xs">
-                                Search your history by name or score to quickly find specific entries.
-                            </FieldDescription>
-                        </FieldContent>
-                    </Field>
-                </div>
-                <Table containerClassName="max-h-96 overflow-auto border rounded-lg relative overscroll-contain">
-                    <TableHeader className="sticky top-0 bg-background z-10 rounded-lg overflow-hidden">
-                        <TableRow className="outline outline-border">
-                            <TableHead className="w-8">
-                                <Checkbox
-                                    checked={selectedIds.size === sortedHistory.length && sortedHistory.length > 0}
-                                    onCheckedChange={(checked) => {
-                                        if (checked) {
-                                            setSelectedIds(new Set(sortedHistory.map((entry) => entry.id)));
-                                        }
-                                        else {
-                                            setSelectedIds(new Set());
-                                        }
-                                    }}
-                                />
-                            </TableHead>
-                            <TableHead>Name</TableHead>
-                            <TableHead className="cursor-pointer select-none hover:bg-muted/50" onClick={() => handleSort(`score`)}>
-                                <div className="flex items-center gap-1">
-                                    Score
-                                    {getSortIcon(`score`)}
-                                </div>
-                            </TableHead>
-                            <TableHead
-                                className="cursor-pointer select-none hover:bg-muted/50"
-                                onClick={() => handleSort(`severity`)}
-                            >
-                                <div className="flex items-center gap-1">
-                                    Severity
-                                    {getSortIcon(`severity`)}
-                                </div>
-                            </TableHead>
-                            <TableHead>Vector</TableHead>
-                            <TableHead>Date</TableHead>
-                            <TableHead className="w-24"></TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {sortedHistory.map((entry) => {
-                            const isSelected = selectedIds.has(entry.id);
-                            return (
-                                <TableRow
-                                    key={entry.id}
-                                    className={isSelected ? `bg-sky-500/5 cursor-pointer` : `cursor-pointer`}
-                                    onClick={() => toggleSelection(entry.id)}
-                                >
-                                    <TableCell onClick={(e) => e.stopPropagation()}>
-                                        <Checkbox
-                                            checked={isSelected}
-                                            onCheckedChange={() => toggleSelection(entry.id)} />
-                                    </TableCell>
-                                    <TableCell className="font-semibold">{entry.name}</TableCell>
-                                    <TableCell>{entry.score.toFixed(1)}</TableCell>
-                                    <TableCell>
-                                        <Badge className={getSeverityColor(entry.severity)}>{entry.severity}</Badge>
-                                    </TableCell>
-                                    <TableCell className="font-mono text-xs max-w-xs truncate">{entry.vectorString}</TableCell>
-                                    <TableCell className="text-xs text-muted-foreground">
-                                        {dayjs(entry.timestamp).format(`ddd DD MMM, YYYY hh:mm`)}
-                                    </TableCell>
-                                    <TableCell onClick={(e) => e.stopPropagation()}>
-                                        <div className="flex gap-2">
-                                            <Button variant="secondary" size="icon-sm" onClick={() => startEdit(entry)} title="Edit name">
-                                                <Edit className="size-3.5" />
-                                            </Button>
-                                            <Button
-                                                variant="secondary"
-                                                size="icon-sm"
-                                                onClick={() => restoreEntry(entry)}
-                                                title="Restore this score"
+                {
+                    isLoading && (
+                        <div className="flex justify-center py-8">
+                            <Spinner />
+                        </div>
+                    )
+                }
+                {
+                    !isLoading && history.length === 0
+                    ? (
+                        <p className="text-center text-sm text-muted-foreground py-8">
+                            No scores yet. Start calculating CVSS scores to build your collection.
+                        </p>
+                    )
+                    : (
+                        <>
+                            <div className="mb-4 flex items-center">
+                                <Field className="max-w-96">
+                                    <FieldContent>
+                                        <FieldLabel htmlFor="search-history">Search History</FieldLabel>
+                                        <Input
+                                            placeholder="Search by name or score"
+                                            value={search}
+                                            id="search-history"
+                                            onChange={(e) => setSearch(e.target.value)}
+                                        />
+                                        <FieldDescription className="text-xs">
+                                            Search your history by name or score to quickly find specific entries.
+                                        </FieldDescription>
+                                    </FieldContent>
+                                </Field>
+                            </div>
+                            <Table containerClassName="max-h-96 overflow-auto border rounded-lg relative overscroll-contain">
+                                <TableHeader className="sticky top-0 bg-background z-10 rounded-lg overflow-hidden">
+                                    <TableRow className="outline outline-border">
+                                        <TableHead className="w-8">
+                                            <Checkbox
+                                                checked={selectedIds.size === sortedHistory.length && sortedHistory.length > 0}
+                                                onCheckedChange={(checked) => {
+                                                    if (checked) {
+                                                        setSelectedIds(new Set(sortedHistory.map((entry) => entry.id)));
+                                                    }
+                                                    else {
+                                                        setSelectedIds(new Set());
+                                                    }
+                                                }}
+                                            />
+                                        </TableHead>
+                                        <TableHead>Name</TableHead>
+                                        <TableHead className="cursor-pointer select-none hover:bg-muted/50" onClick={() => handleSort(`score`)}>
+                                            <div className="flex items-center gap-1">
+                                                Score
+                                                {getSortIcon(`score`)}
+                                            </div>
+                                        </TableHead>
+                                        <TableHead
+                                            className="cursor-pointer select-none hover:bg-muted/50"
+                                            onClick={() => handleSort(`severity`)}
+                                        >
+                                            <div className="flex items-center gap-1">
+                                                Severity
+                                                {getSortIcon(`severity`)}
+                                            </div>
+                                        </TableHead>
+                                        <TableHead>Vector</TableHead>
+                                        <TableHead>Date</TableHead>
+                                        <TableHead className="w-24"></TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {sortedHistory.map((entry) => {
+                                        const isSelected = selectedIds.has(entry.id);
+                                        return (
+                                            <TableRow
+                                                key={entry.id}
+                                                className={isSelected ? `bg-sky-500/5 cursor-pointer` : `cursor-pointer`}
+                                                onClick={() => toggleSelection(entry.id)}
                                             >
-                                                <RotateCcw className="size-3.5" />
-                                            </Button>
-                                            <Button
-                                                variant="destructive"
-                                                size="icon-sm"
-                                                onClick={() => deleteEntry(entry.id)}
-                                                title="Delete this entry"
-                                            >
-                                                <Trash2 className="size-3.5" />
-                                            </Button>
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-                            );
-                        })}
-                    </TableBody>
-                </Table>
+                                                <TableCell onClick={(e) => e.stopPropagation()}>
+                                                    <Checkbox
+                                                        checked={isSelected}
+                                                        onCheckedChange={() => toggleSelection(entry.id)} />
+                                                </TableCell>
+                                                <TableCell className="font-semibold">{entry.name}</TableCell>
+                                                <TableCell>{entry.score.toFixed(1)}</TableCell>
+                                                <TableCell>
+                                                    <Badge className={getSeverityColor(entry.severity)}>{entry.severity}</Badge>
+                                                </TableCell>
+                                                <TableCell className="font-mono text-xs max-w-xs truncate">{entry.vectorString}</TableCell>
+                                                <TableCell className="text-xs text-muted-foreground">
+                                                    {dayjs(entry.timestamp).format(`ddd DD MMM, YYYY hh:mm`)}
+                                                </TableCell>
+                                                <TableCell onClick={(e) => e.stopPropagation()}>
+                                                    <div className="flex gap-2">
+                                                        <Button variant="secondary" size="icon-sm" onClick={() => startEdit(entry)} title="Edit name">
+                                                            <Edit className="size-3.5" />
+                                                        </Button>
+                                                        <Button
+                                                            variant="secondary"
+                                                            size="icon-sm"
+                                                            onClick={() => restoreEntry(entry)}
+                                                            title="Restore this score"
+                                                        >
+                                                            <RotateCcw className="size-3.5" />
+                                                        </Button>
+                                                        <Button
+                                                            variant="destructive"
+                                                            size="icon-sm"
+                                                            onClick={() => deleteEntry(entry.id)}
+                                                            title="Delete this entry"
+                                                        >
+                                                            <Trash2 className="size-3.5" />
+                                                        </Button>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    })}
+                                </TableBody>
+                            </Table>
+                        </>
+                    )
+                }
             </CardContent>
 
             <ComparisonDialog
