@@ -73,7 +73,7 @@ export const CVSSCalculator: FC = () => {
             setRestoreVectorString(null);
 
             // Switch to the appropriate tab
-            setActiveTab(`v${parsed.version}`);
+            setActiveTab(`v${ parsed.version }`);
         }
     }, []);
 
@@ -89,7 +89,7 @@ export const CVSSCalculator: FC = () => {
             if (parsed) {
                 setParsedVector(parsed);
                 setRestoreVectorString(vectorString);
-                setActiveTab(`v${parsed.version}`);
+                setActiveTab(`v${ parsed.version }`);
             }
         };
 
