@@ -1,11 +1,60 @@
-import type { ScoreHistoryEntry } from "@/lib/add-to-history";
-import {
+import React, {
     useCallback, useEffect, useMemo, useRef, useState,
     type FC
 } from "react";
-import { title as titleCase } from "radash";
+import type { ScoreHistoryEntry } from "@/lib/add-to-history";
+import {
+    debounce,
+    title as titleCase
+} from "radash";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import {
+    ALL_SEVERITIES,
+    SEVERITY_COLOR_MAP,
+    ZERO,
+    UNIT,
+    TRANSPARENCY_MIN,
+    TRANSPARENCY_MAX,
+    BAR_RADIUS_MIN,
+    BAR_RADIUS_MAX,
+    INNER_RADIUS_MIN,
+    INNER_RADIUS_MAX,
+    DEFAULT_INNER_RADIUS,
+    DEFAULT_TRANSPARENCY,
+    DEFAULT_BAR_RADIUS,
+    RGB_RED_START,
+    RGB_RED_END,
+    RGB_GREEN_START,
+    RGB_GREEN_END,
+    RGB_BLUE_START,
+    RGB_BLUE_END,
+    HUNDRED,
+    THROTTLE_DELAY,
+    DEFAULT_FRACTION_DIGITS,
+    BAR_CHART_DEFAULT_LEFT_MARGIN,
+    BAR_CHART_DEFAULT_BOTTOM_MARGIN,
+    BAR_CHART_FALLBACK_BOTTOM_MARGIN,
+    BAR_CHART_X_AXIS_DEFAULT_OFFSET,
+    BAR_CHART_X_AXIS_FALLBACK_OFFSET,
+    BAR_CHART_Y_AXIS_FALLBACK_WIDTH,
+    CHART_DIALOG_SETTINGS_KEY,
+    CHART_NOT_FOUND_MESSAGE,
+    EXPORT_FAILED_MESSAGE,
+    EXPORT_SUCCESS_MESSAGE,
+    EMBED_CODE_COPIED_MESSAGE,
+    CHART_FILENAME_PREFIX,
+    CHART_FILENAME_SUFFIX,
+    DARK_THEME_BGCOLOR,
+    LIGHT_THEME_BGCOLOR,
+    EXPORT_SCALE,
+    EXPORT_QUALITY,
+    EMBED_IFRAME_WIDTH,
+    EMBED_IFRAME_HEIGHT,
+    EMBED_IFRAME_STYLE,
+    SHOULD_COPY_DEFAULT_STYLES,
+    DEFAULT_SETTINGS
+} from "@/lib/constants";
 import {
     Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle
 } from "./ui/dialog";
@@ -72,69 +121,6 @@ import {
 import { Spinner } from "./ui/spinner";
 import { useTheme } from "@/hooks/use-theme";
 
-const ALL_SEVERITIES = [
-    `none`,
-    `low`,
-    `medium`,
-    `high`,
-    `critical`,
-] as const;
-
-const SEVERITY_COLOR_MAP: Record<string, string> = {
-    none:     `#87CEEB`,
-    low:      `#32CD32`,
-    medium:   `#FFD700`,
-    high:     `#FF6347`,
-    critical: `#8A2BE2`,
-};
-
-const ZERO = 0;
-const UNIT = 1;
-const TRANSPARENCY_MIN = 0;
-const TRANSPARENCY_MAX = 100;
-const BAR_RADIUS_MIN = 0;
-const BAR_RADIUS_MAX = 20;
-const INNER_RADIUS_MIN = 0;
-const INNER_RADIUS_MAX = 80;
-const DEFAULT_INNER_RADIUS = 60;
-const DEFAULT_TRANSPARENCY = 70;
-const DEFAULT_BAR_RADIUS = 5;
-const RGB_RED_START = 0;
-const RGB_RED_END = 2;
-const RGB_GREEN_START = RGB_RED_END;
-const RGB_GREEN_END = 4;
-const RGB_BLUE_START = RGB_GREEN_END;
-const RGB_BLUE_END = 6;
-const HUNDRED = 100;
-const DEFAULT_FRACTION_DIGITS = 2;
-const BAR_CHART_DEFAULT_LEFT_MARGIN = 20;
-const BAR_CHART_DEFAULT_BOTTOM_MARGIN = 20;
-const BAR_CHART_FALLBACK_BOTTOM_MARGIN = 5;
-const BAR_CHART_X_AXIS_DEFAULT_OFFSET = 5;
-const BAR_CHART_X_AXIS_FALLBACK_OFFSET = -5;
-const BAR_CHART_Y_AXIS_FALLBACK_WIDTH = 25;
-
-const DEFAULT_SETTINGS = {
-    chart_type:                     `bar` as `bar` | `donut`,
-    title:                          `CVSS Scores Chart`,
-    should_show_legend:             true,
-    should_show_x_axis_label:       true,
-    should_show_y_axis_label:       true,
-    inner_radius:                   DEFAULT_INNER_RADIUS,
-    custom_colors:                  {} as Record<string, string>,
-    transparency:                   DEFAULT_TRANSPARENCY,
-    x_axis_label:                   `Severity`,
-    y_axis_label:                   `Count`,
-    tooltip_label:                  `Count`,
-    bar_radius:                     DEFAULT_BAR_RADIUS,
-    severity_labels:                {} as Record<string, string>,
-    should_show_floating_labels:    true,
-    tooltip_content_type:           `count` as `count` | `percentage`,
-    floating_label_type:            `percentage` as `count` | `percentage`,
-    should_show_x_axis_tick_labels: true,
-    legend_position:                `below-chart` as `below-title` | `below-chart`,
-};
-
 interface ChartDialogProps {
     open:            boolean
     onOpenChange:    (open: boolean) => void
@@ -154,9 +140,11 @@ interface ChartSettingsProps {
     set_tooltip_content_type: (value: `count` | `percentage`) => void
     transparency:             number
     set_transparency:         (value: number) => void
+    localTransparency:        number
+    setLocalTransparency:     (value: number) => void
 }
 
-const ChartSettings: FC<ChartSettingsProps> = ({
+const ChartSettings = React.memo<ChartSettingsProps>(({
     chart_type,
     set_chart_type,
     title,
@@ -169,6 +157,8 @@ const ChartSettings: FC<ChartSettingsProps> = ({
     set_tooltip_content_type,
     transparency,
     set_transparency,
+    localTransparency,
+    setLocalTransparency,
 }) => (
     <AccordionItem value="chart-settings">
         <AccordionTrigger>Chart Settings</AccordionTrigger>
@@ -248,12 +238,15 @@ const ChartSettings: FC<ChartSettingsProps> = ({
                         </Field>
                         <Field
                             orientation={`horizontal`}
-                            className="self-center">
+                            className="self-center cursor-pointer"
+                            onClick={() => set_show_legend(!show_legend)}>
                             <Switch
                                 checked={show_legend}
-                                onCheckedChange={set_show_legend} />
+                                onCheckedChange={set_show_legend}
+                                className="cursor-pointer"
+                                onClick={(e) => e.stopPropagation()} />
                             <FieldContent>
-                                <FieldLabel className="flex items-center gap-2">
+                                <FieldLabel className="flex items-center gap-2 cursor-pointer">
                                     Show Legend
                                 </FieldLabel>
                                 <FieldDescription className="text-xs">
@@ -297,8 +290,12 @@ const ChartSettings: FC<ChartSettingsProps> = ({
                     </FieldLabel>
                     <div className="flex items-center gap-4 -my-2">
                         <Slider
-                            value={[ transparency ]}
-                            onValueChange={(value: Array<number>) => set_transparency(value[0])}
+                            value={[ localTransparency ]}
+                            onValueChange={(value: Array<number>) => {
+                                const [ newVal ] = value;
+                                setLocalTransparency(newVal);
+                                set_transparency(newVal);
+                            }}
                             max={TRANSPARENCY_MAX}
                             min={TRANSPARENCY_MIN}
                             step={UNIT}
@@ -318,8 +315,12 @@ const ChartSettings: FC<ChartSettingsProps> = ({
                             <InputGroupInput
                                 id="input-secure-19"
                                 type="number"
-                                value={transparency}
-                                onChange={(e) => set_transparency(Math.min(TRANSPARENCY_MAX, Math.max(TRANSPARENCY_MIN, Number(e.target.value))))}
+                                value={localTransparency}
+                                onChange={(e) => {
+                                    const newVal = Math.min(TRANSPARENCY_MAX, Math.max(TRANSPARENCY_MIN, Number(e.target.value)));
+                                    setLocalTransparency(newVal);
+                                    set_transparency(newVal);
+                                }}
                                 min={TRANSPARENCY_MIN}
                                 max={TRANSPARENCY_MAX}
                                 step={UNIT}
@@ -345,7 +346,7 @@ const ChartSettings: FC<ChartSettingsProps> = ({
             </FieldSet>
         </AccordionContent>
     </AccordionItem>
-);
+));
 
 interface TypeSpecificSettingsProps {
     chart_type:                  `bar` | `donut`
@@ -363,15 +364,19 @@ interface TypeSpecificSettingsProps {
     set_tooltip_label:           (value: string) => void
     bar_radius:                  number
     set_bar_radius:              (value: number) => void
+    localBarRadius:              number
+    setLocalBarRadius:           (value: number) => void
     inner_radius:                number
     set_inner_radius:            (value: number) => void
+    localInnerRadius:            number
+    setLocalInnerRadius:         (value: number) => void
     show_floating_labels:        boolean
     set_show_floating_labels:    (value: boolean) => void
     floating_label_type:         `count` | `percentage`
     set_floating_label_type:     (value: `count` | `percentage`) => void
 }
 
-const TypeSpecificSettings: FC<TypeSpecificSettingsProps> = ({
+const TypeSpecificSettings = React.memo<TypeSpecificSettingsProps>(({
     chart_type,
     show_x_axis_label,
     set_show_x_axis_label,
@@ -389,6 +394,10 @@ const TypeSpecificSettings: FC<TypeSpecificSettingsProps> = ({
     set_bar_radius,
     inner_radius,
     set_inner_radius,
+    localBarRadius,
+    setLocalBarRadius,
+    localInnerRadius,
+    setLocalInnerRadius,
     show_floating_labels,
     set_show_floating_labels,
     floating_label_type,
@@ -412,12 +421,16 @@ const TypeSpecificSettings: FC<TypeSpecificSettingsProps> = ({
                         <div className="grid grid-cols-2 gap-4">
                             <FieldGroup className="col-span-full grid grid-cols-2 gap-4">
                                 <div className="flex flex-col gap-4">
-                                    <Field orientation={`horizontal`}>
+                                    <Field orientation={`horizontal`}
+                                        className="cursor-pointer"
+                                        onClick={() => set_show_x_axis_label(!show_x_axis_label)}>
                                         <Switch
                                             checked={show_x_axis_label}
-                                            onCheckedChange={set_show_x_axis_label} />
+                                            onCheckedChange={set_show_x_axis_label}
+                                            className="cursor-pointer"
+                                            onClick={(e) => e.stopPropagation()} />
                                         <FieldContent>
-                                            <FieldLabel className="flex items-center gap-2">
+                                            <FieldLabel className="flex items-center gap-2 cursor-pointer">
                                                 Show X-Axis Label
                                             </FieldLabel>
                                             <FieldDescription className="text-xs">
@@ -425,12 +438,16 @@ const TypeSpecificSettings: FC<TypeSpecificSettingsProps> = ({
                                             </FieldDescription>
                                         </FieldContent>
                                     </Field>
-                                    <Field orientation={`horizontal`}>
+                                    <Field orientation={`horizontal`}
+                                        className="cursor-pointer"
+                                        onClick={() => set_show_x_axis_tick_labels(!show_x_axis_tick_labels)}>
                                         <Switch
                                             checked={show_x_axis_tick_labels}
-                                            onCheckedChange={set_show_x_axis_tick_labels} />
+                                            onCheckedChange={set_show_x_axis_tick_labels}
+                                            className="cursor-pointer"
+                                            onClick={(e) => e.stopPropagation()} />
                                         <FieldContent>
-                                            <FieldLabel className="flex items-center gap-2">
+                                            <FieldLabel className="flex items-center gap-2 cursor-pointer">
                                                 Show X-Axis Tick Labels
                                             </FieldLabel>
                                             <FieldDescription className="text-xs">
@@ -455,12 +472,16 @@ const TypeSpecificSettings: FC<TypeSpecificSettingsProps> = ({
                             </FieldGroup>
                             <FieldSeparator className="col-span-full" />
                             <FieldGroup className="col-span-full grid grid-cols-2 gap-4">
-                                <Field orientation={`horizontal`}>
+                                <Field orientation={`horizontal`}
+                                    className="cursor-pointer"
+                                    onClick={() => set_show_y_axis_label(!show_y_axis_label)}>
                                     <Switch
                                         checked={show_y_axis_label}
-                                        onCheckedChange={set_show_y_axis_label} />
+                                        onCheckedChange={set_show_y_axis_label}
+className="cursor-pointer"
+                                        onClick={(e) => e.stopPropagation()} />
                                     <FieldContent>
-                                        <FieldLabel className="flex items-center gap-2">
+                                        <FieldLabel className="flex items-center gap-2 cursor-pointer">
                                             Show Y-Axis Label
                                         </FieldLabel>
                                         <FieldDescription className="text-xs">
@@ -502,8 +523,12 @@ const TypeSpecificSettings: FC<TypeSpecificSettingsProps> = ({
                                 </FieldLabel>
                                 <div className="flex items-center gap-4">
                                     <Slider
-                                        value={[ bar_radius ]}
-                                        onValueChange={(value: Array<number>) => set_bar_radius(value[0])}
+                                        value={[ localBarRadius ]}
+                                        onValueChange={(value: Array<number>) => {
+                                            const [ newVal ] = value;
+                                            setLocalBarRadius(newVal);
+                                            set_bar_radius(newVal);
+                                        }}
                                         max={BAR_RADIUS_MAX}
                                         min={BAR_RADIUS_MIN}
                                         step={UNIT}
@@ -513,7 +538,11 @@ const TypeSpecificSettings: FC<TypeSpecificSettingsProps> = ({
                                             <InputGroupButton
                                                 variant="secondary"
                                                 size="icon-xs"
-                                                onClick={() => set_bar_radius(Math.max(BAR_RADIUS_MIN, bar_radius - UNIT))}
+                                                onClick={() => {
+                                                    const newVal = Math.max(BAR_RADIUS_MIN, localBarRadius - UNIT);
+                                                    setLocalBarRadius(newVal);
+                                                    set_bar_radius(newVal);
+                                                }}
                                                 aria-label="Decrease chart border radius by 1"
                                             >
                                                 <Minus />
@@ -522,8 +551,12 @@ const TypeSpecificSettings: FC<TypeSpecificSettingsProps> = ({
                                         <InputGroupInput
                                             id="input-secure-19"
                                             type="number"
-                                            value={bar_radius}
-                                            onChange={(e) => set_bar_radius(Math.min(BAR_RADIUS_MAX, Math.max(BAR_RADIUS_MIN, Number(e.target.value))))}
+                                            value={localBarRadius}
+                                            onChange={(e) => {
+                                                const newVal = Math.min(BAR_RADIUS_MAX, Math.max(BAR_RADIUS_MIN, Number(e.target.value)));
+                                                setLocalBarRadius(newVal);
+                                                set_bar_radius(newVal);
+                                            }}
                                             min={BAR_RADIUS_MIN}
                                             max={BAR_RADIUS_MAX}
                                             step={UNIT}
@@ -536,7 +569,11 @@ const TypeSpecificSettings: FC<TypeSpecificSettingsProps> = ({
                                             <InputGroupButton
                                                 variant="secondary"
                                                 size="icon-xs"
-                                                onClick={() => set_bar_radius(Math.min(BAR_RADIUS_MAX, bar_radius + UNIT))}
+                                                onClick={() => {
+                                                    const newVal = Math.min(BAR_RADIUS_MAX, localBarRadius + UNIT);
+                                                    setLocalBarRadius(newVal);
+                                                    set_bar_radius(newVal);
+                                                }}
                                                 aria-label="Increase chart border radius by 1"
                                             >
                                                 <Plus />
@@ -564,8 +601,12 @@ const TypeSpecificSettings: FC<TypeSpecificSettingsProps> = ({
                             </FieldLabel>
                             <div className="flex items-center gap-4">
                                 <Slider
-                                    value={[ inner_radius ]}
-                                    onValueChange={(value: Array<number>) => set_inner_radius(value[0])}
+                                    value={[ localInnerRadius ]}
+                                    onValueChange={(value: Array<number>) => {
+                                        const [ newVal ] = value;
+                                        setLocalInnerRadius(newVal);
+                                        set_inner_radius(newVal);
+                                    }}
                                     max={INNER_RADIUS_MAX}
                                     min={INNER_RADIUS_MIN}
                                     step={UNIT}
@@ -575,7 +616,11 @@ const TypeSpecificSettings: FC<TypeSpecificSettingsProps> = ({
                                         <InputGroupButton
                                             variant="secondary"
                                             size="icon-xs"
-                                            onClick={() => set_inner_radius(Math.max(INNER_RADIUS_MIN, inner_radius - UNIT))}
+                                            onClick={() => {
+                                                const newVal = Math.max(INNER_RADIUS_MIN, localInnerRadius - UNIT);
+                                                setLocalInnerRadius(newVal);
+                                                set_inner_radius(newVal);
+                                            }}
                                             aria-label="Decrease chart inner radius by 1"
                                         >
                                             <Minus />
@@ -584,8 +629,12 @@ const TypeSpecificSettings: FC<TypeSpecificSettingsProps> = ({
                                     <InputGroupInput
                                         id="input-secure-19"
                                         type="number"
-                                        value={inner_radius}
-                                        onChange={(e) => set_inner_radius(Math.min(INNER_RADIUS_MAX, Math.max(INNER_RADIUS_MIN, Number(e.target.value))))}
+                                        value={localInnerRadius}
+                                        onChange={(e) => {
+                                            const newVal = Math.min(INNER_RADIUS_MAX, Math.max(INNER_RADIUS_MIN, Number(e.target.value)));
+                                            setLocalInnerRadius(newVal);
+                                            set_inner_radius(newVal);
+                                        }}
                                         min={INNER_RADIUS_MIN}
                                         max={INNER_RADIUS_MAX}
                                         step={UNIT}
@@ -598,7 +647,11 @@ const TypeSpecificSettings: FC<TypeSpecificSettingsProps> = ({
                                         <InputGroupButton
                                             variant="secondary"
                                             size="icon-xs"
-                                            onClick={() => set_inner_radius(Math.min(INNER_RADIUS_MAX, inner_radius + UNIT))}
+                                            onClick={() => {
+                                                const newVal = Math.min(INNER_RADIUS_MAX, localInnerRadius + UNIT);
+                                                setLocalInnerRadius(newVal);
+                                                set_inner_radius(newVal);
+                                            }}
                                             aria-label="Increase chart inner radius by 1"
                                         >
                                             <Plus />
@@ -611,12 +664,16 @@ const TypeSpecificSettings: FC<TypeSpecificSettingsProps> = ({
                             </FieldDescription>
                         </Field>
                         <div className="grid grid-cols-2">
-                            <Field orientation={`horizontal`} className="self-center">
+                            <Field orientation={`horizontal`}
+                                className="self-center cursor-pointer"
+                                onClick={() => set_show_floating_labels(!show_floating_labels)}>
                                 <Switch
                                     checked={show_floating_labels}
-                                    onCheckedChange={set_show_floating_labels} />
+                                    onCheckedChange={set_show_floating_labels}
+                                    className="cursor-pointer"
+                                    onClick={(e) => e.stopPropagation()} />
                                 <FieldContent>
-                                    <FieldLabel className="flex items-center gap-2">
+                                    <FieldLabel className="flex items-center gap-2 cursor-pointer">
                                         Show Floating Labels
                                     </FieldLabel>
                                     <FieldDescription className="text-xs">
@@ -656,7 +713,7 @@ const TypeSpecificSettings: FC<TypeSpecificSettingsProps> = ({
                 )}
         </AccordionContent>
     </AccordionItem>
-);
+));
 
 interface CustomizationProps {
     custom_colors:       Record<string, string>
@@ -665,7 +722,7 @@ interface CustomizationProps {
     set_severity_labels: (updater: (prev: Record<string, string>) => Record<string, string>) => void
 }
 
-const Customization: FC<CustomizationProps> = ({
+const Customization = React.memo<CustomizationProps>(({
     custom_colors, set_custom_colors, severity_labels, set_severity_labels,
 }) => {
     const severity_colors = useMemo(
@@ -771,7 +828,7 @@ const Customization: FC<CustomizationProps> = ({
             </AccordionContent>
         </AccordionItem>
     );
-};
+});
 
 export const ChartDialog: FC<ChartDialogProps> = ({
     open, onOpenChange, selectedEntries,
@@ -786,8 +843,58 @@ export const ChartDialog: FC<ChartDialogProps> = ({
     ] = useState(true);
     const chart_ref = useRef<HTMLDivElement>(null);
 
+    const [
+        localTransparency,
+        setLocalTransparency,
+    ] = useState(DEFAULT_TRANSPARENCY);
+    const [
+        localBarRadius,
+        setLocalBarRadius,
+    ] = useState(DEFAULT_BAR_RADIUS);
+    const [
+        localInnerRadius,
+        setLocalInnerRadius,
+    ] = useState(DEFAULT_INNER_RADIUS);
+
+    const throttledSetTransparency = useMemo(
+        () => debounce(
+            {
+                delay: THROTTLE_DELAY,
+            },
+            (value: number) => setSettings((prev) => ({
+                ...prev,
+                transparency: value,
+            }))
+        ),
+        []
+    );
+    const throttledSetBarRadius = useMemo(
+        () => debounce(
+            {
+                delay: THROTTLE_DELAY,
+            },
+            (value: number) => setSettings((prev) => ({
+                ...prev,
+                bar_radius: value,
+            }))
+        ),
+        []
+    );
+    const throttledSetInnerRadius = useMemo(
+        () => debounce(
+            {
+                delay: THROTTLE_DELAY,
+            },
+            (value: number) => setSettings((prev) => ({
+                ...prev,
+                inner_radius: value,
+            }))
+        ),
+        []
+    );
+
     useEffect(() => {
-        const saved = localStorage.getItem(`chart-dialog-settings`);
+        const saved = localStorage.getItem(CHART_DIALOG_SETTINGS_KEY);
         if (saved) {
             try {
                 const parsed = JSON.parse(saved);
@@ -804,7 +911,7 @@ export const ChartDialog: FC<ChartDialogProps> = ({
     }, []);
 
     useEffect(() => {
-        localStorage.setItem(`chart-dialog-settings`, JSON.stringify(settings));
+        localStorage.setItem(CHART_DIALOG_SETTINGS_KEY, JSON.stringify(settings));
     }, [ settings ]);
 
     const {
@@ -827,6 +934,10 @@ export const ChartDialog: FC<ChartDialogProps> = ({
         should_show_x_axis_tick_labels,
         legend_position,
     } = settings;
+
+    useEffect(() => setLocalTransparency(transparency), [ transparency ]);
+    useEffect(() => setLocalBarRadius(bar_radius), [ bar_radius ]);
+    useEffect(() => setLocalInnerRadius(inner_radius), [ inner_radius ]);
 
     const severity_counts = useMemo(() => {
         const counts = ALL_SEVERITIES.reduce((acc, sev) => {
@@ -966,7 +1077,7 @@ export const ChartDialog: FC<ChartDialogProps> = ({
 
     const export_chart = useCallback(async() => {
         if (!chart_ref.current) {
-            toast.error(`Chart not found`);
+            toast.error(CHART_NOT_FOUND_MESSAGE);
             return;
         }
 
@@ -974,23 +1085,23 @@ export const ChartDialog: FC<ChartDialogProps> = ({
             const domtoimage = (await import(`dom-to-image-more`)).default;
 
             const blob = await domtoimage.toBlob(chart_ref.current, {
-                bgcolor:           theme === `dark` ? `#18181B` : `#ffffff`,
-                quality:           1,
-                scale:             2,
-                copyDefaultStyles: false,
+                bgcolor:           theme === `dark` ? DARK_THEME_BGCOLOR : LIGHT_THEME_BGCOLOR,
+                quality:           EXPORT_QUALITY,
+                scale:             EXPORT_SCALE,
+                copyDefaultStyles: SHOULD_COPY_DEFAULT_STYLES,
             });
 
             const url = URL.createObjectURL(blob);
             const a = document.createElement(`a`);
             a.href = url;
-            a.download = `cvss-chart-${ Date.now() }.png`;
+            a.download = `${ CHART_FILENAME_PREFIX }${ Date.now() }${ CHART_FILENAME_SUFFIX }`;
             a.click();
             URL.revokeObjectURL(url);
-            toast.success(`Chart exported as PNG`);
+            toast.success(EXPORT_SUCCESS_MESSAGE);
         }
         catch (error) {
             console.error(`Export failed:`, error);
-            toast.error(`Failed to export chart`);
+            toast.error(EXPORT_FAILED_MESSAGE);
         }
     }, [ theme ]);
 
@@ -1014,9 +1125,9 @@ export const ChartDialog: FC<ChartDialogProps> = ({
             floating_label_type:     floating_label_type,
             show_x_axis_tick_labels: JSON.stringify(should_show_x_axis_tick_labels),
             legend_position:         legend_position,
-        }).toString() }" width="400" height="600" style="border:none;"></iframe>`;
+        }).toString() }" width="${ EMBED_IFRAME_WIDTH }" height="${ EMBED_IFRAME_HEIGHT }" style="${ EMBED_IFRAME_STYLE }"></iframe>`;
         navigator.clipboard.writeText(embeddable_code);
-        toast.success(`Embeddable code copied`);
+        toast.success(EMBED_CODE_COPIED_MESSAGE);
     }, [
         chart_type,
         title,
@@ -1279,10 +1390,9 @@ export const ChartDialog: FC<ChartDialogProps> = ({
                                         tooltip_content_type: value,
                                     }))}
                                     transparency={transparency}
-                                    set_transparency={(value) => setSettings((prev) => ({
-                                        ...prev,
-                                        transparency: value,
-                                    }))}
+                                    set_transparency={throttledSetTransparency}
+                                    localTransparency={localTransparency}
+                                    setLocalTransparency={setLocalTransparency}
                                 />
                                 <TypeSpecificSettings
                                     chart_type={chart_type}
@@ -1317,15 +1427,13 @@ export const ChartDialog: FC<ChartDialogProps> = ({
                                         tooltip_label: value,
                                     }))}
                                     bar_radius={bar_radius}
-                                    set_bar_radius={(value) => setSettings((prev) => ({
-                                        ...prev,
-                                        bar_radius: value,
-                                    }))}
+                                    set_bar_radius={throttledSetBarRadius}
                                     inner_radius={inner_radius}
-                                    set_inner_radius={(value) => setSettings((prev) => ({
-                                        ...prev,
-                                        inner_radius: value,
-                                    }))}
+                                    set_inner_radius={throttledSetInnerRadius}
+                                    localBarRadius={localBarRadius}
+                                    setLocalBarRadius={setLocalBarRadius}
+                                    localInnerRadius={localInnerRadius}
+                                    setLocalInnerRadius={setLocalInnerRadius}
                                     show_floating_labels={should_show_floating_labels}
                                     set_show_floating_labels={(value) => setSettings((prev) => ({
                                         ...prev,
