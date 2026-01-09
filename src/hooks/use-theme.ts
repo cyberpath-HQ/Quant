@@ -1,10 +1,11 @@
 import {
+    useCallback,
     useEffect, useState
 } from "react";
 
 export interface UseThemeResult {
-    theme:    `light` | `dark`
-    setTheme: (theme: `light` | `dark`) => void
+    theme:             `light` | `dark`
+    setTheme:          (theme: `light` | `dark`) => void
 }
 
 export function useTheme(): UseThemeResult {
@@ -42,10 +43,10 @@ export function useTheme(): UseThemeResult {
         applyTheme(theme);
     }, [ theme ]);
 
-    const updateTheme = (newTheme: `light` | `dark`) => {
+    const updateTheme = useCallback((newTheme: `light` | `dark`) => {
         setTheme(newTheme);
         localStorage.setItem(`theme`, newTheme);
-    };
+    }, []);
 
     return {
         theme,
