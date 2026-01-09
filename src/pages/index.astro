@@ -3,7 +3,7 @@ import Layout from "../layouts/Layout.astro";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { CVSSCalculator } from "@/components/CVSSCalculator";
-import { CVSSScoreManager } from "@/components/ScoreHistory";
+import { ScoreManager } from "@/components/ScoreHistory";
 import { makeJsonLd } from "@/lib/make-json-ld";
 import type { WebPage } from "schema-dts";
 
@@ -79,7 +79,7 @@ const json_ld = makeJsonLd<WebPage>({
   <main class="min-h-screen bg-background">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8 grid grid-cols-1 gap-y-16">
       <CVSSCalculator client:load />
-      <CVSSScoreManager client:load />
+      <ScoreManager client:load />
     </div>
   </main>
   <Footer />
