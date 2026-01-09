@@ -53,7 +53,7 @@ export const ScoreCard: FC<ScoreCardProps> = ({
                         <div className={cn(`text-6xl font-bold tabular-nums`, severity.color)}>
                             {scoreDisplay}
                         </div>
-                        <Badge className={cn(`text-sm px-3 py-1.5 font-semibold`, severity.color, severity.bgColor)}>
+                        <Badge className={cn(`text-sm px-3 font-semibold rounded`, severity.color, severity.bgColor)}>
                             {severity.label}
                         </Badge>
                     </div>
