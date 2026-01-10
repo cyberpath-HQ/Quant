@@ -117,7 +117,7 @@ export const RESPONSIVE_CONTAINER_HEIGHT = `100%`;
 
 // Default Settings
 export const DEFAULT_SETTINGS = {
-    chart_type:                     CHART_TYPE_BAR,
+    chart_type:                     CHART_TYPE_BAR as `bar` | `donut`,
     title:                          CHART_SETTINGS_TITLE_DEFAULT,
     should_show_legend:             true,
     should_show_x_axis_label:       true,
@@ -131,10 +131,10 @@ export const DEFAULT_SETTINGS = {
     bar_radius:                     DEFAULT_BAR_RADIUS,
     severity_labels:                {} as Record<string, string>,
     should_show_floating_labels:    true,
-    tooltip_content_type:           TOOLTIP_CONTENT_TYPE_COUNT,
-    floating_label_type:            TOOLTIP_CONTENT_TYPE_PERCENTAGE,
+    tooltip_content_type:           TOOLTIP_CONTENT_TYPE_COUNT as `count` | `percentage`,
+    floating_label_type:            TOOLTIP_CONTENT_TYPE_PERCENTAGE as `count` | `percentage`,
     should_show_x_axis_tick_labels: true,
-    legend_position:                LEGEND_POSITION_BELOW_CHART,
+    legend_position:                LEGEND_POSITION_BELOW_CHART as `below-chart` | `below-title`,
 };
 
 // CVSS Calculator Constants
