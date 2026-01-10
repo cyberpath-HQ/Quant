@@ -788,15 +788,15 @@ export function ScoreManager() {
     return (
         <Card>
             <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="space-y-2">
-                        <CardTitle className="flex items-center gap-2">
+                        <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                             <History className="h-5 w-5" />
-                            CVSS Score Manager
+                            <span className="truncate">CVSS Score Manager</span>
                         </CardTitle>
-                        <CardDescription>{descriptionText}</CardDescription>
+                        <CardDescription className="text-sm sm:text-base">{descriptionText}</CardDescription>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                         <HeaderControls
                             isLoading={isLoading}
                             isAnySelected={selectedIds.size > 0}
