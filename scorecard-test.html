@@ -1,5 +1,5 @@
 <style>
-    .cvss-widget-container-1767974402 {
+    .cvss-widget-container-1768027599 {
         all: initial;
         font-family: system-ui, -apple-system, sans-serif;
         color: #1f2937;
@@ -13,10 +13,10 @@
         margin: 0 auto;
         display: block;
     }
-    .cvss-widget-container-1767974402 * {
+    .cvss-widget-container-1768027599 * {
         box-sizing: border-box;
     }
-    @keyframes cvss-slideInRight-1767974402 {
+    @keyframes cvss-slideInRight-1768027599 {
         from {
             transform: translateX(100%);
             opacity: 0;
@@ -26,7 +26,7 @@
             opacity: 1;
         }
     }
-    @keyframes cvss-slideDown-1767974402 {
+    @keyframes cvss-slideDown-1768027599 {
         from {
             opacity: 0;
             transform: scale(0.95) translateY(-4px);
@@ -36,7 +36,7 @@
             transform: scale(1) translateY(0);
         }
     }
-    @keyframes cvss-slideUp-1767974402 {
+    @keyframes cvss-slideUp-1768027599 {
         from {
             opacity: 1;
             transform: scale(1) translateY(0);
@@ -46,43 +46,39 @@
             transform: scale(0.95) translateY(-4px);
         }
     }
-    .cvss-widget-container-1767974402 .cvss-toast-1767974402 {
+    .cvss-widget-container-1768027599 .cvss-toast-1768027599 {
         transition: opacity 0.3s ease-out, transform 0.3s ease-out;
     }
-    .cvss-widget-container-1767974402 .cvss-dropdown-1767974402 {
+    .cvss-widget-container-1768027599 .cvss-dropdown-1768027599 {
         position: relative;
         display: inline-block;
     }
-    .cvss-widget-container-1767974402 .cvss-dropdown-content-1767974402 {
+    .cvss-widget-container-1768027599 .cvss-dropdown-content-1768027599 {
         display: none;
         position: absolute;
         right: 0;
         top: 100%;
-        background: white;
-        border: 1px solid #e5e7eb;
+        border: 1px solid oklch(0.92 0.004 286.32);
         border-radius: 4px;
         box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
         z-index: 20;
         min-width: 160px;
         transition: opacity 0.3s ease-out, transform 0.3s ease-out;
     }
-    .cvss-widget-container-1767974402 .cvss-dropdown-content-1767974402.cvss-show-1767974402 {
+    .cvss-widget-container-1768027599 .cvss-dropdown-content-1768027599.cvss-show-1768027599 {
         animation: cvss-slideDown 0.3s ease-out;
     }
-    .cvss-widget-container-1767974402 .cvss-dropdown-content-1767974402.cvss-hide-1767974402 {
+    .cvss-widget-container-1768027599 .cvss-dropdown-content-1768027599.cvss-hide-1768027599 {
         animation: cvss-slideUp 0.3s ease-out;
     }
-    .cvss-widget-container-1767974402 .cvss-dropdown-content-1767974402 a {
+    .cvss-widget-container-1768027599 .cvss-dropdown-content-1768027599 a {
         display: block;
         padding: 8px 16px;
         text-decoration: none;
         color: #1f2937;
         font-size: 14px;
     }
-    .cvss-widget-container-1767974402 .cvss-dropdown-content-1767974402 a:hover {
-        background: #f9fafb;
-    }
-    .cvss-widget-container-1767974402 .cvss-btn-link-1767974402 {
+    .cvss-widget-container-1768027599 .cvss-btn-link-1768027599 {
         background: #0ea5e9;
         color: white;
         border: none;
@@ -96,28 +92,46 @@
         transition: background 0.2s;
         border-right: 1px solid rgba(255,255,255,0.2);
     }
-    .cvss-widget-container-1767974402 .cvss-btn-link-1767974402:hover {
+    .cvss-widget-container-1768027599 .cvss-btn-link-1768027599:hover {
         background: #0284c7;
     }
-    .cvss-widget-container-1767974402 .cvss-dropdown-1767974402 button {
-        background: #0ea5e9;
-        border: none;
+    .cvss-widget-container-1768027599 .cvss-dropdown-1768027599 button {
+        border: 1px solid oklch(0.92 0.004 286.32);
         cursor: pointer;
         padding: 6px 8px;
-        border-radius: 0 4px 4px 0;
-        color: white;
+        border-radius: 4px;
         font-size: 12px;
         display: flex;
         align-items: center;
         gap: 4px;
         transition: background 0.2s;
-        border-left: 1px solid rgba(255,255,255,0.2);
+        background: transparent;
     }
-    .cvss-widget-container-1767974402 .cvss-dropdown-1767974402 button:hover {
-        background: #0284c7;
+    .footer-link-1768027599 {
+        display: block;
+        text-align: center;
+        margin-top: 20px;
+        color: #1f2937;
+        text-decoration: none;
+        font-size: 0.9em;
+        cursor: pointer;
+    }
+    .footer-link-1768027599:after {
+        content: '';
+        display: block;
+        margin-top: 1px;
+        width: 25%;
+        height: 1px;
+        background: #1f2937;
+        margin-left: auto;
+        margin-right: auto;
+        transition: width 300ms ease-in-out;
+    }
+    .footer-link-1768027599:hover:after {
+        width: 50%;
     }
 </style>
-<div class="cvss-widget-container-1767974402">
+<div class="cvss-widget-container-1768027599">
     <div style="
         display: flex;
         justify-content: space-between;
@@ -134,19 +148,16 @@
             CVSS v4.0
         </span>
         <div style="display: flex;">
-            <a href='http://localhost:4321?vector=CVSS%3A4.0%2FAV%3AN%2FAC%3AL%2FAT%3AN%2FPR%3AN%2FUI%3AN%2FVC%3AN%2FVI%3AN%2FVA%3AN%2FSC%3AN%2FSI%3AN%2FSA%3AN&utm_source=view_in_calculator&utm_medium=widget&utm_campaign=cvss_calculator' rel="noopener" target="_blank" class="cvss-btn-link-1767974402" aria-label="Open CVSS calculator with current vector">
-                Open in calculator
-            </a>
-            <div class="cvss-dropdown-1767974402">
-                <button onclick="cvssToggleDropdown_1767974402()" aria-expanded="false" aria-haspopup="menu" aria-label="More options">
+            <div class="cvss-dropdown-1768027599">
+                <button onclick="cvssToggleDropdown_1768027599()" aria-expanded="false" aria-haspopup="menu" aria-label="More options">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                         <circle cx="12" cy="12" r="1"></circle>
                         <circle cx="12" cy="5" r="1"></circle>
                         <circle cx="12" cy="19" r="1"></circle>
                     </svg>
                 </button>
-                <div id="cvss-dropdown-content-1767974402" class="cvss-dropdown-content-1767974402" role="menu" aria-hidden="true">
-                    <a href="#" onclick="cvssCopyLink_1767974402('http://localhost:4321?vector=CVSS%3A4.0%2FAV%3AN%2FAC%3AL%2FAT%3AN%2FPR%3AN%2FUI%3AN%2FVC%3AN%2FVI%3AN%2FVA%3AN%2FSC%3AN%2FSI%3AN%2FSA%3AN'); cvssToggleDropdown_1767974402(); return false;" role="menuitem" tabindex="-1">
+                <div id="cvss-dropdown-content-1768027599" class="cvss-dropdown-content-1768027599" role="menu" aria-hidden="true">
+                    <a href="#" onclick="cvssCopyLink_1768027599('http://localhost:4321?vector=CVSS%3A4.0%2FAV%3AN%2FAC%3AL%2FAT%3AN%2FPR%3AN%2FUI%3AN%2FVC%3AN%2FVI%3AN%2FVA%3AN%2FSC%3AN%2FSI%3AN%2FSA%3AN'); cvssToggleDropdown_1768027599(); return false;" role="menuitem" tabindex="-1">
                         Copy share link
                     </a>
                 </div>
@@ -166,7 +177,7 @@
             font-variant-numeric: tabular-nums;
             color: oklch(50% 0.134 242.749);
         ">
-            0.00
+            0.0
         </span>
         <span style="
             font-size: 14px;
@@ -202,16 +213,16 @@
             word-break: break-all;
             color: #1f2937;
             position: relative;
-        " onmouseover="cvssShowIcons_1767974402()" onmouseout="cvssHideIcons_1767974402()">
+        " onmouseover="cvssShowIcons_1768027599()" onmouseout="cvssHideIcons_1768027599()">
             CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N
-            <div id="cvss-vector-icons-1767974402" style="
+            <div id="cvss-vector-icons-1768027599" style="
                 position: absolute;
                 top: 8px;
                 right: 8px;
                 display: none;
                 gap: 4px;
             ">
-                <button onclick="cvssCopyVector_1767974402('CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N')" style="
+                <button onclick="cvssCopyVector_1768027599('CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N')" style="
                     background: white;
                     border: 1px solid #e5e7eb;
                     cursor: pointer;
@@ -230,7 +241,7 @@
         </div>
     </div>
 
-    <div id="cvss-toast-1767974402" class="cvss-toast-1767974402" style="
+    <div id="cvss-toast-1768027599" class="cvss-toast-1768027599" style="
         position: fixed;
         top: 20px;
         right: 20px;
@@ -247,42 +258,42 @@
 
     <script>
         (function() {
-            const container = document.querySelector('.cvss-widget-container-1767974402');
+            const container = document.querySelector('.cvss-widget-container-1768027599');
             if (!container) return;
 
             container.addEventListener('click', function(event) {
-                const dropdown = container.querySelector('.cvss-dropdown-1767974402');
-                const content = container.querySelector('#cvss-dropdown-content-1767974402');
+                const dropdown = container.querySelector('.cvss-dropdown-1768027599');
+                const content = container.querySelector('#cvss-dropdown-content-1768027599');
                 if (!dropdown.contains(event.target)) {
-                    cvssCloseDropdown_1767974402();
+                    cvssCloseDropdown_1768027599();
                 }
             });
 
-            window.cvssToggleDropdown_1767974402 = function() {
-                const content = container.querySelector('#cvss-dropdown-content-1767974402');
+            window.cvssToggleDropdown_1768027599 = function() {
+                const content = container.querySelector('#cvss-dropdown-content-1768027599');
                 const button = content.previousElementSibling;
                 if (content.style.display === 'block') {
-                    cvssCloseDropdown_1767974402();
+                    cvssCloseDropdown_1768027599();
                 } else {
-                    cvssOpenDropdown_1767974402();
+                    cvssOpenDropdown_1768027599();
                 }
             };
 
-            window.cvssOpenDropdown_1767974402 = function() {
-                const content = container.querySelector('#cvss-dropdown-content-1767974402');
+            window.cvssOpenDropdown_1768027599 = function() {
+                const content = container.querySelector('#cvss-dropdown-content-1768027599');
                 const button = content.previousElementSibling;
                 content.style.display = 'block';
-                content.classList.add('cvss-show-1767974402');
-                content.classList.remove('cvss-hide-1767974402');
+                content.classList.add('cvss-show-1768027599');
+                content.classList.remove('cvss-hide-1768027599');
                 button.setAttribute('aria-expanded', 'true');
                 content.setAttribute('aria-hidden', 'false');
             };
 
-            window.cvssCloseDropdown_1767974402 = function() {
-                const content = container.querySelector('#cvss-dropdown-content-1767974402');
+            window.cvssCloseDropdown_1768027599 = function() {
+                const content = container.querySelector('#cvss-dropdown-content-1768027599');
                 const button = content.previousElementSibling;
-                content.classList.add('cvss-hide-1767974402');
-                content.classList.remove('cvss-show-1767974402');
+                content.classList.add('cvss-hide-1768027599');
+                content.classList.remove('cvss-show-1768027599');
                 setTimeout(() => {
                     content.style.display = 'none';
                 }, 300);
@@ -290,30 +301,30 @@
                 content.setAttribute('aria-hidden', 'true');
             };
 
-            window.cvssShowIcons_1767974402 = function() {
-                const icons = container.querySelector('#cvss-vector-icons-1767974402');
+            window.cvssShowIcons_1768027599 = function() {
+                const icons = container.querySelector('#cvss-vector-icons-1768027599');
                 icons.style.display = 'flex';
             };
 
-            window.cvssHideIcons_1767974402 = function() {
-                const icons = container.querySelector('#cvss-vector-icons-1767974402');
+            window.cvssHideIcons_1768027599 = function() {
+                const icons = container.querySelector('#cvss-vector-icons-1768027599');
                 icons.style.display = 'none';
             };
 
-            window.cvssCopyVector_1767974402 = function(text) {
+            window.cvssCopyVector_1768027599 = function(text) {
                 navigator.clipboard.writeText(text).then(() => {
-                    cvssShowToast_1767974402('Vector copied!');
+                    cvssShowToast_1768027599('Vector copied!');
                 });
             };
 
-            window.cvssCopyLink_1767974402 = function(url) {
+            window.cvssCopyLink_1768027599 = function(url) {
                 navigator.clipboard.writeText(url).then(() => {
-                    cvssShowToast_1767974402('Share link copied!');
+                    cvssShowToast_1768027599('Share link copied!');
                 });
             };
 
-            window.cvssShowToast_1767974402 = function(message) {
-                const toast = container.querySelector('#cvss-toast-1767974402');
+            window.cvssShowToast_1768027599 = function(message) {
+                const toast = container.querySelector('#cvss-toast-1768027599');
                 toast.textContent = message;
                 toast.style.display = 'block';
                 // Trigger animation
@@ -332,13 +343,8 @@
         })();
     </script>
 
-    <div style="text-align: center; margin-top: 32px;">
-        <a href='http://localhost:4321?utm_source=embedded_logo&utm_medium=widget&utm_campaign=cvss_calculator' rel="noopener" target="_blank">
-            <img src="http://localhost:4321/logo.svg" alt="CyberPath Quant Logo" style="
-                width: 100%;
-                height: auto;
-                max-width: 200px;
-            " />
-        </a>
-    </div>
+    <a href='http://localhost:4321?vector=CVSS%3A4.0%2FAV%3AN%2FAC%3AL%2FAT%3AN%2FPR%3AN%2FUI%3AN%2FVC%3AN%2FVI%3AN%2FVA%3AN%2FSC%3AN%2FSI%3AN%2FSA%3AN&utm_source=view_in_calculator&utm_medium=widget&utm_campaign=cvss_calculator' rel="noopener" target="_blank" class="footer-link-1768027599" aria-label="Open CVSS calculator with current vector">
+        View on 
+        <img src="http://localhost:4321/logo.svg" alt="CyberPath Quant Logo" style="height: 1.4em; vertical-align: middle;"  />
+    </a>
 </div>
