@@ -13,6 +13,7 @@ import type {
 export interface ParsedVector {
     version: `2.0` | `3.0` | `3.1` | `4.0`
     metrics: CVSSv2Metrics | CVSSv3Metrics | CVSSv4Metrics
+    raw:     string
 }
 
 /**
@@ -200,6 +201,7 @@ export function parseVector(vector: string): ParsedVector | null {
     return {
         version,
         metrics,
+        raw: vector,
     };
 }
 
