@@ -12,7 +12,7 @@ import logoBlack from "@/assets/logo.svg";
 import {
     CVSS_IMAGE_LOADING,
     CVSS_LOGO_ALT,
-    DEFAULT_FRACTION_DIGITS
+    IMPACT_FRACTION_DIGITS
 } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -37,7 +37,7 @@ export const ScoreCard: FC<ScoreCardProps> = ({
     severity,
     exportMenu,
 }) => {
-    const scoreDisplay = useMemo(() => score.toFixed(DEFAULT_FRACTION_DIGITS), [ score ]);
+    const scoreDisplay = useMemo(() => score.toFixed(IMPACT_FRACTION_DIGITS), [ score ]);
 
     return (
         <Card className="border-2 border-sky-500/30 shadow-lg">
