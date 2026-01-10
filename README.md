@@ -6,11 +6,15 @@
   </picture>
 </p>
 
-[![Cyberpath](https://img.shields.io/badge/Cyberpath-project-blue)](https://cyberpath-hq.com) [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE.md) [![Made with Astro](https://img.shields.io/badge/Made%20with-Astro-FF5D01?logo=astro&logoColor=white)](https://astro.build)
+[![Cyberpath](https://img.shields.io/badge/Cyberpath-project-blue)](https://cyberpath-hq.com)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE.md)
+[![Made with Astro](https://img.shields.io/badge/Made%20with-Astro-FF5D01?logo=astro&logoColor=white)](https://astro.build)
 
 ## What is Quant?
 
-**Quant** is an intuitive, modern CVSS score calculator that makes vulnerability severity assessment fast, accurate, and accessible. Unlike traditional calculators, Quant provides an interactive experience with color-coded severity indicators, real-time scoring, and one-click downloads, making it your new go-to tool.
+**Quant** is an intuitive, modern CVSS score calculator that makes vulnerability severity assessment fast, accurate, and
+accessible. Unlike traditional calculators, Quant provides an interactive experience with color-coded severity
+indicators, real-time scoring, and one-click downloads, making it your new go-to tool.
 
 ### Why Quant?
 
@@ -55,10 +59,10 @@ Quant delivers industry-leading features designed to streamline vulnerability as
 
 ### One-Click Export & Sharing
 
-- **Download as PDF** — Beautifully formatted vulnerability reports ready to share
 - **Copy Score Vector** — Copy CVSS vector string for documentation and tracking
 - **Share Links** — Generate shareable URLs with pre-configured scores and metrics
-- **JSON Export** — Export assessment data in structured format for integration with other tools
+- **Embeddable Code** — Generate HTML snippets to embed score cards on websites
+- **Save to Score Manager** — Store assessments for later reference and advanced management
 
 ### Score Analytics & Insights
 
@@ -100,13 +104,16 @@ Quant delivers industry-leading features designed to streamline vulnerability as
 
 ### Installation
 
-Although Quant is open-source and can be run locally, we recommend using the [official website](https://quant.cyberpath-hq.com) for the best experience.
+Although Quant is open-source and can be run locally, we recommend using the
+[official website](https://quant.cyberpath-hq.com) for the best experience.
 
-The website is updated automatically with every new release, and you can access the latest features without needing to install anything.
+The website is updated automatically with every new release, and you can access the latest features without needing to
+install anything.
 
 If you'd like to run it locally:
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/cyberpath-HQ/Quant.git
    cd Quant
@@ -131,24 +138,24 @@ Access the application at `http://localhost:4321`
 
 All commands are run from the root of the project:
 
-| Command            | Action                                      |
-| :----------------- | :------------------------------------------ |
-| `pnpm install`     | Install dependencies                       |
-| `pnpm dev`         | Start local dev server at `localhost:4321` |
-| `pnpm build`       | Build production site to `./dist/`         |
-| `pnpm preview`     | Preview build locally before deploying      |
-| `pnpm astro ...`   | Run Astro CLI commands                     |
-| `pnpm lint`        | Run ESLint and code quality checks          |
+| Command          | Action                                     |
+| :--------------- | :----------------------------------------- |
+| `pnpm install`   | Install dependencies                       |
+| `pnpm dev`       | Start local dev server at `localhost:4321` |
+| `pnpm build`     | Build production site to `./dist/`         |
+| `pnpm preview`   | Preview build locally before deploying     |
+| `pnpm astro ...` | Run Astro CLI commands                     |
+| `pnpm lint`      | Run ESLint and code quality checks         |
 
 ## Contributing
 
 We welcome contributions from the cybersecurity community! Whether you're:
 
-- 🐛 Reporting bugs or suggesting improvements
-- 🎨 Enhancing the UI/UX
-- 📝 Improving documentation
-- 💻 Adding features or fixing issues
-- 🌍 Translating for international users
+- Reporting bugs or suggesting improvements
+- Enhancing the UI/UX
+- Improving documentation
+- Adding features or fixing issues
+- Translating for international users
 
 Please check our [contribution guidelines](CONTRIBUTING.md) for detailed information on how to contribute.
 
@@ -181,5 +188,5 @@ Join the Cyberpath community and stay connected:
 
 ## Acknowledgments
 
-Built with ❤️ by the [Cyberpath-HQ](https://github.com/cyberpath-HQ) team to make vulnerability assessment accessible to everyone.
-
+Built with ❤️ by the [Cyberpath-HQ](https://github.com/cyberpath-HQ) team to make vulnerability assessment accessible to
+everyone.
