@@ -5,7 +5,8 @@
 
 import dayjs from "dayjs";
 import {
-    DEFAULT_FRACTION_DIGITS, CVSS_LOGO_ALT
+    CVSS_LOGO_ALT,
+    IMPACT_FRACTION_DIGITS
 } from "./constants";
 
 interface SeverityInfo {
@@ -76,7 +77,7 @@ export function generateEmbeddableCode(params: {
         severity,
         origin,
     } = params;
-    const scoreDisplay = score.toFixed(DEFAULT_FRACTION_DIGITS);
+    const scoreDisplay = score.toFixed(IMPACT_FRACTION_DIGITS);
     const logoUrl = `${ origin }/logo.svg`;
     const severityCSS = getSeverityCSS(severity);
     const escapedVector = vectorString.replace(/'/g, `\\'`);
