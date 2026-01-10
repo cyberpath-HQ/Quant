@@ -7,6 +7,39 @@ import { Badge } from "@/components/ui/badge";
 import CVSSVersionsTabs from "@/components/CVSSVersionsTabs";
 import FAQAccordion from "@/components/FAQAccordion";
 import BackToTopButton from "@/components/BackToTopButton";
+import { makeJsonLd } from "@/lib/make-json-ld";
+import type { WebPage } from "schema-dts";
+
+const date = new Date();
+const json_ld = makeJsonLd<WebPage>({
+  "@type": "WebPage",
+  "@context": "https://schema.org",
+  "@id": "https://quant.cyberpath-hq.com/docs",
+  url: "https://quant.cyberpath-hq.com/docs",
+  name: "Documentation - Quant CVSS Calculator",
+  description:
+    "Complete guide to Quant CVSS Calculator. Learn how to use CVSS v4.0, v3.1, v3.0, and v2.0 for vulnerability scoring, export results, and understand metrics.",
+  inLanguage: "en-US",
+  author: "CyberPath <support@cyberpath-hq.com>",
+  image: {
+    "@type": "ImageObject",
+    url: "https://quant.cyberpath-hq.com/og-image.svg",
+    width: "1200",
+    height: "630",
+    description: "Documentation - Quant CVSS Calculator",
+  },
+  mainEntityOfPage: {
+    "@type": "WebPage",
+    "@id": "https://quant.cyberpath-hq.com/docs",
+  },
+  datePublished: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
+  dateModified: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
+  publisher: {
+    "@type": "Person",
+    name: "CyberPath",
+    email: "support@cyberpath-hq.com",
+  },
+});
 
 const seoProps = {
   title: "Documentation - Quant CVSS Calculator",
@@ -18,11 +51,31 @@ const seoProps = {
     title: "Documentation - Quant CVSS Calculator",
     description: "Complete guide to Quant CVSS Calculator and CVSS vulnerability scoring.",
     site_name: "Quant",
+    images: [
+      {
+        url: "https://quant.cyberpath-hq.com/og-image.svg",
+        width: 1200,
+        height: 630,
+        alt: "Documentation - Quant CVSS Calculator",
+      },
+    ],
+  },
+  additionalMetaTags: [
+    {
+      name: "keywords",
+      content:
+        "CVSS, vulnerability scoring, security assessment, CVSS v4.0, CVSS v3.1, CVSS calculator, cybersecurity, documentation",
+    },
+  ],
+  twitter: {
+    cardType: "summary_large_image",
+    handle: "@cyberpath_hq",
+    site: "@cyberpath_hq",
   },
 };
 ---
 
-<Layout seo={seoProps}>
+<Layout JSON_LD={json_ld} seo={seoProps}>
   <Header client:load activePage="documentation" />
   <main class="w-full min-h-screen bg-background text-foreground/90">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
