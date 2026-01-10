@@ -12,6 +12,7 @@ import {
     type FC
 } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
     Tabs, TabsContent, TabsList, TabsTrigger
 } from "@/components/ui/tabs";
@@ -72,6 +73,9 @@ import ScoreCard from './cvss-calculator/ScoreCard';
 import ExportMenu from './cvss-calculator/ExportMenu';
 import SaveScoreDialog from './cvss-calculator/SaveScoreDialog';
 import { addToHistory } from "@/lib/add-to-history";
+import {
+    Card, CardContent, CardDescription, CardHeader, CardTitle
+} from "@/components/ui/card";
 
 type CVSSVersion = typeof CVSS_VERSION_2_0 | typeof CVSS_VERSION_3_0 | typeof CVSS_VERSION_3_1 | typeof CVSS_VERSION_4_0;
 
@@ -540,6 +544,29 @@ export const CVSSGenericCalculator: FC<CVSSGenericCalculatorProps> = ({
                             />
                         }
                     />
+
+                    <Card className="mt-8">
+                        <CardHeader>
+                            <CardTitle>
+                                Never Miss an Update!
+                            </CardTitle>
+                            <CardDescription>
+                                Get the latest updates from CyberPath, including new features,
+                                articles, and cybersecurity insights delivered straight to your inbox.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Button asChild className="bg-foreground/90">
+                                <a
+                                    href="https://newsletter.cyberpath-hq.com"
+                                    target="_blank"
+                                    rel="noopener"
+                                >
+                                    Subscribe to Newsletter
+                                </a>
+                            </Button>
+                        </CardContent>
+                    </Card>
                 </div>
             </div>
 
