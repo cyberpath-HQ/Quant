@@ -339,7 +339,7 @@ export const CVSSGenericCalculator: FC<CVSSGenericCalculatorProps> = ({
 
     return (
         <>
-            <Toaster position="top-right" richColors theme={theme.theme} />
+            <Toaster position="top-right" richColors theme={theme.theme} className="max-w-dvw" />
             <div className="grid lg:grid-cols-[1fr_380px] gap-8">
                 {/* Left: Metrics */}
                 <div className="space-y-6">
@@ -391,7 +391,7 @@ export const CVSSGenericCalculator: FC<CVSSGenericCalculatorProps> = ({
                                         {group.description}
                                     </div>
 
-                                    <div className="grid gap-5">
+                                    <div className="grid md:gap-8 gap-10">
                                         {group.metrics.map((metric) => (
                                             <div key={metric.key} className="space-y-2">
                                                 <FieldSet>
