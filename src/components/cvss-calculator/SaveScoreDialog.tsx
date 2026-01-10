@@ -45,10 +45,10 @@ export const SaveScoreDialog: FC<SaveScoreDialogProps> = ({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>
+                    <DialogTitle className="text-balance text-left">
                         Save Score to Score Manager
                     </DialogTitle>
-                    <DialogDescription>
+                    <DialogDescription className="text-balance text-left">
                         Enter a name for this CVSS score to save it in your Score Manager.
                     </DialogDescription>
                 </DialogHeader>
