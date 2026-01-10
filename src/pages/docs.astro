@@ -5,6 +5,7 @@ import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import CVSSVersionsTabs from "@/components/CVSSVersionsTabs";
+import FAQAccordion from "@/components/FAQAccordion";
 
 const seoProps = {
   title: "Documentation - Quant CVSS Calculator",
@@ -22,7 +23,7 @@ const seoProps = {
 
 <Layout seo={seoProps}>
   <Header client:load activePage="documentation" />
-  <main class="w-full min-h-screen bg-linear-to-b from-background to-muted/30">
+  <main class="w-full min-h-screen bg-background text-foreground/90">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
       <!-- Hero Section -->
       <div class="mx-auto max-w-4xl space-y-8">
@@ -409,205 +410,8 @@ const seoProps = {
             <p class="text-muted-foreground text-lg">Quick answers to common questions about Quant and CVSS.</p>
           </div>
 
-          <div class="space-y-4">
-            <details class="group border rounded-lg p-6 hover:bg-accent transition-colors">
-              <summary class="flex items-center justify-between cursor-pointer font-semibold text-lg">
-                Which CVSS version should I use for new vulnerabilities?
-                <svg
-                  class="w-5 h-5 transition-transform group-open:rotate-180"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"
-                  ></path>
-                </svg>
-              </summary>
-              <div class="mt-4 text-muted-foreground space-y-2">
-                <p>
-                  Always use <strong>CVSS v4.0</strong> for new vulnerability assessments. It's the latest standard from FIRST.org
-                  and provides the most comprehensive evaluation framework.
-                </p>
-                <p>
-                  Use v3.1 only if v4.0 is not yet supported by your organization or systems. Use v3.0 and v2.0 only for
-                  legacy systems or historical comparisons.
-                </p>
-              </div>
-            </details>
-
-            <details class="group border rounded-lg p-6 hover:bg-accent transition-colors">
-              <summary class="flex items-center justify-between cursor-pointer font-semibold text-lg">
-                Is my data stored on a server or sent anywhere?
-                <svg
-                  class="w-5 h-5 transition-transform group-open:rotate-180"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"
-                  ></path>
-                </svg>
-              </summary>
-              <div class="mt-4 text-muted-foreground space-y-2">
-                <p>
-                  <strong>No.</strong> All calculations happen completely in your browser. Quant is 100% client-side with
-                  zero server communication.
-                </p>
-                <p>
-                  Your vulnerability assessments remain entirely private. Your browser's localStorage stores scores
-                  locally, and nothing is ever sent to external servers.
-                </p>
-              </div>
-            </details>
-
-            <details class="group border rounded-lg p-6 hover:bg-accent transition-colors">
-              <summary class="flex items-center justify-between cursor-pointer font-semibold text-lg">
-                How accurate are the calculations compared to official sources?
-                <svg
-                  class="w-5 h-5 transition-transform group-open:rotate-180"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"
-                  ></path>
-                </svg>
-              </summary>
-              <div class="mt-4 text-muted-foreground space-y-2">
-                <p>
-                  Quant implements the official CVSS specifications exactly as published by FIRST.org. All scoring
-                  algorithms match the official standards.
-                </p>
-                <p>
-                  The implementation has been tested against reference calculators to ensure accuracy. All formulas,
-                  lookup tables, and calculations are verified against the official documentation.
-                </p>
-              </div>
-            </details>
-
-            <details class="group border rounded-lg p-6 hover:bg-accent transition-colors">
-              <summary class="flex items-center justify-between cursor-pointer font-semibold text-lg">
-                What's the difference between Base, Temporal, and Environmental metrics?
-                <svg
-                  class="w-5 h-5 transition-transform group-open:rotate-180"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"
-                  ></path>
-                </svg>
-              </summary>
-              <div class="mt-4 text-muted-foreground space-y-2">
-                <ul class="space-y-2">
-                  <li>
-                    <strong>Base Metrics (Required):</strong> Intrinsic characteristics that don't change over time. Represents
-                    the inherent properties of the vulnerability.
-                  </li>
-                  <li>
-                    <strong>Temporal/Threat Metrics (Optional):</strong> Characteristics that change over time like exploit
-                    availability, fix status, or proof-of-concept maturity.
-                  </li>
-                  <li>
-                    <strong>Environmental Metrics (Optional):</strong> Characteristics unique to your environment such as
-                    deployed system count, required privileges, and security requirements.
-                  </li>
-                  <li>
-                    <strong>Supplemental Metrics (v4.0 only):</strong> Additional context like Safety impact, Automatable
-                    nature, and Recovery potential—doesn't affect the score.
-                  </li>
-                </ul>
-              </div>
-            </details>
-
-            <details class="group border rounded-lg p-6 hover:bg-accent transition-colors">
-              <summary class="flex items-center justify-between cursor-pointer font-semibold text-lg">
-                How do I share my assessment with others?
-                <svg
-                  class="w-5 h-5 transition-transform group-open:rotate-180"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"
-                  ></path>
-                </svg>
-              </summary>
-              <div class="mt-4 text-muted-foreground space-y-2">
-                <p>Quant provides multiple sharing options:</p>
-                <ul class="space-y-2">
-                  <li>
-                    <strong>Copy Vector:</strong> Click "Copy Vector" to copy the CVSS string for documentation and tracking
-                  </li>
-                  <li>
-                    <strong>Share Link:</strong> Click "Share Link" to generate a URL with your assessment pre-configured
-                  </li>
-                  <li>
-                    <strong>Embeddable Code:</strong> Click "Embed Code" to get HTML snippets for embedding score cards on
-                    websites
-                  </li>
-                  <li>
-                    <strong>Save to Manager:</strong> Click "Save to Score Manager" to store assessments for later comparison
-                    and analysis
-                  </li>
-                </ul>
-              </div>
-            </details>
-
-            <details class="group border rounded-lg p-6 hover:bg-accent transition-colors">
-              <summary class="flex items-center justify-between cursor-pointer font-semibold text-lg">
-                Can I manage and track my calculated scores?
-                <svg
-                  class="w-5 h-5 transition-transform group-open:rotate-180"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"
-                  ></path>
-                </svg>
-              </summary>
-              <div class="mt-4 text-muted-foreground space-y-2">
-                <p>
-                  <strong>Yes!</strong> Quant automatically saves every calculated score to your browser. The Score Manager
-                  lets you:
-                </p>
-                <ul class="space-y-2">
-                  <li>• Sort and filter by score or severity</li>
-                  <li>• Edit names and descriptions</li>
-                  <li>• Compare multiple scores side-by-side</li>
-                  <li>• Generate visualizations and charts</li>
-                  <li>• Delete unwanted entries or restore previous versions</li>
-                  <li>• Import and export history as JSON</li>
-                </ul>
-              </div>
-            </details>
-
-            <details class="group border rounded-lg p-6 hover:bg-accent transition-colors">
-              <summary class="flex items-center justify-between cursor-pointer font-semibold text-lg">
-                Does Quant work offline?
-                <svg
-                  class="w-5 h-5 transition-transform group-open:rotate-180"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"
-                  ></path>
-                </svg>
-              </summary>
-              <div class="mt-4 text-muted-foreground space-y-2">
-                <p>
-                  <strong>Yes!</strong> Quant works completely offline. All calculations happen in your browser with no internet
-                  connection required.
-                </p>
-                <p>
-                  Your assessment history is stored locally in your browser, so you can access previous scores anytime
-                  without connectivity.
-                </p>
-              </div>
-            </details>
-          </div>
+          <FAQAccordion client:only />
+        </section>
         </section>
 
         <!-- Resources Section -->
