@@ -197,7 +197,7 @@ const ChartSettings = React.memo<ChartSettingsProps>(({
                             Set a title for the chart to describe its content.
                         </FieldDescription>
                     </Field>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         <Field>
                             <FieldLabel>
                                 Chart Type
@@ -344,7 +344,9 @@ const ChartSettings = React.memo<ChartSettingsProps>(({
                                 step={UNIT}
                                 className="text-end"
                             />
-                            <InputGroupAddon align={`inline-end`}>%</InputGroupAddon>
+                            <InputGroupAddon align={`inline-end`} className="hidden lg:inline-block">
+                                %
+                            </InputGroupAddon>
                             <InputGroupAddon align="inline-end">
                                 <InputGroupButton
                                     variant="secondary"
@@ -436,8 +438,8 @@ const TypeSpecificSettings = React.memo<TypeSpecificSettingsProps>(({
                         <FieldDescription>
                             Customize the appearance of the bar chart.
                         </FieldDescription>
-                        <div className="grid grid-cols-2 gap-4">
-                            <FieldGroup className="col-span-full grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            <FieldGroup className="col-span-full grid grid-cols-1 lg:grid-cols-2 gap-4">
                                 <div className="flex flex-col gap-4">
                                     <Field orientation={`horizontal`}
                                         className="cursor-pointer"
@@ -489,7 +491,7 @@ const TypeSpecificSettings = React.memo<TypeSpecificSettingsProps>(({
                                 </Field>
                             </FieldGroup>
                             <FieldSeparator className="col-span-full" />
-                            <FieldGroup className="col-span-full grid grid-cols-2 gap-4">
+                            <FieldGroup className="col-span-full grid grid-cols-1 lg:grid-cols-2 gap-4">
                                 <Field orientation={`horizontal`}
                                     className="cursor-pointer"
                                     onClick={() => set_show_y_axis_label(!show_y_axis_label)}>
@@ -580,7 +582,7 @@ const TypeSpecificSettings = React.memo<TypeSpecificSettingsProps>(({
                                             step={UNIT}
                                             className="text-end"
                                         />
-                                        <InputGroupAddon align={`inline-end`}>
+                                        <InputGroupAddon align={`inline-end`} className="hidden lg:inline-block">
                                             px
                                         </InputGroupAddon>
                                         <InputGroupAddon align="inline-end">
@@ -658,7 +660,7 @@ const TypeSpecificSettings = React.memo<TypeSpecificSettingsProps>(({
                                         step={UNIT}
                                         className="text-end"
                                     />
-                                    <InputGroupAddon align={`inline-end`}>
+                                    <InputGroupAddon align={`inline-end`} className="hidden lg:inline-block">
                                         %
                                     </InputGroupAddon>
                                     <InputGroupAddon align="inline-end">
@@ -681,7 +683,7 @@ const TypeSpecificSettings = React.memo<TypeSpecificSettingsProps>(({
                                 Set the inner radius of the donut chart to {inner_radius}% of the outer radius.
                             </FieldDescription>
                         </Field>
-                        <div className="grid grid-cols-2">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                             <Field orientation={`horizontal`}
                                 className="self-center cursor-pointer"
                                 onClick={() => set_show_floating_labels(!show_floating_labels)}>
@@ -774,7 +776,7 @@ const Customization = React.memo<CustomizationProps>(({
                                 <>
                                     <FieldSet
                                         key={severity}
-                                        className="grid grid-cols-2 gap-4">
+                                        className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                         <div className="flex flex-col col-span-full">
                                             <FieldLegend className="text-sm! font-medium!">
                                                 {titleCase(severity)} Severity
@@ -1137,10 +1139,10 @@ export const ChartDialog: FC<ChartDialogProps> = ({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="lg:max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>
+                    <DialogTitle className="text-balance text-left">
                         Chart Configuration
                     </DialogTitle>
-                    <DialogDescription>
+                    <DialogDescription className="text-balance text-left">
                         Customize and view charts for selected CVSS score entries.
                     </DialogDescription>
                     <DropdownMenu>
