@@ -23,10 +23,10 @@ import {
 } from "@/lib/constants";
 
 interface SettingsMenuProps {
-    shouldUseAlternativeDescription:    boolean
+    shouldUseAlternativeDescription: boolean
     setShouldUseAlternativeDescription: (value: boolean) => void
-    shouldShowContributions:            boolean
-    setShouldShowContributions:         (value: boolean) => void
+    shouldShowContributions: boolean
+    setShouldShowContributions: (value: boolean) => void
 }
 
 export const SettingsMenu: FC<SettingsMenuProps> = ({
@@ -53,7 +53,7 @@ export const SettingsMenu: FC<SettingsMenuProps> = ({
                     Settings
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="max-w-96">
+            <DropdownMenuContent className="max-w-[90vw] lg:max-w-96" align="start" side="bottom">
                 <DropdownMenuItem
                     className="cursor-pointer p-3"
                     onClick={() => setShouldUseAlternativeDescription(!shouldUseAlternativeDescription)}
