@@ -65,7 +65,8 @@ import {
     CVSS_EMBED_PATH_3_PREFIX,
     CVSS_QUERY_PARAM_VECTOR,
     ZERO,
-    IMPACT_FRACTION_DIGITS
+    IMPACT_FRACTION_DIGITS,
+    UTM_PARAMS
 } from "@/lib/constants";
 import { generateEmbeddableCode } from "@/lib/embed";
 import SettingsMenu from './cvss-calculator/SettingsMenu';
@@ -82,19 +83,19 @@ type CVSSVersion = typeof CVSS_VERSION_2_0 | typeof CVSS_VERSION_3_0 | typeof CV
 type CVSSMetrics = CVSSv2Metrics | CVSSv3Metrics | CVSSv4Metrics;
 
 interface VersionConfig {
-    metricsData:    Array<MetricGroup>
-    gridCols:       number
-    embedPath:      string
+    metricsData: Array<MetricGroup>
+    gridCols: number
+    embedPath: string
     defaultMetrics: CVSSMetrics
 }
 
 interface CVSSGenericCalculatorProps {
-    version:                            CVSSVersion
-    initialMetrics?:                    Partial<CVSSMetrics>
-    shouldUseAlternativeDescription:    boolean
+    version: CVSSVersion
+    initialMetrics?: Partial<CVSSMetrics>
+    shouldUseAlternativeDescription: boolean
     setShouldUseAlternativeDescription: (value: boolean) => void
-    shouldShowContributions:            boolean
-    setShouldShowContributions:         (value: boolean) => void
+    shouldShowContributions: boolean
+    setShouldShowContributions: (value: boolean) => void
 }
 
 export const CVSSGenericCalculator: FC<CVSSGenericCalculatorProps> = ({
@@ -110,28 +111,28 @@ export const CVSSGenericCalculator: FC<CVSSGenericCalculatorProps> = ({
         switch (version) {
             case CVSS_VERSION_4_0:
                 return {
-                    metricsData:    cvss40Metrics,
-                    gridCols:       CVSS_GRID_COLS_4,
-                    embedPath:      CVSS_EMBED_PATH_40,
+                    metricsData: cvss40Metrics,
+                    gridCols: CVSS_GRID_COLS_4,
+                    embedPath: CVSS_EMBED_PATH_40,
                     defaultMetrics: V4_DEFAULT_METRICS,
                 };
             case CVSS_VERSION_3_1:
             case CVSS_VERSION_3_0:
                 return {
-                    metricsData:    cvss3Metrics,
-                    gridCols:       CVSS_GRID_COLS_3,
-                    embedPath:      `${ CVSS_EMBED_PATH_3_PREFIX }${ version.replace(`.`, ``) }`,
+                    metricsData: cvss3Metrics,
+                    gridCols: CVSS_GRID_COLS_3,
+                    embedPath: `${CVSS_EMBED_PATH_3_PREFIX}${version.replace(`.`, ``)}`,
                     defaultMetrics: V3_DEFAULT_METRICS,
                 };
             case CVSS_VERSION_2_0:
                 return {
-                    metricsData:    cvss2Metrics,
-                    gridCols:       CVSS_GRID_COLS_3,
-                    embedPath:      CVSS_EMBED_PATH_2,
+                    metricsData: cvss2Metrics,
+                    gridCols: CVSS_GRID_COLS_3,
+                    embedPath: CVSS_EMBED_PATH_2,
                     defaultMetrics: V2_DEFAULT_METRICS,
                 };
         }
-    }, [ version ]);
+    }, [version]);
 
     const [
         metrics,
@@ -179,13 +180,13 @@ export const CVSSGenericCalculator: FC<CVSSGenericCalculatorProps> = ({
     const copyVector = useCallback(() => {
         navigator.clipboard.writeText(vectorString);
         toast.success(CVSS_VECTOR_COPIED_MESSAGE);
-    }, [ vectorString ]);
+    }, [vectorString]);
 
     const shareScore = useCallback(() => {
-        const url = `${ window.location.origin }?${ CVSS_QUERY_PARAM_VECTOR }=${ encodeURIComponent(vectorString) }`;
+        const url = `${window.location.origin}?${CVSS_QUERY_PARAM_VECTOR}=${encodeURIComponent(vectorString)}`;
         navigator.clipboard.writeText(url);
         toast.success(CVSS_SHAREABLE_LINK_MESSAGE);
-    }, [ vectorString ]);
+    }, [vectorString]);
 
 
     const severity = useMemo(() => getSeverityRating(score, version), [
@@ -218,7 +219,7 @@ export const CVSSGenericCalculator: FC<CVSSGenericCalculatorProps> = ({
                 score,
                 severity: currentSeverity.label,
                 vectorString,
-                name:     historyName.trim(),
+                name: historyName.trim(),
             });
             toast.success(CVSS_SCORE_SAVED_MESSAGE);
             set_should_save_dialog_be_open(false);
@@ -266,7 +267,7 @@ export const CVSSGenericCalculator: FC<CVSSGenericCalculatorProps> = ({
 
     useEffect(() => {
         let result: {
-            score:  number
+            score: number
             vector: string
         };
 
@@ -283,7 +284,7 @@ export const CVSSGenericCalculator: FC<CVSSGenericCalculatorProps> = ({
                 break;
             default:
                 result = {
-                    score:  0,
+                    score: 0,
                     vector: ``,
                 };
         }
@@ -332,10 +333,10 @@ export const CVSSGenericCalculator: FC<CVSSGenericCalculatorProps> = ({
         const urlParams = new URLSearchParams(window.location.search);
         urlParams.set(`group`, activeGroup);
         const newSearch = urlParams.toString();
-        if (window.location.search !== `?${ newSearch }`) {
-            window.history.replaceState(null, ``, `?${ newSearch }`);
+        if (window.location.search !== `?${newSearch}`) {
+            window.history.replaceState(null, ``, `?${newSearch}`);
         }
-    }, [ activeGroup ]);
+    }, [activeGroup]);
 
     return (
         <>
@@ -413,7 +414,7 @@ export const CVSSGenericCalculator: FC<CVSSGenericCalculatorProps> = ({
                                                             metric.options.map((option) => {
                                                                 const is_currently_selected =
                                                                     metrics[
-                                                                        metric.key as keyof CVSSMetrics
+                                                                    metric.key as keyof CVSSMetrics
                                                                     ] === option.value;
 
                                                                 // Calculate impact
@@ -458,7 +459,7 @@ export const CVSSGenericCalculator: FC<CVSSGenericCalculatorProps> = ({
                                                                         onClick={() => {
                                                                             const element =
                                                                                 document.getElementById(
-                                                                                    `${ metric.key }-${ option.value
+                                                                                    `${metric.key}-${option.value
                                                                                     }`
                                                                                 );
                                                                             element?.click();
@@ -466,14 +467,14 @@ export const CVSSGenericCalculator: FC<CVSSGenericCalculatorProps> = ({
                                                                     >
                                                                         <RadioGroupItem
                                                                             value={option.value}
-                                                                            id={`${ metric.key }-${ option.value }`}
+                                                                            id={`${metric.key}-${option.value}`}
                                                                             className="mt-1
                                                                             data-[state='checked']:border-sky-500"
                                                                         />
                                                                         <div className="flex flex-col flex-1">
                                                                             <div className="flex items-center justify-between gap-2">
                                                                                 <FieldLabel
-                                                                                    htmlFor={`${ metric.key }-${ option.value }`}
+                                                                                    htmlFor={`${metric.key}-${option.value}`}
                                                                                     className="font-medium"
                                                                                 >
                                                                                     {option.label}
@@ -558,7 +559,9 @@ export const CVSSGenericCalculator: FC<CVSSGenericCalculatorProps> = ({
                         <CardContent>
                             <Button asChild className="bg-foreground/90">
                                 <a
-                                    href="https://newsletter.cyberpath-hq.com"
+                                    href={
+                                        `https://newsletter.cyberpath-hq.com?${new URLSearchParams(UTM_PARAMS).toString()}`
+                                    }
                                     target="_blank"
                                     rel="noopener"
                                 >

@@ -48,6 +48,12 @@ export const CHART_NOT_FOUND_MESSAGE = `Chart not found`;
 export const EXPORT_FAILED_MESSAGE = `Failed to export chart`;
 export const EXPORT_SUCCESS_MESSAGE = `Chart exported as PNG`;
 export const EMBED_CODE_COPIED_MESSAGE = `Embeddable code copied`;
+
+export const UTM_PARAMS = {
+    utm_source:   `quant.cyberpath-hq.com`,
+    utm_medium:   `referral`,
+    utm_campaign: `website`,
+} as const;
 export const CHART_FILENAME_PREFIX = `cvss-chart-`;
 export const CHART_FILENAME_SUFFIX = `.png`;
 export const DARK_THEME_BGCOLOR = `#18181B`;

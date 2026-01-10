@@ -21,6 +21,7 @@ import {
 import logoBlack from "@/assets/logo.svg";
 import logoWhite from "@/assets/logo-white.svg";
 import { cn } from "@/lib/utils";
+import { UTM_PARAMS } from "@/lib/constants";
 
 interface HeaderProps {
     activePage?: `calculator` | `documentation`
@@ -83,21 +84,23 @@ export const Header: FC<HeaderProps> = ({
                         <a href="/"
                             className={cn(
                                 `text-sm font-medium transition-colors hover:text-primary`,
-                                activePage === `calculator` ? `text-foreground` : `text-muted-foreground`,
+                                activePage === `calculator` ? `text-foreground` : `text-muted-foreground`
                             )}>
                             Calculator
                         </a>
                         <a href="/docs"
                             className={cn(
                                 `text-sm font-medium transition-colors hover:text-primary`,
-                                activePage === `documentation` ? `text-foreground` : `text-muted-foreground`,
+                                activePage === `documentation` ? `text-foreground` : `text-muted-foreground`
                             )}>
                             Documentation
                         </a>
                         <a
-                            href="https://github.com/cyberpath-HQ/Quant"
+                            href={
+                                `https://github.com/cyberpath-HQ/Quant?${new URLSearchParams(UTM_PARAMS).toString()}`
+                            }
                             target="_blank"
-                            rel="noopener noreferrer"
+                            rel="noopener"
                             className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
                         >
                             GitHub
@@ -128,7 +131,9 @@ export const Header: FC<HeaderProps> = ({
                                 </Button>
                                 <Button variant="ghost" className="w-full justify-start font-medium text-muted-foreground" asChild>
                                     <a
-                                        href="https://github.com/cyberpath-HQ/Quant"
+                                        href={
+                                            `https://github.com/cyberpath-HQ/Quant?${new URLSearchParams(UTM_PARAMS).toString()}`
+                                        }
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         onClick={() => setIsOpen(false)}

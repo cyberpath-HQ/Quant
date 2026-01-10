@@ -4,6 +4,8 @@
  * Application footer with links and information
  */
 
+import { UTM_PARAMS } from "@/lib/constants";
+
 export function Footer() {
     const currentYear = new Date().getFullYear();
 
@@ -22,7 +24,9 @@ export function Footer() {
                         <ul className="space-y-2 text-sm">
                             <li>
                                 <a
-                                    href="https://www.first.org/cvss/v4-0/specification-document"
+                                    href={
+                                        `https://www.first.org/cvss/v4-0/specification-document?${new URLSearchParams(UTM_PARAMS).toString()}`
+                                    }
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-muted-foreground hover:text-primary transition-colors"
@@ -32,7 +36,9 @@ export function Footer() {
                             </li>
                             <li>
                                 <a
-                                    href="https://www.first.org/cvss/v3-1/specification-document"
+                                    href={
+                                        `https://www.first.org/cvss/v3-1/specification-document?${new URLSearchParams(UTM_PARAMS).toString()}`
+                                    }
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-muted-foreground hover:text-primary transition-colors"
@@ -42,7 +48,9 @@ export function Footer() {
                             </li>
                             <li>
                                 <a
-                                    href="https://www.first.org/cvss/v2/guide"
+                                    href={
+                                        `https://www.first.org/cvss/v2/guide?${new URLSearchParams(UTM_PARAMS).toString()}`
+                                    }
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-muted-foreground hover:text-primary transition-colors"
@@ -57,7 +65,9 @@ export function Footer() {
                         <ul className="space-y-2 text-sm">
                             <li>
                                 <a
-                                    href="https://github.com/cyberpath-HQ/Quant"
+                                    href={
+                                        `https://github.com/cyberpath-HQ/Quant?${new URLSearchParams(UTM_PARAMS).toString()}`
+                                    }
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-muted-foreground hover:text-primary transition-colors"
@@ -67,7 +77,9 @@ export function Footer() {
                             </li>
                             <li>
                                 <a
-                                    href="https://discord.gg/WmPc56hYut"
+                                    href={
+                                        `https://discord.gg/WmPc56hYut?${new URLSearchParams(UTM_PARAMS).toString()}`
+                                    }
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-muted-foreground hover:text-primary transition-colors"
@@ -77,7 +89,9 @@ export function Footer() {
                             </li>
                             <li>
                                 <a
-                                    href="https://x.com/cyberpath_hq"
+                                    href={
+                                        `https://x.com/cyberpath_hq?${new URLSearchParams(UTM_PARAMS).toString()}`
+                                    }
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-muted-foreground hover:text-primary transition-colors"
@@ -92,7 +106,9 @@ export function Footer() {
                         <ul className="space-y-2 text-sm">
                             <li>
                                 <a
-                                    href="https://github.com/cyberpath-HQ/Quant/blob/main/LICENSE"
+                                    href={
+                                        `https://github.com/cyberpath-HQ/Quant/blob/main/LICENSE?${new URLSearchParams(UTM_PARAMS).toString()}`
+                                    }
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-muted-foreground hover:text-primary transition-colors"
@@ -102,7 +118,9 @@ export function Footer() {
                             </li>
                             <li>
                                 <a
-                                    href="https://cyberpath-hq.com"
+                                    href={
+                                        `https://cyberpath-hq.com?${new URLSearchParams(UTM_PARAMS).toString()}`
+                                    }
                                     target="_blank"
                                     rel="noopener"
                                     className="text-muted-foreground hover:text-primary transition-colors"
