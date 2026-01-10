@@ -5,7 +5,8 @@
  */
 
 import {
-    useState, useEffect
+    useState, useEffect,
+    type FC
 } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,14 +20,24 @@ import {
 } from "lucide-react";
 import logoBlack from "@/assets/logo.svg";
 import logoWhite from "@/assets/logo-white.svg";
+import { cn } from "@/lib/utils";
 
-export function Header() {
+interface HeaderProps {
+    activePage?: `calculator` | `documentation`
+}
+
+export const Header: FC<HeaderProps> = ({
+    activePage = `calculator`,
+}) => {
     const [
         theme,
         setTheme,
     ] = useState<`light` | `dark`>(`light`);
 
-    const [isOpen, setIsOpen] = useState(false);
+    const [
+        isOpen,
+        setIsOpen,
+    ] = useState(false);
 
     useEffect(() => {
         // Check for saved theme preference or default to light mode
@@ -69,10 +80,18 @@ export function Header() {
                         </picture>
                     </a>
                     <nav className="hidden md:flex gap-6">
-                        <a href="/" className="text-sm font-medium transition-colors hover:text-primary text-foreground">
+                        <a href="/"
+                            className={cn(
+                                `text-sm font-medium transition-colors hover:text-primary`,
+                                activePage === `calculator` ? `text-foreground` : `text-muted-foreground`,
+                            )}>
                             Calculator
                         </a>
-                        <a href="/docs" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+                        <a href="/docs"
+                            className={cn(
+                                `text-sm font-medium transition-colors hover:text-primary`,
+                                activePage === `documentation` ? `text-foreground` : `text-muted-foreground`,
+                            )}>
                             Documentation
                         </a>
                         <a
@@ -132,4 +151,4 @@ export function Header() {
             </div>
         </header>
     );
-}
+};
