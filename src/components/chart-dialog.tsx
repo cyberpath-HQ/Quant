@@ -43,16 +43,6 @@ import {
     EXPORT_FAILED_MESSAGE,
     EXPORT_SUCCESS_MESSAGE,
     EMBED_CODE_COPIED_MESSAGE,
-    CHART_FILENAME_PREFIX,
-    CHART_FILENAME_SUFFIX,
-    DARK_THEME_BGCOLOR,
-    LIGHT_THEME_BGCOLOR,
-    EXPORT_SCALE,
-    EXPORT_QUALITY,
-    EMBED_IFRAME_WIDTH,
-    EMBED_IFRAME_HEIGHT,
-    EMBED_IFRAME_STYLE,
-    SHOULD_COPY_DEFAULT_STYLES,
     DEFAULT_SETTINGS,
     CHART_TYPE_BAR,
     CHART_TYPE_DONUT,
@@ -73,7 +63,14 @@ import {
     LOGO_ALT_TEXT,
     IMAGE_LOADING_LAZY,
     BAR_CHART_SETTINGS_TITLE,
-    DONUT_CHART_SETTINGS_TITLE
+    DONUT_CHART_SETTINGS_TITLE,
+    DARK_THEME_BGCOLOR,
+    LIGHT_THEME_BGCOLOR,
+    EXPORT_QUALITY,
+    EXPORT_SCALE,
+    SHOULD_COPY_DEFAULT_STYLES,
+    CHART_FILENAME_PREFIX,
+    CHART_FILENAME_SUFFIX
 } from "@/lib/constants";
 import {
     Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle
@@ -140,6 +137,7 @@ import {
 } from "./ui/select";
 import { Spinner } from "./ui/spinner";
 import { useTheme } from "@/hooks/use-theme";
+import { generateEmbeddableChartHTML } from "@/lib/embed-chart";
 
 interface ChartDialogProps {
     open:            boolean
@@ -1126,47 +1124,13 @@ export const ChartDialog: FC<ChartDialogProps> = ({
     }, [ theme ]);
 
     const share_embeddable_code = useCallback(() => {
-        const embeddable_code = `<iframe src="${ window.location.origin }/embed/chart?${ new URLSearchParams({
-            chart_type:              chart_type,
-            title,
-            show_legend:             JSON.stringify(should_show_legend),
-            show_x_axis_label:       JSON.stringify(should_show_x_axis_label),
-            show_y_axis_label:       JSON.stringify(should_show_y_axis_label),
-            inner_radius:            JSON.stringify(inner_radius),
-            custom_colors:           JSON.stringify(custom_colors),
-            transparency:            JSON.stringify(transparency),
-            x_axis_label:            x_axis_label,
-            y_axis_label:            y_axis_label,
-            tooltip_label:           tooltip_label,
-            bar_radius:              JSON.stringify(bar_radius),
-            severity_labels:         JSON.stringify(severity_labels),
-            show_floating_labels:    JSON.stringify(should_show_floating_labels),
-            tooltip_content_type:    tooltip_content_type,
-            floating_label_type:     floating_label_type,
-            show_x_axis_tick_labels: JSON.stringify(should_show_x_axis_tick_labels),
-            legend_position:         legend_position,
-        }).toString() }" width="${ EMBED_IFRAME_WIDTH }" height="${ EMBED_IFRAME_HEIGHT }" style="${ EMBED_IFRAME_STYLE }"></iframe>`;
+        const embeddable_code = generateEmbeddableChartHTML(settings, selectedEntries, window.location.origin);
         navigator.clipboard.writeText(embeddable_code);
         toast.success(EMBED_CODE_COPIED_MESSAGE);
     }, [
-        chart_type,
-        title,
-        should_show_legend,
-        should_show_x_axis_label,
-        should_show_y_axis_label,
-        inner_radius,
-        custom_colors,
-        transparency,
-        x_axis_label,
-        y_axis_label,
-        tooltip_label,
-        bar_radius,
-        severity_labels,
-        should_show_floating_labels,
-        tooltip_content_type,
-        floating_label_type,
-        should_show_x_axis_tick_labels,
-        legend_position,
+        settings,
+        selectedEntries,
+        theme,
     ]);
 
     return (
@@ -1216,7 +1180,7 @@ export const ChartDialog: FC<ChartDialogProps> = ({
                         <div className="space-y-6">
                             <div
                                 ref={chart_ref}
-                                className="relative">
+                                className="relative flex flex-col">
                                 <div className="text-center">
                                     <h3 className={cn(
                                         `text-lg font-semibold dark:text-foreground/95`,
@@ -1360,14 +1324,15 @@ export const ChartDialog: FC<ChartDialogProps> = ({
                                     </ResponsiveContainer>
                                 </div>
                                 {should_show_legend && legend_position === `below-chart` && custom_legend}
-                                <div className="absolute top-1.25 right-4 h-5 pointer-events-none bg-transparent p-px rounded-xs">
+                                <div className="mt-3 h-6 pointer-events-none bg-transparent mx-auto flex items-center text">
+                                    View on{` `}
                                     {/* Light theme image */}
                                     <picture className="block dark:hidden" data-light-theme>
                                         <img
                                             src={logoBlack.src}
                                             loading={IMAGE_LOADING_LAZY}
                                             alt={LOGO_ALT_TEXT}
-                                            className="w-auto h-5"
+                                            className="w-auto h-6"
                                         />
                                     </picture>
 
@@ -1377,7 +1342,7 @@ export const ChartDialog: FC<ChartDialogProps> = ({
                                             src={logoWhite.src}
                                             loading={IMAGE_LOADING_LAZY}
                                             alt={LOGO_ALT_TEXT}
-                                            className="w-auto h-5"
+                                            className="w-auto h-6"
                                         />
                                     </picture>
                                 </div>
