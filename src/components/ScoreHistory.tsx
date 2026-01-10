@@ -786,7 +786,7 @@ export function ScoreManager() {
             : `Manage your saved CVSS scores`;
 
     return (
-        <Card>
+        <Card className="w-full max-w-7xl mx-auto">
             <CardHeader>
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="space-y-2">
