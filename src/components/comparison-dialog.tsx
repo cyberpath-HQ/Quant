@@ -171,20 +171,22 @@ export const ComparisonDialog: FC<ComparisonDialogProps> = ({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="lg:max-w-3xl w-full max-h-[80vh] overflow-y-auto">
-                <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
+            <DialogContent className="lg:max-w-3xl w-full max-h-[80vh] overflow-y-auto overflow-x-hidden">
+                <DialogHeader className="max-w-[calc(100%-8rem)]">
+                    <DialogTitle className="flex items-start md:items-center gap-2 text-balance text-left">
                         <GitCompare className="h-5 w-5" />
                         Score Comparison ({selectedEntries.length} scores)
                     </DialogTitle>
-                    <DialogDescription>Compare CVSS scores side by side to identify differences</DialogDescription>
+                    <DialogDescription className="text-balance text-left">
+                        Compare CVSS scores side by side to identify differences
+                    </DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-6 mt-4">
+                <div className="space-y-6 mt-4 max-w-[calc(100%-8rem)]">
                     {
                         selectedEntries.length === 2 && (
                             <>
-                                <div className="grid gap-4 grid-cols-2">
+                                <div className="grid gap-4 grid-cols-1 lg:grid-cols-2 overflow-hidden">
                                     {selectedEntries.map((entry, index) => (
                                         <Card key={entry.id} className="border-2">
                                             <CardContent className="p-4 space-y-3">
@@ -230,7 +232,7 @@ export const ComparisonDialog: FC<ComparisonDialogProps> = ({
                                                     {metricDifferences.length} changed
                                                 </Badge>
                                             </div>
-                                            <div className="rounded-lg border overflow-hidden">
+                                            <div className="rounded-lg border overflow-hidden overflow-x-auto">
                                                 <Table>
                                                     <TableHeader className="bg-muted">
                                                         <TableRow>
