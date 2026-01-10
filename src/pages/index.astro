@@ -6,6 +6,7 @@ import { CVSSCalculator } from "@/components/CVSSCalculator";
 import { ScoreManager } from "@/components/ScoreHistory";
 import { makeJsonLd } from "@/lib/make-json-ld";
 import type { WebPage } from "schema-dts";
+import BackToTopButton from "@/components/BackToTopButton";
 
 const date = new Date();
 const json_ld = makeJsonLd<WebPage>({
@@ -82,5 +83,6 @@ const json_ld = makeJsonLd<WebPage>({
       <ScoreManager client:load />
     </div>
   </main>
+  <BackToTopButton client:load />
   <Footer />
 </Layout>
