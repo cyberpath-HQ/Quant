@@ -49,6 +49,11 @@ export const CVSSCalculator: FC = () => {
     });
 
     const [
+        is_parsing_vector,
+        setIsParsingVector,
+    ] = useState(false);
+
+    const [
         should_show_contributions,
         setShouldShowContributions,
     ] = useState(() => {
@@ -67,18 +72,37 @@ export const CVSSCalculator: FC = () => {
 
     // Check for vector in URL on mount
     useEffect(() => {
+        setIsParsingVector(true);
         const parsed = vectorParser.getVectorFromURL();
         if (parsed) {
             setParsedVector(parsed);
-            setRestoreVectorString(null);
+            setRestoreVectorString(parsed.raw);
 
             // Switch to the appropriate tab
-            setActiveTab(`v${parsed.version}`);
+            setActiveTab(`v${ parsed.version }`);
+
+            // update URL to set version parameter
+            const urlParams = new URLSearchParams(window.location.search);
+
+            // Remove vector parameter from URL
+            urlParams.delete(`vector`);
+
+            urlParams.set(`version`, `v${ parsed.version }`);
+            const newSearch = urlParams.toString();
+            if (window.location.search !== `?${ newSearch }`) {
+                window.history.replaceState(null, ``, `?${ newSearch }`);
+            }
         }
+        setIsParsingVector(false);
     }, []);
 
-    // Load activeTab from URL on mount
+    // Load activeTab from URL on mount, but only if no vector is loaded
     useEffect(() => {
+        if (parsedVector || is_parsing_vector) {
+            // Prioritize vector over version parameter
+            return;
+        }
+
         const urlParams = new URLSearchParams(window.location.search);
         const version = urlParams.get(`version`);
         if (version && [
@@ -89,7 +113,7 @@ export const CVSSCalculator: FC = () => {
         ].includes(version)) {
             setActiveTab(version);
         }
-    }, []);
+    }, [ parsedVector ]);
 
     // Listen for restore events from CVSSScoreManager component
     useEffect(() => {
@@ -103,7 +127,7 @@ export const CVSSCalculator: FC = () => {
             if (parsed) {
                 setParsedVector(parsed);
                 setRestoreVectorString(vectorString);
-                setActiveTab(`v${parsed.version}`);
+                setActiveTab(`v${ parsed.version }`);
             }
         };
 
@@ -131,13 +155,17 @@ export const CVSSCalculator: FC = () => {
 
     // Update URL when version changes
     useEffect(() => {
+        if (is_parsing_vector) {
+            return;
+        }
+
         const urlParams = new URLSearchParams(window.location.search);
         urlParams.set(`version`, activeTab);
         const newSearch = urlParams.toString();
-        if (window.location.search !== `?${newSearch}`) {
-            window.history.replaceState(null, ``, `?${newSearch}`);
+        if (window.location.search !== `?${ newSearch }`) {
+            window.history.replaceState(null, ``, `?${ newSearch }`);
         }
-    }, [activeTab]);
+    }, [ activeTab ]);
 
     // Load settings from local storage on mount
     useEffect(() => {
