@@ -148,8 +148,7 @@ export function generateEmbeddableCode(params: {
         position: absolute;
         right: 0;
         top: 100%;
-        background: white;
-        border: 1px solid #e5e7eb;
+        border: 1px solid oklch(0.92 0.004 286.32);
         border-radius: 4px;
         box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
         z-index: 20;
@@ -169,9 +168,6 @@ export function generateEmbeddableCode(params: {
         color: #1f2937;
         font-size: 14px;
     }
-    .cvss-widget-container-${ date } .cvss-dropdown-content-${ date } a:hover {
-        background: #f9fafb;
-    }
     .cvss-widget-container-${ date } .cvss-btn-link-${ date } {
         background: #0ea5e9;
         color: white;
@@ -190,21 +186,39 @@ export function generateEmbeddableCode(params: {
         background: #0284c7;
     }
     .cvss-widget-container-${ date } .cvss-dropdown-${ date } button {
-        background: #0ea5e9;
-        border: none;
+        border: 1px solid oklch(0.92 0.004 286.32);
         cursor: pointer;
         padding: 6px 8px;
-        border-radius: 0 4px 4px 0;
-        color: white;
+        border-radius: 4px;
         font-size: 12px;
         display: flex;
         align-items: center;
         gap: 4px;
         transition: background 0.2s;
-        border-left: 1px solid rgba(255,255,255,0.2);
+        background: transparent;
     }
-    .cvss-widget-container-${ date } .cvss-dropdown-${ date } button:hover {
-        background: #0284c7;
+    .footer-link-${ date } {
+        display: block;
+        text-align: center;
+        margin-top: 20px;
+        color: #1f2937;
+        text-decoration: none;
+        font-size: 0.9em;
+        cursor: pointer;
+    }
+    .footer-link-${ date }:after {
+        content: '';
+        display: block;
+        margin-top: 1px;
+        width: 25%;
+        height: 1px;
+        background: #1f2937;
+        margin-left: auto;
+        margin-right: auto;
+        transition: width 300ms ease-in-out;
+    }
+    .footer-link-${ date }:hover:after {
+        width: 50%;
     }
 </style>
 <div class="cvss-widget-container-${ date }">
@@ -224,14 +238,6 @@ export function generateEmbeddableCode(params: {
             CVSS v${ version }
         </span>
         <div style="display: flex;">
-            <a href='${ origin }?${ new URLSearchParams({
-                vector:       vectorString,
-                utm_source:   `view_in_calculator`,
-                utm_medium:   `widget`,
-                utm_campaign: `cvss_calculator`,
-            }).toString() }' rel="noopener" target="_blank" class="cvss-btn-link-${ date }" aria-label="Open CVSS calculator with current vector">
-                Open in calculator
-            </a>
             <div class="cvss-dropdown-${ date }">
                 <button onclick="cvssToggleDropdown_${ date }()" aria-expanded="false" aria-haspopup="menu" aria-label="More options">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -427,19 +433,15 @@ export function generateEmbeddableCode(params: {
         })();
     </script>
 
-    <div style="text-align: center; margin-top: 32px;">
-        <a href='${ origin }?${ new URLSearchParams({
-            utm_source:   `embedded_logo`,
-            utm_medium:   `widget`,
-            utm_campaign: `cvss_calculator`,
-        }).toString() }' rel="noopener" target="_blank">
-            <img src="${ logoUrl }" alt="${ CVSS_LOGO_ALT }" style="
-                width: 100%;
-                height: auto;
-                max-width: 200px;
-            " />
-        </a>
-    </div>
+    <a href='${ origin }?${ new URLSearchParams({
+        vector:       vectorString,
+        utm_source:   `view_in_calculator`,
+        utm_medium:   `widget`,
+        utm_campaign: `cvss_calculator`,
+    }).toString() }' rel="noopener" target="_blank" class="footer-link-${ date }" aria-label="Open CVSS calculator with current vector">
+        View on 
+        <img src="${ logoUrl }" alt="${ CVSS_LOGO_ALT }" style="height: 1.4em; vertical-align: middle;"  />
+    </a>
 </div>
 `;
 
