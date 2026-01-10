@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import CVSSVersionsTabs from "@/components/CVSSVersionsTabs";
 import FAQAccordion from "@/components/FAQAccordion";
+import BackToTopButton from "@/components/BackToTopButton";
 
 const seoProps = {
   title: "Documentation - Quant CVSS Calculator",
@@ -187,7 +188,9 @@ const seoProps = {
                   <li><strong>Copy Vector:</strong> CVSS vector string for documentation</li>
                   <li><strong>Share Link:</strong> Pre-configured assessment URL</li>
                   <li><strong>Embeddable Code:</strong> HTML snippet to embed score cards on websites</li>
-                  <li><strong>Save to Manager:</strong> Store assessments in the Score Manager for later and more advanced use</li>
+                  <li>
+                    <strong>Save to Manager:</strong> Store assessments in the Score Manager for later and more advanced use
+                  </li>
                 </ul>
               </CardContent>
             </Card>
@@ -198,8 +201,8 @@ const seoProps = {
               </CardHeader>
               <CardContent className="text-sm text-muted-foreground space-y-2">
                 <p>
-                  Save calculated scores to your browser. Sort, filter, compare, edit, delete, and
-                  restore previous assessments with ease.
+                  Save calculated scores to your browser. Sort, filter, compare, edit, delete, and restore previous
+                  assessments with ease.
                 </p>
                 <ul class="space-y-1 mt-3 list-disc list-inside">
                   <li><strong>Side-by-Side Comparison:</strong> Compare multiple scores to identify differences</li>
@@ -249,8 +252,8 @@ const seoProps = {
               </CardHeader>
               <CardContent className="text-sm text-muted-foreground space-y-2">
                 <p>
-                  Works completely offline with no internet required. All calculations happen in your browser, no data is
-                  ever sent to our servers.
+                  Works completely offline with no internet required. All calculations happen in your browser, no data
+                  is ever sent to our servers.
                 </p>
               </CardContent>
             </Card>
@@ -412,82 +415,82 @@ const seoProps = {
 
           <FAQAccordion client:only />
         </section>
-        </section>
-
-        <!-- Resources Section -->
-        <section class="space-y-6 pb-16">
-          <div class="space-y-2">
-            <h2 class="text-4xl font-bold tracking-tight">Official Resources</h2>
-            <p class="text-muted-foreground text-lg">Learn more about CVSS from the official FIRST.org sources.</p>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>FIRST.org CVSS Specifications</CardTitle>
-              <CardDescription>Official documentation and references</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div class="grid gap-4 md:grid-cols-2">
-                <a
-                  href="https://www.first.org/cvss/v4-0/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="group p-4 rounded-lg border border-border hover:bg-accent transition-colors"
-                >
-                  <div class="font-semibold group-hover:text-primary transition-colors">CVSS v4.0 Resources</div>
-                  <div class="text-sm text-muted-foreground">Latest specification and documentation</div>
-                </a>
-                <a
-                  href="https://www.first.org/cvss/v3-1/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="group p-4 rounded-lg border border-border hover:bg-accent transition-colors"
-                >
-                  <div class="font-semibold group-hover:text-primary transition-colors">CVSS v3.1 Resources</div>
-                  <div class="text-sm text-muted-foreground">Specification and guidance documents</div>
-                </a>
-                <a
-                  href="https://www.first.org/cvss/v3-0/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="group p-4 rounded-lg border border-border hover:bg-accent transition-colors"
-                >
-                  <div class="font-semibold group-hover:text-primary transition-colors">CVSS v3.0 Resources</div>
-                  <div class="text-sm text-muted-foreground">Original v3 specification documents</div>
-                </a>
-                <a
-                  href="https://www.first.org/cvss/v2/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="group p-4 rounded-lg border border-border hover:bg-accent transition-colors"
-                >
-                  <div class="font-semibold group-hover:text-primary transition-colors">CVSS v2.0 Resources</div>
-                  <div class="text-sm text-muted-foreground">Legacy version complete guide</div>
-                </a>
-                <a
-                  href="https://www.first.org/cvss/examples"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="group p-4 rounded-lg border border-border hover:bg-accent transition-colors"
-                >
-                  <div class="font-semibold group-hover:text-primary transition-colors">CVSS Scoring Examples</div>
-                  <div class="text-sm text-muted-foreground">Real-world vulnerability assessments</div>
-                </a>
-                <a
-                  href="https://www.first.org/cvss/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="group p-4 rounded-lg border border-border hover:bg-accent transition-colors"
-                >
-                  <div class="font-semibold group-hover:text-primary transition-colors">FIRST.org CVSS Home</div>
-                  <div class="text-sm text-muted-foreground">Official FIRST.org CVSS information</div>
-                </a>
-              </div>
-            </CardContent>
-          </Card>
-        </section>
       </div>
+
+      <!-- Resources Section -->
+      <section class="space-y-6 mx-auto max-w-4xl mt-16">
+        <div class="space-y-2">
+          <h2 class="text-4xl font-bold tracking-tight">Official Resources</h2>
+          <p class="text-muted-foreground text-lg">Learn more about CVSS from the official FIRST.org sources.</p>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>FIRST.org CVSS Specifications</CardTitle>
+            <CardDescription>Official documentation and references</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div class="grid gap-4 md:grid-cols-2">
+              <a
+                href="https://www.first.org/cvss/v4-0/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group p-4 rounded-lg border border-border hover:bg-accent transition-colors"
+              >
+                <div class="font-semibold group-hover:text-primary transition-colors">CVSS v4.0 Resources</div>
+                <div class="text-sm text-muted-foreground">Latest specification and documentation</div>
+              </a>
+              <a
+                href="https://www.first.org/cvss/v3-1/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group p-4 rounded-lg border border-border hover:bg-accent transition-colors"
+              >
+                <div class="font-semibold group-hover:text-primary transition-colors">CVSS v3.1 Resources</div>
+                <div class="text-sm text-muted-foreground">Specification and guidance documents</div>
+              </a>
+              <a
+                href="https://www.first.org/cvss/v3-0/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group p-4 rounded-lg border border-border hover:bg-accent transition-colors"
+              >
+                <div class="font-semibold group-hover:text-primary transition-colors">CVSS v3.0 Resources</div>
+                <div class="text-sm text-muted-foreground">Original v3 specification documents</div>
+              </a>
+              <a
+                href="https://www.first.org/cvss/v2/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group p-4 rounded-lg border border-border hover:bg-accent transition-colors"
+              >
+                <div class="font-semibold group-hover:text-primary transition-colors">CVSS v2.0 Resources</div>
+                <div class="text-sm text-muted-foreground">Legacy version complete guide</div>
+              </a>
+              <a
+                href="https://www.first.org/cvss/examples"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group p-4 rounded-lg border border-border hover:bg-accent transition-colors"
+              >
+                <div class="font-semibold group-hover:text-primary transition-colors">CVSS Scoring Examples</div>
+                <div class="text-sm text-muted-foreground">Real-world vulnerability assessments</div>
+              </a>
+              <a
+                href="https://www.first.org/cvss/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group p-4 rounded-lg border border-border hover:bg-accent transition-colors"
+              >
+                <div class="font-semibold group-hover:text-primary transition-colors">FIRST.org CVSS Home</div>
+                <div class="text-sm text-muted-foreground">Official FIRST.org CVSS information</div>
+              </a>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
     </div>
   </main>
-  <Footer />
+<BackToTopButton client:load />
+<Footer />
 </Layout>
